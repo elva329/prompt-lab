@@ -24,7 +24,7 @@ async function importPrompts() {
     await client.connect();
     
     const db = client.db(dbName);
-    const promptsCollection = db.collection('prompts');
+    const promptsCollection = db.collection('prompt_library');
     
     // Read transformed prompts
     const promptsPath = path.join(__dirname, '../prompts/chatgpt_prompts_transformed.json');
@@ -51,7 +51,7 @@ async function importPrompts() {
     
     console.log(`✅ Successfully imported ${result.insertedCount} prompts`);
     console.log(`📊 Database: ${dbName}`);
-    console.log(`📁 Collection: prompts`);
+    console.log(`📁 Collection: prompt_library`);
     
     // Display sample
     console.log('\n📝 Sample prompt:');

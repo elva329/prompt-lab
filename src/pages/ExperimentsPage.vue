@@ -1,0 +1,127 @@
+<template>
+  <div class="vstack gap-3 fade-in-up">
+    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+      <div>
+        <h1 class="h2 fw-bold mb-1">Experiments</h1>
+        <p class="text-secondary mb-0">View and re-run your saved prompt experiments.</p>
+      </div>
+      <button class="btn btn-primary" @click="router.push('/prompts')">
+        <i class="bi bi-plus-lg me-1"></i>
+        New Experiment
+      </button>
+    </section>
+
+    <section v-if="isLoading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="text-secondary mt-2 mb-0">Loading experiments...</p>
+    </section>
+
+    <section v-else-if="errorMessage" class="alert alert-danger mb-0">{{ errorMessage }}</section>
+
+    <section v-else-if="experiments.length" class="row g-3">
+      <div v-for="experiment in experiments" :key="experiment._id" class="col-md-6 col-xl-4">
+        <article class="card border-0 shadow-sm h-100">
+          <div class="card-body d-flex flex-column gap-2">
+            <div class="d-flex justify-content-between align-items-center">
+              <h2 class="h6 fw-semibold mb-0">Experiment {{ shortId(experiment._id) }}</h2>
+              <span class="badge text-bg-light border">{{ experiment.prompts.length }} prompts</span>
+            </div>
+
+            <p class="small text-secondary mb-0">
+              Created at {{ formatDate(experiment.createdAt) }}
+            </p>
+
+            <div class="small text-secondary">
+              Prompt IDs: {{ experiment.prompts.join(', ') }}
+            </div>
+
+            <div class="mt-auto pt-2 border-top d-flex justify-content-end">
+              <button class="btn btn-outline-primary btn-sm" @click="rerunExperiment(experiment.prompts)">
+                <i class="bi bi-play-fill me-1"></i>
+                Re-run
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section v-else class="card border border-secondary-subtle border-dashed">
+      <div class="card-body text-center text-secondary py-5">
+        No experiments yet. Go to Prompt Library and select prompts to run your first experiment.
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { fetchUserByEmailRequest } from '../lib/authApi';
+import { fetchExperimentsRequest, type ExperimentRecord } from '../lib/experimentsApi';
+import { appStore } from '../stores/appStore';
+
+const router = useRouter();
+const isLoading = ref(false);
+const errorMessage = ref('');
+const experiments = ref<ExperimentRecord[]>([]);
+
+function shortId(value: string): string {
+  return value.slice(-6).toUpperCase();
+}
+
+function formatDate(value: string): string {
+  return new Date(value).toLocaleString();
+}
+
+function rerunExperiment(promptIds: number[]): void {
+  router.push({
+    name: 'experiment-runner',
+    params: { id: 'new' },
+    query: { prompts: promptIds.join(',') },
+  });
+}
+
+async function loadExperiments(): Promise<void> {
+  let resolvedUserId = appStore.state.user?.id || '';
+
+  if (!resolvedUserId) {
+    const savedEmail = window.localStorage.getItem('promptlab_user_email');
+
+    if (savedEmail) {
+      try {
+        const userData = await fetchUserByEmailRequest(savedEmail);
+        if (userData.user?.id && appStore.state.user) {
+          appStore.state.user.id = userData.user.id;
+          window.localStorage.setItem('promptlab_user_id', userData.user.id);
+          resolvedUserId = userData.user.id;
+        }
+      } catch {
+        errorMessage.value = 'Please log in again to load experiments.';
+        return;
+      }
+    }
+  }
+
+  if (!resolvedUserId) {
+    errorMessage.value = 'Please log in again to load experiments.';
+    return;
+  }
+
+  isLoading.value = true;
+  errorMessage.value = '';
+
+  try {
+    experiments.value = await fetchExperimentsRequest(resolvedUserId);
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to load experiments.';
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(() => {
+  loadExperiments();
+});
+</script>

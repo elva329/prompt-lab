@@ -62,6 +62,27 @@ export async function fetchPromptById(id: number): Promise<PromptRecord> {
   return response.json();
 }
 
+export async function updatePromptById(
+  id: number,
+  data: Partial<Pick<PromptRecord, 'title' | 'promptText' | 'category'>>
+): Promise<PromptRecord> {
+  const response = await fetch(`/api/prompts/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Failed to update prompt.');
+  }
+
+  return payload.prompt as PromptRecord;
+}
+
 export async function fetchCategories(): Promise<CategoriesResponse> {
   const response = await fetch('/api/prompts/categories');
 
@@ -70,4 +91,27 @@ export async function fetchCategories(): Promise<CategoriesResponse> {
   }
 
   return response.json();
+}
+
+export async function createPrompt(data: {
+  title: string;
+  promptText: string;
+  category: string;
+  userId?: string;
+}): Promise<{ prompt: PromptRecord }> {
+  const response = await fetch('/api/prompts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Failed to create prompt.');
+  }
+
+  return payload;
 }

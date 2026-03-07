@@ -93,9 +93,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { createExperimentRequest } from '../lib/experimentsApi';
+import { fetchPromptById, type PromptRecord } from '../lib/promptsApi';
 import { appStore } from '../stores/appStore';
 
 const route = useRoute();
@@ -103,37 +105,52 @@ const router = useRouter();
 
 const isRunning = ref(false);
 const hasRun = ref(false);
+const selectedPromptRecords = ref<PromptRecord[]>([]);
+const runResults = ref<Record<number, {
+  aiResponse: string;
+  aiScore: number;
+  userRating: number;
+  responseTimeMs: number;
+}>>({});
 
 const id = computed(() => String(route.params.id || ''));
 const isNew = computed(() => id.value === 'new');
+const selectedPromptIds = computed(() => {
+  const value = String(route.query.prompts || '');
 
-const experiment = computed(() => {
-  if (isNew.value) {
-    return appStore.state.experiments[0];
-  }
-
-  return appStore.state.experiments.find((entry) => entry.id === id.value);
+  return value
+    .split(',')
+    .map((entry) => Number(entry.trim()))
+    .filter((entry) => Number.isInteger(entry));
 });
 
 const selectedPrompts = computed(() => {
-  if (!experiment.value) {
-    return [];
-  }
-
-  return experiment.value.selectedPromptIds
-    .map((promptId) => appStore.state.prompts.find((prompt) => prompt.id === promptId))
-    .filter((prompt): prompt is NonNullable<typeof prompt> => Boolean(prompt));
+  return selectedPromptRecords.value.map((prompt) => ({
+    id: String(prompt.promptId),
+    promptId: prompt.promptId,
+    title: prompt.title,
+    content: prompt.promptText,
+  }));
 });
 
+const experiment = computed(() => ({
+  name: isNew.value ? 'New Experiment Setup' : `Experiment ${id.value}`,
+  taskDescription: `${selectedPrompts.value.length} selected prompt(s) ready for testing.`,
+}));
+
 const resultByPrompt = computed(() => {
-  const map: Record<string, (typeof appStore.state.experiments)[number]['results'][number]> = {};
+  const map: Record<string, {
+    aiResponse: string;
+    aiScore: number;
+    userRating: number;
+    responseTimeMs: number;
+  }> = {};
 
-  if (!experiment.value) {
-    return map;
-  }
-
-  for (const result of experiment.value.results) {
-    map[result.promptId] = result;
+  for (const prompt of selectedPrompts.value) {
+    const result = runResults.value[prompt.promptId];
+    if (result) {
+      map[prompt.id] = result;
+    }
   }
 
   return map;
@@ -169,13 +186,64 @@ function goBack(): void {
   router.back();
 }
 
-function handleRun(): void {
+async function loadSelectedPrompts(): Promise<void> {
+  if (!selectedPromptIds.value.length) {
+    selectedPromptRecords.value = [];
+    return;
+  }
+
+  try {
+    const prompts = await Promise.all(selectedPromptIds.value.map((promptId) => fetchPromptById(promptId)));
+    selectedPromptRecords.value = prompts;
+  } catch (error) {
+    console.error('Failed to load selected prompts:', error);
+    appStore.showToast('Failed to load selected prompts.', 'danger');
+  }
+}
+
+async function handleRun(): Promise<void> {
+  if (!selectedPromptIds.value.length) {
+    appStore.showToast('Please select prompts from Prompt Library first.', 'warning');
+    return;
+  }
+
+  if (!appStore.state.user?.id) {
+    appStore.showToast('Please log in again to run experiments.', 'warning');
+    return;
+  }
+
   isRunning.value = true;
 
-  window.setTimeout(() => {
+  try {
+    await createExperimentRequest(appStore.state.user.id, selectedPromptIds.value);
+
+    const generatedResults: Record<number, {
+      aiResponse: string;
+      aiScore: number;
+      userRating: number;
+      responseTimeMs: number;
+    }> = {};
+
+    for (const prompt of selectedPrompts.value) {
+      generatedResults[prompt.promptId] = {
+        aiResponse: `Simulated response for "${prompt.title}".`,
+        aiScore: 80 + (prompt.promptId % 20),
+        userRating: 3 + (prompt.promptId % 3),
+        responseTimeMs: 700 + (prompt.promptId % 6) * 110,
+      };
+    }
+
+    runResults.value = generatedResults;
     isRunning.value = false;
     hasRun.value = true;
-    appStore.showToast('Experiment completed successfully!', 'success');
-  }, 2500);
+    appStore.showToast('Experiment saved and completed successfully!', 'success');
+  } catch (error) {
+    isRunning.value = false;
+    appStore.showToast(error instanceof Error ? error.message : 'Failed to run experiment.', 'danger');
+  }
 }
+
+onMounted(() => {
+  loadSelectedPrompts();
+});
 </script>

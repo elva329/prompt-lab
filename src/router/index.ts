@@ -2,7 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 import AppLayout from '../components/AppLayout.vue';
 import DashboardPage from '../pages/DashboardPage.vue';
+import ExperimentsPage from '../pages/ExperimentsPage.vue';
 import ExperimentRunnerPage from '../pages/ExperimentRunnerPage.vue';
+import FavoritesPage from '../pages/FavoritesPage.vue';
 import LandingPage from '../pages/LandingPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
 import NotFoundPage from '../pages/NotFoundPage.vue';
@@ -18,10 +20,11 @@ const routes = [
       { path: 'login', name: 'login', component: LoginPage },
       { path: 'dashboard', name: 'dashboard', component: DashboardPage, meta: { requiresAuth: true } },
       { path: 'prompts', name: 'prompts', component: PromptsPage, meta: { requiresAuth: true } },
+      { path: 'favorites', name: 'favorites', component: FavoritesPage, meta: { requiresAuth: true } },
       {
         path: 'experiments',
         name: 'experiments',
-        redirect: { name: 'dashboard' },
+        component: ExperimentsPage,
         meta: { requiresAuth: true },
       },
       {

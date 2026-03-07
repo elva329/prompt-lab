@@ -3,6 +3,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import express from 'express';
+import { ObjectId } from 'mongodb';
 
 import { getDb } from './db.js';
 
@@ -13,8 +14,11 @@ const SALT_ROUNDS = 10;
 async function ensureIndexes() {
   const db = await getDb();
   await db.collection('users').createIndex({ email: 1 }, { unique: true });
-  await db.collection('prompts').createIndex({ promptId: 1 }, { unique: true });
-  await db.collection('prompts').createIndex({ category: 1 });
+  await db.collection('prompt_library').createIndex({ promptId: 1 }, { unique: true });
+  await db.collection('prompt_library').createIndex({ category: 1 });
+  await db.collection('experiments').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('favorite_prompts').createIndex({ userId: 1, sourcePromptId: 1 }, { unique: true });
+  await db.collection('favorite_prompts').createIndex({ userId: 1, updatedAt: -1 });
 }
 
 app.use(cors());
@@ -50,7 +54,7 @@ app.get('/api/prompts', async (req, res) => {
   try {
     const { category, search, limit = 100, offset = 0 } = req.query;
     const db = await getDb();
-    const promptsCollection = db.collection('prompts');
+    const promptsCollection = db.collection('prompt_library');
 
     const query = {};
     
@@ -86,7 +90,7 @@ app.get('/api/prompts', async (req, res) => {
 app.get('/api/prompts/categories', async (_req, res) => {
   try {
     const db = await getDb();
-    const promptsCollection = db.collection('prompts');
+    const promptsCollection = db.collection('prompt_library');
 
     const categories = await promptsCollection.distinct('category');
     
@@ -106,7 +110,7 @@ app.get('/api/prompts/:id', async (req, res) => {
     }
 
     const db = await getDb();
-    const promptsCollection = db.collection('prompts');
+    const promptsCollection = db.collection('prompt_library');
 
     const prompt = await promptsCollection.findOne({ promptId });
 
@@ -118,6 +122,303 @@ app.get('/api/prompts/:id', async (req, res) => {
   } catch (error) {
     console.error('Fetch prompt error:', error);
     return res.status(500).json({ message: 'Failed to fetch prompt.' });
+  }
+});
+
+app.patch('/api/prompts/:id', async (req, res) => {
+  try {
+    const promptId = Number(req.params.id);
+    const { title, promptText, category } = req.body || {};
+
+    if (!Number.isInteger(promptId)) {
+      return res.status(400).json({ message: 'Invalid prompt ID.' });
+    }
+
+    const updates = {};
+
+    if (typeof title === 'string' && title.trim()) {
+      updates.title = title.trim();
+    }
+
+    if (typeof promptText === 'string' && promptText.trim()) {
+      updates.promptText = promptText.trim();
+    }
+
+    if (typeof category === 'string' && category.trim()) {
+      updates.category = category.trim().toLowerCase();
+    }
+
+    if (!Object.keys(updates).length) {
+      return res.status(400).json({ message: 'No valid fields to update.' });
+    }
+
+    const db = await getDb();
+    const promptsCollection = db.collection('prompt_library');
+    const result = await promptsCollection.findOneAndUpdate(
+      { promptId },
+      { $set: updates },
+      { returnDocument: 'after' }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: 'Prompt not found.' });
+    }
+
+    return res.json({ prompt: result });
+  } catch (error) {
+    console.error('Update prompt error:', error);
+    return res.status(500).json({ message: 'Failed to update prompt.' });
+  }
+});
+
+app.post('/api/prompts', async (req, res) => {
+  try {
+    const { title, promptText, category, userId } = req.body || {};
+
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ message: 'Title is required.' });
+    }
+
+    if (!promptText || typeof promptText !== 'string' || !promptText.trim()) {
+      return res.status(400).json({ message: 'Prompt text is required.' });
+    }
+
+    if (!category || typeof category !== 'string' || !category.trim()) {
+      return res.status(400).json({ message: 'Category is required.' });
+    }
+
+    const db = await getDb();
+    const promptsCollection = db.collection('prompt_library');
+
+    const maxPromptIdDoc = await promptsCollection.findOne({}, { sort: { promptId: -1 } });
+    const nextPromptId = maxPromptIdDoc ? maxPromptIdDoc.promptId + 1 : 1000;
+
+    const newPrompt = {
+      promptId: nextPromptId,
+      title: title.trim(),
+      promptText: promptText.trim(),
+      category: category.trim().toLowerCase(),
+      createdAt: new Date().toISOString(),
+      createdBy: userId || 'user',
+    };
+
+    await promptsCollection.insertOne(newPrompt);
+
+    return res.status(201).json({
+      message: 'Prompt created successfully.',
+      prompt: newPrompt,
+    });
+  } catch (error) {
+    console.error('Create prompt error:', error);
+    return res.status(500).json({ message: 'Failed to create prompt.' });
+  }
+});
+
+app.post('/api/experiments', async (req, res) => {
+  try {
+    const { userId, prompts } = req.body || {};
+
+    if (!userId || !ObjectId.isValid(String(userId))) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    if (!Array.isArray(prompts) || prompts.length === 0) {
+      return res.status(400).json({ message: 'At least one prompt ID is required.' });
+    }
+
+    const normalizedPrompts = prompts
+      .map((entry) => Number(entry))
+      .filter((entry) => Number.isInteger(entry));
+
+    if (normalizedPrompts.length === 0) {
+      return res.status(400).json({ message: 'Prompt IDs must be numbers.' });
+    }
+
+    const db = await getDb();
+    const usersCollection = db.collection('users');
+    const experimentsCollection = db.collection('experiments');
+
+    const user = await usersCollection.findOne({ _id: new ObjectId(String(userId)) });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const createdAt = new Date().toISOString();
+    const insertResult = await experimentsCollection.insertOne({
+      userId: String(user._id),
+      prompts: normalizedPrompts,
+      createdAt,
+    });
+
+    return res.status(201).json({
+      message: 'Experiment saved successfully.',
+      experiment: {
+        id: String(insertResult.insertedId),
+        userId: String(user._id),
+        prompts: normalizedPrompts,
+        createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('Create experiment error:', error);
+    return res.status(500).json({ message: 'Failed to save experiment.' });
+  }
+});
+
+app.get('/api/experiments', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const experimentsCollection = db.collection('experiments');
+
+    const experiments = await experimentsCollection
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({ experiments });
+  } catch (error) {
+    console.error('Fetch experiments error:', error);
+    return res.status(500).json({ message: 'Failed to fetch experiments.' });
+  }
+});
+
+app.post('/api/favorites', async (req, res) => {
+  try {
+    const { userId, sourcePromptId, customTitle, customCategory, customPromptText } = req.body || {};
+
+    if (!userId || !ObjectId.isValid(String(userId))) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const promptId = Number(sourcePromptId);
+    if (!Number.isInteger(promptId)) {
+      return res.status(400).json({ message: 'Valid sourcePromptId is required.' });
+    }
+
+    const db = await getDb();
+    const favoritesCollection = db.collection('favorite_prompts');
+    const promptsCollection = db.collection('prompt_library');
+
+    const sourcePrompt = await promptsCollection.findOne({ promptId });
+    if (!sourcePrompt) {
+      return res.status(404).json({ message: 'Source prompt not found.' });
+    }
+
+    const now = new Date().toISOString();
+    
+    // Always set custom fields for consistency (null if not provided)
+    const updateData = {
+      userId: String(userId),
+      sourcePromptId: promptId,
+      customTitle: typeof customTitle === 'string' && customTitle.trim() ? customTitle.trim() : null,
+      customCategory: typeof customCategory === 'string' && customCategory.trim() ? customCategory.trim() : null,
+      customPromptText: typeof customPromptText === 'string' && customPromptText.trim() ? customPromptText.trim() : null,
+      updatedAt: now,
+    };
+
+    const result = await favoritesCollection.findOneAndUpdate(
+      { userId: String(userId), sourcePromptId: promptId },
+      { 
+        $set: updateData, 
+        $setOnInsert: { createdAt: now } 
+      },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    return res.status(200).json({
+      message: 'Favorite saved successfully.',
+      favorite: result,
+    });
+  } catch (error) {
+    console.error('Save favorite error:', error);
+    return res.status(500).json({ message: 'Failed to save favorite.' });
+  }
+});
+
+app.get('/api/favorites', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const favoritesCollection = db.collection('favorite_prompts');
+    const promptsCollection = db.collection('prompt_library');
+
+    const favorites = await favoritesCollection
+      .find({ userId })
+      .sort({ updatedAt: -1 })
+      .toArray();
+
+    const sourcePromptIds = favorites.map((fav) => fav.sourcePromptId);
+    const sourcePrompts = await promptsCollection
+      .find({ promptId: { $in: sourcePromptIds } })
+      .toArray();
+
+    const promptsMap = new Map();
+    sourcePrompts.forEach((prompt) => {
+      promptsMap.set(prompt.promptId, prompt);
+    });
+
+    const merged = favorites.map((fav) => {
+      const sourcePrompt = promptsMap.get(fav.sourcePromptId);
+      if (!sourcePrompt) {
+        return null;
+      }
+
+      return {
+        ...fav,
+        promptId: fav.sourcePromptId,
+        title: fav.customTitle ?? sourcePrompt.title,
+        category: fav.customCategory ?? sourcePrompt.category,
+        promptText: fav.customPromptText ?? sourcePrompt.promptText,
+      };
+    }).filter(Boolean);
+
+    return res.json({ favorites: merged });
+  } catch (error) {
+    console.error('Fetch favorites error:', error);
+    return res.status(500).json({ message: 'Failed to fetch favorites.' });
+  }
+});
+
+app.delete('/api/favorites/:sourcePromptId', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+    const sourcePromptId = Number(req.params.sourcePromptId);
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    if (!Number.isInteger(sourcePromptId)) {
+      return res.status(400).json({ message: 'Valid sourcePromptId is required.' });
+    }
+
+    const db = await getDb();
+    const favoritesCollection = db.collection('favorite_prompts');
+
+    const result = await favoritesCollection.deleteOne({
+      userId,
+      sourcePromptId,
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Favorite not found.' });
+    }
+
+    return res.json({ message: 'Favorite removed successfully.' });
+  } catch (error) {
+    console.error('Remove favorite error:', error);
+    return res.status(500).json({ message: 'Failed to remove favorite.' });
   }
 });
 
@@ -140,7 +441,7 @@ app.post('/api/auth/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(String(password), SALT_ROUNDS);
-    await usersCollection.insertOne({
+    const insertResult = await usersCollection.insertOne({
       email: normalizedEmail,
       passwordHash,
     });
@@ -148,6 +449,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(201).json({
       message: 'Registration successful.',
       user: {
+        id: String(insertResult.insertedId),
         email: normalizedEmail,
       },
     });
@@ -182,12 +484,41 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(200).json({
       message: 'Login successful.',
       user: {
+        id: String(user._id),
         email: user.email,
       },
     });
   } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({ message: 'Internal server error.' });
+  }
+});
+
+app.get('/api/auth/user', async (req, res) => {
+  try {
+    const email = normalizeEmail(req.query.email);
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    const db = await getDb();
+    const usersCollection = db.collection('users');
+    const user = await usersCollection.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.json({
+      user: {
+        id: String(user._id),
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    console.error('Fetch user by email error:', error);
+    return res.status(500).json({ message: 'Failed to fetch user.' });
   }
 });
 

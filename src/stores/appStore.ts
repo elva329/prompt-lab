@@ -4,6 +4,7 @@ import { loginRequest, registerRequest } from '../lib/authApi';
 import { MOCK_EXPERIMENTS, MOCK_PROMPTS, type Experiment, type Prompt } from '../lib/mockData';
 
 type AuthUser = {
+  id: string;
   email: string;
 };
 
@@ -28,40 +29,47 @@ const state = reactive({
 
 let toastTimer: number | null = null;
 const USER_EMAIL_KEY = 'promptlab_user_email';
+const USER_ID_KEY = 'promptlab_user_id';
 
 const savedEmail = window.localStorage.getItem(USER_EMAIL_KEY);
-if (savedEmail) {
-  state.user = { email: savedEmail };
+const savedUserId = window.localStorage.getItem(USER_ID_KEY);
+if (savedEmail && savedUserId) {
+  state.user = { id: savedUserId, email: savedEmail };
 }
 
 async function login(email: string, password: string): Promise<void> {
   const data = await loginRequest(email, password);
 
-if (!data.user?.email) {
+  if (!data.user?.email || !data.user.id) {
     throw new Error('Login failed.');
   }
 
   state.user = {
+    id: data.user.id,
     email: data.user.email,
   };
+  window.localStorage.setItem(USER_ID_KEY, data.user.id);
   window.localStorage.setItem(USER_EMAIL_KEY, data.user.email);
 }
 
 function logout(): void {
   state.user = null;
+  window.localStorage.removeItem(USER_ID_KEY);
   window.localStorage.removeItem(USER_EMAIL_KEY);
 }
 
 async function register(email: string, password: string): Promise<void> {
   const data = await registerRequest(email, password);
 
-  if (!data.user?.email) {
+  if (!data.user?.email || !data.user.id) {
     throw new Error('Registration failed.');
   }
 
   state.user = {
+    id: data.user.id,
     email: data.user.email,
   };
+  window.localStorage.setItem(USER_ID_KEY, data.user.id);
   window.localStorage.setItem(USER_EMAIL_KEY, data.user.email);
 }
 

@@ -5,6 +5,15 @@
         <h1 class="h2 fw-bold mb-1">Prompt Library</h1>
         <p class="text-secondary mb-0">Browse and search {{ totalPrompts }} AI prompts.</p>
       </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="small text-secondary">Selected: {{ selectedPromptIds.length }}/3</span>
+        <button class="btn btn-outline-secondary btn-sm" :disabled="selectedPromptIds.length === 0" @click="clearSelection">
+          Clear
+        </button>
+        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0" @click="goToTestPrompt">
+          Test Prompt
+        </button>
+      </div>
     </section>
 
     <section class="row g-2">
@@ -40,14 +49,40 @@
           <div class="card-body d-flex flex-column gap-1">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
-              <span class="badge text-bg-secondary">{{ prompt.category }}</span>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge text-bg-secondary">{{ prompt.category }}</span>
+                <button
+                  class="btn btn-link p-0 text-decoration-none"
+                  :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
+                  @click="toggleFavorite(prompt.promptId)"
+                >
+                  <i
+                    class="bi fs-5"
+                    :class="isFavorite(prompt.promptId) ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
+                  ></i>
+                </button>
+              </div>
             </div>
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
             <div class="mt-auto pt-2 border-top d-flex justify-content-between text-secondary small">
-              <span>ID: {{ prompt.promptId }}</span>
-              <span class="text-primary">View <i class="bi bi-chevron-right"></i></span>
+              <div>
+                <span class="d-flex align-items-center gap-1">
+                  <i class="bi bi-star-fill text-warning"></i>
+                  {{ getPopularityScore(prompt.promptId) }}/5
+                  <span class="text-muted">({{ getPopularityCount(prompt.promptId) }} ratings)</span>
+                </span>
+              </div>
+              <label class="form-check mb-0 d-flex align-items-center gap-2">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  :checked="isSelected(prompt.promptId)"
+                  @change="togglePromptSelection(prompt.promptId)"
+                />
+                <span class="form-check-label">Select Prompt</span>
+              </label>
             </div>
           </div>
         </article>
@@ -93,7 +128,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+import { addOrUpdateFavorite, fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
 import { fetchCategories, fetchPrompts, type PromptRecord } from '../lib/promptsApi';
 import { appStore } from '../stores/appStore';
 
@@ -101,11 +138,14 @@ const searchTerm = ref('');
 const selectedCategory = ref('');
 const categories = ref<string[]>([]);
 const prompts = ref<PromptRecord[]>([]);
+const selectedPromptIds = ref<number[]>([]);
+const favoritePromptIds = ref<number[]>([]);
 const totalPrompts = ref(0);
 const currentPage = ref(1);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const pageSize = 9;
+const router = useRouter();
 
 let searchTimeout: number | null = null;
 
@@ -188,7 +228,86 @@ function goToPage(page: number | '...'): void {
   loadPrompts(page);
 }
 
-onMounted(() => {
+function isSelected(promptId: number): boolean {
+  return selectedPromptIds.value.includes(promptId);
+}
+
+function togglePromptSelection(promptId: number): void {
+  if (isSelected(promptId)) {
+    selectedPromptIds.value = selectedPromptIds.value.filter((entry) => entry !== promptId);
+    return;
+  }
+
+  if (selectedPromptIds.value.length >= 3) {
+    appStore.showToast('You can select up to 3 prompts only.', 'warning');
+    return;
+  }
+
+  selectedPromptIds.value = [...selectedPromptIds.value, promptId];
+}
+
+function isFavorite(promptId: number): boolean {
+  return favoritePromptIds.value.includes(promptId);
+}
+
+async function toggleFavorite(promptId: number): Promise<void> {
+  const userId = appStore.state.user?.id;
+  if (!userId) {
+    appStore.showToast('Please log in to save favorites.', 'warning');
+    return;
+  }
+
+  try {
+    if (isFavorite(promptId)) {
+      await removeFavorite(userId, promptId);
+      favoritePromptIds.value = favoritePromptIds.value.filter((entry) => entry !== promptId);
+      appStore.showToast('Removed from favorites.', 'info');
+    } else {
+      await addOrUpdateFavorite(userId, promptId);
+      favoritePromptIds.value = [...favoritePromptIds.value, promptId];
+      appStore.showToast('Saved to favorites.', 'success');
+    }
+  } catch (error) {
+    appStore.showToast(error instanceof Error ? error.message : 'Failed to update favorites.', 'danger');
+  }
+}
+
+function getPopularityScore(promptId: number): string {
+  return (3.6 + (promptId % 15) / 10).toFixed(1);
+}
+
+function getPopularityCount(promptId: number): number {
+  return 80 + (promptId % 220);
+}
+
+function clearSelection(): void {
+  selectedPromptIds.value = [];
+}
+
+function goToTestPrompt(): void {
+  if (!selectedPromptIds.value.length) {
+    appStore.showToast('Please select at least one prompt.', 'warning');
+    return;
+  }
+
+  router.push({
+    name: 'experiment-runner',
+    params: { id: 'new' },
+    query: { prompts: selectedPromptIds.value.join(',') },
+  });
+}
+
+onMounted(async () => {
+  const userId = appStore.state.user?.id;
+  if (userId) {
+    try {
+      const response = await fetchUserFavorites(userId);
+      favoritePromptIds.value = response.favorites.map((fav) => fav.promptId);
+    } catch {
+      favoritePromptIds.value = [];
+    }
+  }
+
   loadCategories();
   loadPrompts(1);
 });

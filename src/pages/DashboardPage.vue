@@ -1,20 +1,8 @@
 <template>
   <div class="vstack gap-3 fade-in-up dashboard-page">
-    <section class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-      <div>
-        <h1 class="h2 fw-bold mb-1">Welcome back, {{ firstName }}</h1>
-        <p class="text-secondary mb-0">Here's what's happening in your lab today.</p>
-      </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" @click="router.push('/prompts')">
-          <i class="bi bi-plus-lg me-1"></i>
-          New Prompt
-        </button>
-        <button class="btn btn-dark" @click="router.push('/experiments/new')">
-          <i class="bi bi-flask me-1"></i>
-          Run Experiment
-        </button>
-      </div>
+    <section>
+      <h1 class="h2 fw-bold mb-1">Welcome back, {{ firstName }}</h1>
+      <p class="text-secondary mb-0">Here's what's happening in your lab today.</p>
     </section>
 
     <section class="row g-3">

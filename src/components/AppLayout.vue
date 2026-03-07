@@ -30,7 +30,7 @@
           :key="item.name"
           :to="item.path"
           class="text-start d-flex align-items-center gap-1 nav-item-link"
-          :class="{ 'active': route.path === item.path }
+          :class="{ 'active': isNavItemActive(item.path) }
           "
         >
           <i :class="item.icon"></i>
@@ -71,7 +71,7 @@
             :key="`mobile-${item.name}`"
             :to="item.path"
             class="btn text-start d-flex align-items-center gap-2 nav-item-link"
-            :class="{ 'active': route.path === item.path }"
+            :class="{ 'active': isNavItemActive(item.path) }"
             @click="isMobileMenuOpen = false"
           >
             <i :class="item.icon"></i>
@@ -106,6 +106,7 @@ const userInitial = computed(() => appStore.state.user?.email?.charAt(0).toUpper
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: 'bi bi-house' },
   { name: 'Prompts', path: '/prompts', icon: 'bi bi-file-text' },
+  { name: 'Favorites', path: '/favorites', icon: 'bi bi-heart' },
   { name: 'Experiments', path: '/experiments', icon: 'bi bi-flask' },
 ];
 
@@ -117,5 +118,13 @@ function handleLogout(): void {
   appStore.logout();
   router.push('/');
   isMobileMenuOpen.value = false;
+}
+
+function isNavItemActive(path: string): boolean {
+  if (path === '/experiments') {
+    return route.path === '/experiments' || route.path.startsWith('/experiments/');
+  }
+
+  return route.path === path;
 }
 </script>
