@@ -1,0 +1,122 @@
+<template>
+  <div class="login-wrapper d-flex align-items-center justify-content-center py-5 px-3">
+    <div class="card shadow-sm border-0 login-card w-100">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center icon-circle mb-3">
+            <i class="bi bi-beaker"></i>
+          </div>
+          <h1 class="h3 fw-bold mb-2">{{ isRegisterMode ? 'Create Account' : 'Welcome Back' }}</h1>
+          <p class="text-secondary mb-0">
+            {{ isRegisterMode ? 'Register to start using PromptLab.' : 'Sign in to access your testing lab.' }}
+          </p>
+        </div>
+
+        <div class="btn-group w-100 mb-3" role="group">
+          <button class="btn" :class="isRegisterMode ? 'btn-outline-secondary' : 'btn-dark'" @click="isRegisterMode = false">
+            Login
+          </button>
+          <button class="btn" :class="isRegisterMode ? 'btn-dark' : 'btn-outline-secondary'" @click="isRegisterMode = true">
+            Register
+          </button>
+        </div>
+
+        <form class="vstack gap-3" @submit.prevent="handleSubmit">
+          <div>
+            <label class="form-label">Email</label>
+            <input v-model.trim="form.email" type="email" class="form-control" required autocomplete="email" />
+          </div>
+          <div>
+            <label class="form-label">Password</label>
+            <input
+              v-model="form.password"
+              type="password"
+              class="form-control"
+              required
+              minlength="6"
+              autocomplete="current-password"
+            />
+          </div>
+          <div v-if="isRegisterMode">
+            <label class="form-label">Confirm Password</label>
+            <input
+              v-model="form.confirmPassword"
+              type="password"
+              class="form-control"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <p v-if="errorMessage" class="mb-0 text-danger small">{{ errorMessage }}</p>
+
+          <button type="submit" class="btn btn-dark w-100 py-2 mt-2" :disabled="isLoading">
+            {{ isLoading ? 'Please wait...' : isRegisterMode ? 'Create Account' : 'Sign In to Dashboard' }}
+            <i class="bi bi-arrow-right ms-2"></i>
+          </button>
+        </form>
+
+        <p class="text-center text-muted small mt-4 mb-0">Passwords are securely hashed before being stored as <code>passwordHash</code>.</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+import { appStore } from '../stores/appStore';
+
+const router = useRouter();
+const isRegisterMode = ref(false);
+const isLoading = ref(false);
+const errorMessage = ref('');
+
+const form = reactive({
+  email: '',
+  password: '',
+  confirmPassword: '',
+});
+
+function validateForm(): string | null {
+  if (!form.email || !form.password) {
+    return 'Email and password are required.';
+  }
+
+  if (isRegisterMode.value && form.password !== form.confirmPassword) {
+    return 'Passwords do not match.';
+  }
+
+  return null;
+}
+
+async function handleSubmit(): Promise<void> {
+  errorMessage.value = '';
+
+  const validationError = validateForm();
+  if (validationError) {
+    errorMessage.value = validationError;
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    if (isRegisterMode.value) {
+      await appStore.register(form.email, form.password);
+      appStore.showToast('Account created successfully.', 'success');
+    } else {
+      await appStore.login(form.email, form.password);
+      appStore.showToast('Login successful.', 'success');
+    }
+
+    router.push('/dashboard');
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Authentication failed.';
+  } finally {
+    isLoading.value = false;
+  }
+}
+</script>
