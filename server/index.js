@@ -503,6 +503,7 @@ app.post('/api/results/batch', async (req, res) => {
         userId: String(userId),
         experimentId: String(experimentId),
         promptId: Number(entry?.promptId),
+        category: typeof entry?.category === 'string' ? entry.category.trim().toLowerCase() : '',
         aiResponse: typeof entry?.aiResponse === 'string' ? entry.aiResponse : '',
         overallQuality: Number(entry?.overallQuality),
         responseTimeMs: Number(entry?.responseTimeMs || 0),
@@ -516,6 +517,7 @@ app.post('/api/results/batch', async (req, res) => {
       .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
       .map((entry) => ({
         ...entry,
+        category: entry.category || 'uncategorized',
         aiResponse: String(entry.aiResponse || ''),
         overallQuality: Math.max(0, Math.min(100, Math.round(entry.overallQuality))),
         responseTimeMs: Math.max(0, Math.round(entry.responseTimeMs)),
@@ -584,23 +586,14 @@ app.get('/api/results/summary', async (req, res) => {
         { $match: { userId: { $in: userIdCandidates } } },
         {
           $group: {
-            _id: '$promptId',
+            _id: {
+              $cond: [
+                { $and: [{ $ne: ['$category', null] }, { $ne: ['$category', ''] }] },
+                '$category',
+                'uncategorized',
+              ],
+            },
             count: { $sum: 1 },
-          },
-        },
-        {
-          $lookup: {
-            from: 'prompt_library',
-            localField: '_id',
-            foreignField: 'promptId',
-            as: 'prompt',
-          },
-        },
-        { $unwind: { path: '$prompt', preserveNullAndEmptyArrays: true } },
-        {
-          $group: {
-            _id: { $ifNull: ['$prompt.category', 'uncategorized'] },
-            count: { $sum: '$count' },
           },
         },
         {

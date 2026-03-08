@@ -137,28 +137,10 @@
             </div>
           </article>
 
-          <!-- Developed Areas: Top Prompt Categories -->
           <article class="card border-0 shadow-sm dashboard-side-card">
             <div class="card-body">
               <h2 class="h6 mb-1 fw-semibold">Top 3 Tested Prompt Categories</h2>
-              <div v-if="topCategories.length" class="vstack gap-3">
-                <div v-for="(cat, index) in topCategories" :key="cat.name">
-                  <div class="d-flex justify-content-between align-items-center mb-1">
-                    <span class="small fw-semibold">{{ cat.name }}</span>
-                    <div class="d-flex align-items-center gap-1">
-                      <span class="small fw-semibold">{{ Math.round((cat.count / topCategoriesTotal) * 100) }}%</span>
-                      <i class="bi bi-info-circle small text-warning"></i>
-                    </div>
-                  </div>
-                  <div class="progress" style="height: 8px;">
-                    <div 
-                      class="progress-bar" 
-                      :class="'bg-' + getCategoryColor(index)"
-                      :style="{ width: Math.round((cat.count / topCategoriesTotal) * 100) + '%' }"
-                    ></div>
-                  </div>
-                </div>
-              </div>
+              <div v-if="topCategories.length" ref="categoryChartEl" class="dashboard-amchart dashboard-amchart-mini"></div>
               <p v-else class="small text-secondary mb-0">No category data yet.</p>
             </div>
           </article>
@@ -484,6 +466,9 @@ function renderCategoryChart(): void {
 
   categoryChartRoot?.dispose();
 
+  const minHeight = Math.max(130, categoryChartData.value.length * 44 + 24);
+  categoryChartEl.value.style.height = `${minHeight}px`;
+
   const root = am5.Root.new(categoryChartEl.value);
   categoryChartRoot = root;
   root.setThemes([am5themes_Animated.new(root)]);
@@ -501,7 +486,7 @@ function renderCategoryChart(): void {
   const yAxis = chart.yAxes.push(
     am5xy.CategoryAxis.new(root, {
       categoryField: 'category',
-      renderer: am5xy.AxisRendererY.new(root, {}),
+      renderer: am5xy.AxisRendererY.new(root, { minGridDistance: 12 }),
     }),
   );
 

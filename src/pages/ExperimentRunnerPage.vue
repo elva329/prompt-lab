@@ -166,6 +166,7 @@ const selectedPrompts = computed(() => {
     id: String(prompt.promptId),
     promptId: prompt.promptId,
     title: prompt.title,
+    category: prompt.category,
     content: prompt.promptText,
   }));
 });
@@ -466,6 +467,7 @@ async function handleRun(): Promise<void> {
           const result = generatedResults[prompt.promptId];
           return {
             promptId: prompt.promptId,
+            category: prompt.category,
             aiResponse: result?.aiResponse ?? '',
             overallQuality: result?.aiScore ?? 0,
             responseTimeMs: result?.responseTimeMs ?? 0,

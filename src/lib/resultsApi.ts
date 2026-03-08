@@ -1,5 +1,6 @@
 export type PromptResultPayload = {
   promptId: number;
+  category?: string;
   aiResponse: string;
   overallQuality: number;
   responseTimeMs: number;
@@ -35,6 +36,7 @@ export type ExperimentResultRow = {
   userId: string;
   experimentId: string;
   promptId: number;
+  category?: string;
   aiResponse: string;
   overallQuality: number;
   responseTimeMs: number;
