@@ -48,6 +48,46 @@ type ExperimentDetailResponse = {
   message?: string;
 };
 
+function normalizeId(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (value && typeof value === 'object') {
+    const maybeOid = (value as { $oid?: unknown }).$oid;
+    if (typeof maybeOid === 'string') {
+      return maybeOid;
+    }
+  }
+
+  return '';
+}
+
+function normalizeExperimentRecord(raw: Record<string, unknown>): ExperimentRecord {
+  const rawId = normalizeId(raw._id) || normalizeId(raw.id) || String(raw._id || raw.id || '');
+
+  return {
+    _id: rawId,
+    userId: String(raw.userId || ''),
+    prompts: Array.isArray(raw.prompts)
+      ? raw.prompts.map((entry) => Number(entry)).filter((entry) => Number.isInteger(entry))
+      : [],
+    createdAt: String(raw.createdAt || ''),
+    status: raw.status === 'completed' ? 'completed' : 'draft',
+    avgQualityScore: typeof raw.avgQualityScore === 'number' ? raw.avgQualityScore : null,
+    avgResponseTimeMs: typeof raw.avgResponseTimeMs === 'number' ? raw.avgResponseTimeMs : null,
+    totalTokens: typeof raw.totalTokens === 'number' ? raw.totalTokens : 0,
+    promptScores: Array.isArray(raw.promptScores)
+      ? raw.promptScores
+          .map((entry) => ({
+            promptId: Number((entry as Record<string, unknown>)?.promptId),
+            overallQuality: Number((entry as Record<string, unknown>)?.overallQuality),
+          }))
+          .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
+      : [],
+  };
+}
+
 export async function createExperimentRequest(
   userId: string,
   promptIds: number[],
@@ -82,7 +122,7 @@ export async function fetchExperimentsRequest(userId: string): Promise<Experimen
     throw new Error(data.message || 'Failed to fetch experiments.');
   }
 
-  return data.experiments || [];
+  return (data.experiments || []).map((item) => normalizeExperimentRecord(item as unknown as Record<string, unknown>));
 }
 
 export async function fetchExperimentByIdRequest(userId: string, experimentId: string): Promise<ExperimentRecord> {
@@ -95,5 +135,5 @@ export async function fetchExperimentByIdRequest(userId: string, experimentId: s
     throw new Error(data.message || 'Failed to fetch experiment details.');
   }
 
-  return data.experiment;
+  return normalizeExperimentRecord(data.experiment as unknown as Record<string, unknown>);
 }

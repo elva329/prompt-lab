@@ -1,6 +1,25 @@
 <template>
-  <div class="vstack gap-2 fade-in-up prompts-page">
-    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+  <div class="fade-in-up prompts-page page-surface page-fullheight">
+    <div class="dashboard-menu-row">
+      <nav class="dashboard-menu-pills">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.name"
+          :to="item.path"
+          class="dashboard-menu-link"
+          :class="{ active: isNavItemActive(item.path) }"
+        >
+          {{ item.name }}
+        </RouterLink>
+      </nav>
+      <div class="dashboard-user-controls">
+        <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
+          <i class="bi bi-person-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
       <div>
         <h1 class="h2 fw-bold mb-1">Prompt Library</h1>
         <p class="text-secondary mb-0">Browse and search {{ totalPrompts }} AI prompts.</p>
@@ -16,7 +35,7 @@
       </div>
     </section>
 
-    <section class="row g-2">
+    <section class="row g-2 page-filters-row">
       <div class="col-md-3">
         <input
           v-model.trim="searchTerm"
@@ -43,14 +62,14 @@
 
     <section v-else-if="errorMessage && prompts.length === 0" class="alert alert-danger">{{ errorMessage }}</section>
 
-    <section v-if="prompts.length > 0" class="row g-2 prompts-grid">
+    <section v-if="prompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
       <div v-for="prompt in prompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
-        <article class="card border-0 shadow-sm h-100 prompt-card">
+        <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
           <div class="card-body d-flex flex-column gap-1">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
               <div class="d-flex align-items-center gap-2">
-                <span class="badge text-bg-secondary">{{ prompt.category }}</span>
+                <span class="badge prompt-badge-category">{{ prompt.category }}</span>
                 <button
                   class="btn btn-link p-0 text-decoration-none"
                   :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
@@ -68,10 +87,10 @@
 
             <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-secondary small gap-2">
               <div>
-                <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill text-bg-light border">
+                <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill prompt-badge-score">
                   Overall Quality: {{ getPromptScoreSummary(prompt.promptId) }}
                 </span>
-                <span v-else class="badge rounded-pill text-bg-light border">Not tested yet</span>
+                <span v-else class="badge rounded-pill prompt-badge-muted">Not tested yet</span>
               </div>
               <label class="form-check mb-0 d-flex align-items-center gap-2">
                 <input
@@ -127,7 +146,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { fetchUserByEmailRequest } from '../lib/authApi';
 import { addOrUpdateFavorite, fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
@@ -148,8 +167,28 @@ const errorMessage = ref('');
 const promptScoreMap = ref<Record<number, { avg: number; count: number }>>({});
 const pageSize = 9;
 const router = useRouter();
+const route = useRoute();
 
 let searchTimeout: number | null = null;
+
+const navItems = [
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Prompts', path: '/prompts' },
+  { name: 'Favorites', path: '/favorites' },
+  { name: 'Experiments', path: '/experiments' },
+];
+
+function isNavItemActive(path: string): boolean {
+  if (path === '/experiments') {
+    return route.path === '/experiments' || route.path.startsWith('/experiments/');
+  }
+  return route.path === path;
+}
+
+function handleLogout(): void {
+  appStore.logout();
+  router.push('/');
+}
 
 const totalPages = computed(() => Math.max(1, Math.ceil(totalPrompts.value / pageSize)));
 

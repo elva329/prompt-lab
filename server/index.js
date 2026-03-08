@@ -49,6 +49,20 @@ function validateCredentials(email, password) {
   return null;
 }
 
+function idAlternatives(rawValue) {
+  const value = String(rawValue || '').trim();
+  if (!value) {
+    return [];
+  }
+
+  const options = [value];
+  if (ObjectId.isValid(value)) {
+    options.push(new ObjectId(value));
+  }
+
+  return options;
+}
+
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
 });
@@ -420,8 +434,10 @@ app.get('/api/experiments', async (req, res) => {
     const db = await getDb();
     const experimentsCollection = db.collection('experiments');
 
+    const userIdCandidates = idAlternatives(userId);
+
     const experiments = await experimentsCollection
-      .find({ userId })
+      .find({ userId: { $in: userIdCandidates } })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -448,9 +464,10 @@ app.get('/api/experiments/:id', async (req, res) => {
     const db = await getDb();
     const experimentsCollection = db.collection('experiments');
 
+    const userIdCandidates = idAlternatives(userId);
     const experiment = await experimentsCollection.findOne({
       _id: new ObjectId(experimentId),
-      userId,
+      userId: { $in: userIdCandidates },
     });
 
     if (!experiment) {
@@ -537,11 +554,12 @@ app.get('/api/results/summary', async (req, res) => {
 
     const db = await getDb();
     const resultsCollection = db.collection('results');
-    const promptsCollection = db.collection('prompt_library');
+
+    const userIdCandidates = idAlternatives(userId);
 
     const [overall] = await resultsCollection
       .aggregate([
-        { $match: { userId } },
+        { $match: { userId: { $in: userIdCandidates } } },
         {
           $group: {
             _id: null,
@@ -563,7 +581,7 @@ app.get('/api/results/summary', async (req, res) => {
 
     const topCategoriesByPrompt = await resultsCollection
       .aggregate([
-        { $match: { userId } },
+        { $match: { userId: { $in: userIdCandidates } } },
         {
           $group: {
             _id: '$promptId',
@@ -597,28 +615,6 @@ app.get('/api/results/summary', async (req, res) => {
       ])
       .toArray();
 
-    if (!topCategoriesByPrompt.length) {
-      const fallbackCategories = await promptsCollection
-        .aggregate([
-          {
-            $group: {
-              _id: { $ifNull: ['$category', 'uncategorized'] },
-              count: { $sum: 1 },
-            },
-          },
-          { $project: { _id: 0, name: '$_id', count: 1 } },
-          { $sort: { count: -1, name: 1 } },
-          { $limit: 6 },
-        ])
-        .toArray();
-
-      return res.json({
-        experimentsRun: overall?.experimentsRun || 0,
-        avgQualityScore: typeof overall?.avgQualityScore === 'number' ? overall.avgQualityScore : null,
-        topCategories: fallbackCategories,
-      });
-    }
-
     return res.json({
       experimentsRun: overall?.experimentsRun || 0,
       avgQualityScore: typeof overall?.avgQualityScore === 'number' ? overall.avgQualityScore : null,
@@ -641,9 +637,11 @@ app.get('/api/results/prompt-summary', async (req, res) => {
     const db = await getDb();
     const resultsCollection = db.collection('results');
 
+    const userIdCandidates = idAlternatives(userId);
+
     const summary = await resultsCollection
       .aggregate([
-        { $match: { userId } },
+        { $match: { userId: { $in: userIdCandidates } } },
         {
           $group: {
             _id: '$promptId',
@@ -672,6 +670,30 @@ app.get('/api/results/prompt-summary', async (req, res) => {
   }
 });
 
+app.get('/api/results/by-user', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const resultsCollection = db.collection('results');
+    const userIdCandidates = idAlternatives(userId);
+
+    const results = await resultsCollection
+      .find({ userId: { $in: userIdCandidates } })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return res.json({ results });
+  } catch (error) {
+    console.error('Fetch results by user error:', error);
+    return res.status(500).json({ message: 'Failed to fetch user results.' });
+  }
+});
+
 app.get('/api/results/by-experiment', async (req, res) => {
   try {
     const userId = String(req.query.userId || '');
@@ -681,15 +703,21 @@ app.get('/api/results/by-experiment', async (req, res) => {
       return res.status(400).json({ message: 'Valid userId is required.' });
     }
 
-    if (!experimentId || !ObjectId.isValid(experimentId)) {
-      return res.status(400).json({ message: 'Valid experimentId is required.' });
+    if (!experimentId) {
+      return res.status(400).json({ message: 'experimentId is required.' });
     }
 
     const db = await getDb();
     const resultsCollection = db.collection('results');
 
+    const userIdCandidates = idAlternatives(userId);
+    const experimentIdCandidates = idAlternatives(experimentId);
+
     const results = await resultsCollection
-      .find({ userId, experimentId })
+      .find({
+        userId: { $in: userIdCandidates },
+        experimentId: { $in: experimentIdCandidates.length ? experimentIdCandidates : [experimentId] },
+      })
       .sort({ promptId: 1 })
       .toArray();
 

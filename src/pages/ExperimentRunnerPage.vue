@@ -1,5 +1,5 @@
 <template>
-  <div class="experiment-runner d-flex flex-column gap-3 fade-in-up">
+  <div class="experiment-runner d-flex flex-column gap-3 fade-in-up page-surface">
     <section class="d-flex justify-content-between align-items-start gap-3 border-bottom pb-3">
       <div>
         <button class="btn btn-link text-decoration-none px-0 small" @click="goBack">
@@ -10,7 +10,6 @@
         <p class="text-secondary mb-0 small">{{ experiment?.taskDescription }}</p>
       </div>
       <div class="d-flex gap-2">
-        <button v-if="isNew" class="btn btn-outline-secondary">Configure Settings</button>
         <button v-if="isNew" class="btn btn-primary" :disabled="isRunning || hasRun" @click="handleRun">
           <i class="bi" :class="runButtonIcon"></i>
           {{ runButtonText }}
@@ -22,7 +21,7 @@
       </div>
     </section>
 
-    <section class="card border-0 shadow-sm flex-grow-1">
+    <section class="card border-0 shadow-sm grow">
       <div class="card-body p-0 position-relative">
         <div v-if="!hasRun && !isRunning" class="runner-overlay text-center p-4">
           <div class="overlay-icon mx-auto mb-3"><i class="bi bi-flask"></i></div>
@@ -44,7 +43,7 @@
                 <pre class="small mb-0 prompt-pre">{{ prompt.content }}</pre>
               </div>
 
-              <div class="p-3 position-relative flex-grow-1 response-area">
+              <div class="p-3 position-relative grow response-area">
                 <div v-if="isRunning && !resultByPrompt[prompt.id]" class="runner-loading text-center">
                   <template v-if="index === currentProgress.current - 1">
                     <div class="spinner-border text-primary" role="status"></div>

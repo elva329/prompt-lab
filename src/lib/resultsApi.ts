@@ -51,6 +51,11 @@ type ResultsByExperimentResponse = {
   message?: string;
 };
 
+type ResultsByUserResponse = {
+  results: ExperimentResultRow[];
+  message?: string;
+};
+
 export async function saveResultsBatchRequest(data: {
   userId: string;
   experimentId: string;
@@ -106,6 +111,17 @@ export async function fetchResultsByExperimentRequest(
 
   if (!response.ok) {
     throw new Error(payload?.message || 'Failed to fetch experiment results.');
+  }
+
+  return payload.results || [];
+}
+
+export async function fetchResultsByUserRequest(userId: string): Promise<ExperimentResultRow[]> {
+  const response = await fetch(`/api/results/by-user?userId=${encodeURIComponent(userId)}`);
+  const payload = (await response.json()) as ResultsByUserResponse;
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Failed to fetch user results.');
   }
 
   return payload.results || [];

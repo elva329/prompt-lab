@@ -1,6 +1,26 @@
 <template>
-  <div class="vstack gap-3 fade-in-up">
-    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+  <div class="fade-in-up page-surface page-fullheight">
+    <div class="dashboard-menu-row">
+      <nav class="dashboard-menu-pills">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.name"
+          :to="item.path"
+          class="dashboard-menu-link"
+          :class="{ active: isNavItemActive(item.path) }"
+        >
+          {{ item.name }}
+        </RouterLink>
+      </nav>
+      <div class="dashboard-user-controls">
+        <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
+          <i class="bi bi-person-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content-scrollable">
+      <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row">
       <div>
         <h1 class="h2 fw-bold mb-1">Favorites</h1>
         <p class="text-secondary mb-0">Your saved prompts for quick access.</p>
@@ -26,11 +46,11 @@
 
     <section v-else-if="favoritePrompts.length" class="row g-3">
       <div v-for="prompt in favoritePrompts" :key="prompt.promptId" class="col-md-6 col-xl-4">
-        <article class="card border-0 shadow-sm h-100 prompt-card">
+        <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern favorite-card-modern">
           <div class="card-body d-flex flex-column gap-2">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <h2 class="h6 fw-semibold mb-0">{{ prompt.title }}</h2>
-              <span class="badge text-bg-secondary">{{ prompt.category }}</span>
+              <span class="badge prompt-badge-category">{{ prompt.category }}</span>
             </div>
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
@@ -57,6 +77,7 @@
         No favorites yet. Go to Prompt Library and click the heart icon to save prompts.
       </div>
     </section>
+    </div>
 
     <div v-if="editingPrompt" class="modal-overlay p-3">
       <div class="card border-0 shadow-lg w-100 modal-card">
@@ -120,7 +141,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import {
   addOrUpdateFavorite,
@@ -132,6 +153,7 @@ import { createPrompt } from '../lib/promptsApi';
 import { appStore } from '../stores/appStore';
 
 const router = useRouter();
+const route = useRoute();
 
 const isLoading = ref(false);
 const errorMessage = ref('');
@@ -150,6 +172,25 @@ const createForm = ref({
   category: '',
   promptText: '',
 });
+
+const navItems = [
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Prompts', path: '/prompts' },
+  { name: 'Favorites', path: '/favorites' },
+  { name: 'Experiments', path: '/experiments' },
+];
+
+function isNavItemActive(path: string): boolean {
+  if (path === '/experiments') {
+    return route.path === '/experiments' || route.path.startsWith('/experiments/');
+  }
+  return route.path === path;
+}
+
+function handleLogout(): void {
+  appStore.logout();
+  router.push('/');
+}
 
 async function loadFavorites(): Promise<void> {
   const userId = appStore.state.user?.id;

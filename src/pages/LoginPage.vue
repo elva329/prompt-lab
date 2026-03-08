@@ -1,10 +1,10 @@
 <template>
   <div class="login-wrapper d-flex align-items-center justify-content-center py-5 px-3">
-    <div class="card shadow-sm border-0 login-card w-100">
+    <div class="card shadow-sm border-0 login-card w-100 login-surface-card">
       <div class="card-body p-4 p-md-5">
         <div class="text-center mb-4">
-          <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center icon-circle mb-3">
-            <i class="bi bi-beaker"></i>
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center icon-circle mb-3 login-brand-orb">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
           </div>
           <h1 class="h3 fw-bold mb-2">{{ isRegisterMode ? 'Create Account' : 'Welcome Back' }}</h1>
           <p class="text-secondary mb-0">
@@ -51,7 +51,7 @@
 
           <p v-if="errorMessage" class="mb-0 text-danger small">{{ errorMessage }}</p>
 
-          <button type="submit" class="btn btn-dark w-100 py-2 mt-2" :disabled="isLoading">
+          <button type="submit" class="btn landing-primary-btn w-100 py-2 mt-2" :disabled="isLoading">
             {{ isLoading ? 'Please wait...' : isRegisterMode ? 'Create Account' : 'Sign In to Dashboard' }}
             <i class="bi bi-arrow-right ms-2"></i>
           </button>

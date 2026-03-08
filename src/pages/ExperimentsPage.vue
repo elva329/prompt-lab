@@ -1,6 +1,26 @@
 <template>
-  <div class="vstack gap-3 fade-in-up">
-    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+  <div class="fade-in-up page-surface page-fullheight">
+    <div class="dashboard-menu-row">
+      <nav class="dashboard-menu-pills">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.name"
+          :to="item.path"
+          class="dashboard-menu-link"
+          :class="{ active: isNavItemActive(item.path) }"
+        >
+          {{ item.name }}
+        </RouterLink>
+      </nav>
+      <div class="dashboard-user-controls">
+        <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
+          <i class="bi bi-person-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="page-content-scrollable">
+      <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row">
       <div>
         <h1 class="h2 fw-bold mb-1">Experiments</h1>
         <p class="text-secondary mb-0">View and re-run your saved prompt experiments.</p>
@@ -20,11 +40,11 @@
 
     <section v-else-if="experiments.length" class="row g-3">
       <div v-for="experiment in experiments" :key="experiment._id" class="col-md-6 col-xl-4">
-        <article class="card border-0 shadow-sm h-100 experiment-row" @click="viewExperimentDetails(experiment._id)">
+        <article class="card border-0 shadow-sm h-100 experiment-row experiment-card-modern" @click="viewExperimentDetails(experiment._id)">
           <div class="card-body d-flex flex-column gap-2">
             <div class="d-flex justify-content-between align-items-center">
               <h2 class="h6 fw-semibold mb-0">Experiment {{ shortId(experiment._id) }}</h2>
-              <span class="badge text-bg-light border">{{ experiment.prompts.length }} prompts</span>
+              <span class="badge prompt-badge-muted">{{ experiment.prompts.length }} prompts</span>
             </div>
 
             <p class="small text-secondary mb-0">
@@ -55,18 +75,20 @@
         No experiments yet. Go to Prompt Library and select prompts to run your first experiment.
       </div>
     </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { fetchUserByEmailRequest } from '../lib/authApi';
 import { fetchExperimentsRequest, type ExperimentRecord } from '../lib/experimentsApi';
 import { appStore } from '../stores/appStore';
 
 const router = useRouter();
+const route = useRoute();
 const isLoading = ref(false);
 const errorMessage = ref('');
 const experiments = ref<ExperimentRecord[]>([]);
@@ -77,6 +99,25 @@ function shortId(value: string): string {
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleString();
+}
+
+const navItems = [
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Prompts', path: '/prompts' },
+  { name: 'Favorites', path: '/favorites' },
+  { name: 'Experiments', path: '/experiments' },
+];
+
+function isNavItemActive(path: string): boolean {
+  if (path === '/experiments') {
+    return route.path === '/experiments' || route.path.startsWith('/experiments/');
+  }
+  return route.path === path;
+}
+
+function handleLogout(): void {
+  appStore.logout();
+  router.push('/');
 }
 
 function rerunExperiment(promptIds: number[]): void {
