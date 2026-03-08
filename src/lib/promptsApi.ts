@@ -19,6 +19,15 @@ export type CategoriesResponse = {
   categories: string[];
 };
 
+export type CategoryStat = {
+  name: string;
+  count: number;
+};
+
+export type CategoryStatsResponse = {
+  categories: CategoryStat[];
+};
+
 export async function fetchPrompts(params?: {
   category?: string;
   search?: string;
@@ -88,6 +97,16 @@ export async function fetchCategories(): Promise<CategoriesResponse> {
 
   if (!response.ok) {
     throw new Error('Failed to fetch categories.');
+  }
+
+  return response.json();
+}
+
+export async function fetchCategoryStats(): Promise<CategoryStatsResponse> {
+  const response = await fetch('/api/prompts/category-stats');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch category stats.');
   }
 
   return response.json();

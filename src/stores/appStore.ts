@@ -1,7 +1,7 @@
 import { computed, reactive } from 'vue';
 
 import { loginRequest, registerRequest } from '../lib/authApi';
-import { MOCK_EXPERIMENTS, MOCK_PROMPTS, type Experiment, type Prompt } from '../lib/mockData';
+import { MOCK_PROMPTS, type Experiment, type Prompt } from '../lib/mockData';
 
 type AuthUser = {
   id: string;
@@ -19,7 +19,7 @@ type ToastState = {
 const state = reactive({
   user: null as AuthUser | null,
   prompts: [...MOCK_PROMPTS] as Prompt[],
-  experiments: [...MOCK_EXPERIMENTS] as Experiment[],
+  experiments: [] as Experiment[],
   toast: {
     visible: false,
     message: '',

@@ -34,18 +34,19 @@
           <ul v-if="recentExperiments.length" class="list-group list-group-flush dashboard-recent-list">
             <li
               v-for="exp in recentExperiments"
-              :key="exp.id"
+              :key="exp._id"
               class="list-group-item py-2 experiment-row"
-              @click="router.push(`/experiments/${exp.id}`)"
+              @click="router.push('/experiments')"
             >
               <div class="d-flex justify-content-between align-items-start gap-3">
                 <div>
-                  <p class="fw-semibold mb-1">{{ exp.name }}</p>
-                  <p class="small text-secondary mb-0">{{ exp.taskDescription }}</p>
+                  <p class="fw-semibold mb-1">Experiment {{ shortId(exp._id) }}</p>
+                  <p class="small text-secondary mb-0">{{ exp.prompts.length }} prompt(s) tested</p>
                 </div>
                 <div class="text-end">
                   <span class="badge rounded-pill text-bg-success" v-if="exp.status === 'completed'">completed</span>
                   <span class="badge rounded-pill text-bg-warning" v-else>draft</span>
+                  <p v-if="typeof exp.avgQualityScore === 'number'" class="small text-secondary mb-0 mt-1">{{ exp.avgQualityScore }}/100</p>
                   <p class="small text-secondary mb-0 mt-1">{{ formatDate(exp.createdAt) }}</p>
                 </div>
               </div>
@@ -60,15 +61,16 @@
           <div class="card-body">
             <h2 class="h6 fw-semibold mb-3">Top Categories</h2>
             <div class="vstack gap-2">
-              <div v-for="item in CATEGORY_STATS.slice(0, 6)" :key="item.name">
+              <div v-for="item in topCategories" :key="item.name">
                 <div class="d-flex justify-content-between small mb-1">
                   <span>{{ item.name }}</span>
                   <span class="text-secondary">{{ item.count }}</span>
                 </div>
-                <div class="progress" style="height: 6px;" role="progressbar" :aria-valuenow="item.count" aria-valuemin="0" aria-valuemax="50">
-                  <div class="progress-bar" :style="{ width: `${item.count * 2}%` }"></div>
+                <div class="progress" style="height: 6px;" role="progressbar" :aria-valuenow="item.count" aria-valuemin="0" :aria-valuemax="topCategoryMax">
+                  <div class="progress-bar" :style="{ width: `${Math.round((item.count / topCategoryMax) * 100)}%` }"></div>
                 </div>
               </div>
+              <p v-if="!topCategories.length" class="small text-secondary mb-0">No category data yet.</p>
             </div>
           </div>
         </article>
@@ -81,12 +83,20 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { fetchUserByEmailRequest } from '../lib/authApi';
+import { fetchExperimentsRequest, type ExperimentRecord } from '../lib/experimentsApi';
 import { fetchPrompts } from '../lib/promptsApi';
-import { CATEGORY_STATS } from '../lib/mockData';
+import { fetchResultsSummaryRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
 
 const router = useRouter();
 const totalPrompts = ref(0);
+const experiments = ref<ExperimentRecord[]>([]);
+const dashboardSummary = ref({
+  experimentsRun: 0,
+  avgQualityScore: null as number | null,
+  topCategories: [] as Array<{ name: string; count: number }>,
+});
 
 const firstName = computed(() => {
   const email = appStore.state.user?.email;
@@ -97,24 +107,111 @@ const firstName = computed(() => {
   return email.split('@')[0];
 });
 
+const avgQualityDisplay = computed(() => {
+  if (typeof dashboardSummary.value.avgQualityScore !== 'number') {
+    return 'N/A';
+  }
+
+  return `${dashboardSummary.value.avgQualityScore}/100`;
+});
+
 const stats = computed(() => [
   { title: 'Total Prompts', value: totalPrompts.value, icon: 'bi bi-file-text', className: 'stat-blue' },
-  { title: 'Experiments Run', value: appStore.state.experiments.length, icon: 'bi bi-flask', className: 'stat-indigo' },
-  { title: 'Avg Quality Score', value: '86/100', icon: 'bi bi-star-fill', className: 'stat-gold' },
+  { title: 'Experiments Run', value: dashboardSummary.value.experimentsRun, icon: 'bi bi-flask', className: 'stat-indigo' },
+  { title: 'Avg Quality Score', value: avgQualityDisplay.value, icon: 'bi bi-star-fill', className: 'stat-gold' },
 ]);
 
-const recentExperiments = computed(() => appStore.state.experiments.slice(0, 3));
+const recentExperiments = computed(() => experiments.value.slice(0, 3));
+const topCategories = computed(() => dashboardSummary.value.topCategories.slice(0, 6));
+const topCategoryMax = computed(() => {
+  const max = topCategories.value[0]?.count ?? 0;
+  return max > 0 ? max : 1;
+});
+
+function shortId(value: string): string {
+  return value.slice(-6).toUpperCase();
+}
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleDateString();
 }
 
+async function loadExperiments(): Promise<void> {
+  let resolvedUserId = appStore.state.user?.id || '';
+
+  if (!resolvedUserId) {
+    const savedEmail = window.localStorage.getItem('promptlab_user_email');
+    if (savedEmail) {
+      try {
+        const userData = await fetchUserByEmailRequest(savedEmail);
+        if (userData.user?.id) {
+          resolvedUserId = userData.user.id;
+        }
+      } catch {
+        experiments.value = [];
+        return;
+      }
+    }
+  }
+
+  if (!resolvedUserId) {
+    experiments.value = [];
+    return;
+  }
+
+  try {
+    experiments.value = await fetchExperimentsRequest(resolvedUserId);
+  } catch (error) {
+    console.error('Failed to fetch experiments for dashboard:', error);
+    experiments.value = [];
+  }
+}
+
+async function loadDashboardSummary(userId: string): Promise<void> {
+  try {
+    const response = await fetchResultsSummaryRequest(userId);
+    dashboardSummary.value = {
+      experimentsRun: response.experimentsRun,
+      avgQualityScore: response.avgQualityScore,
+      topCategories: response.topCategories,
+    };
+  } catch (error) {
+    console.error('Failed to fetch dashboard summary:', error);
+    dashboardSummary.value = {
+      experimentsRun: 0,
+      avgQualityScore: null,
+      topCategories: [],
+    };
+  }
+}
+
 onMounted(async () => {
+  let resolvedUserId = appStore.state.user?.id || '';
+
+  if (!resolvedUserId) {
+    const savedEmail = window.localStorage.getItem('promptlab_user_email');
+    if (savedEmail) {
+      try {
+        const userData = await fetchUserByEmailRequest(savedEmail);
+        if (userData.user?.id) {
+          resolvedUserId = userData.user.id;
+        }
+      } catch {
+        resolvedUserId = '';
+      }
+    }
+  }
+
   try {
     const response = await fetchPrompts({ limit: 1, offset: 0 });
     totalPrompts.value = response.total;
   } catch (error) {
     console.error('Failed to fetch prompts count:', error);
+  }
+
+  if (resolvedUserId) {
+    await loadExperiments();
+    await loadDashboardSummary(resolvedUserId);
   }
 });
 </script>

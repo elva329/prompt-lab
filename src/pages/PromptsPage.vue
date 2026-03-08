@@ -66,13 +66,12 @@
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
-            <div class="mt-auto pt-2 border-top d-flex justify-content-between text-secondary small">
+            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-secondary small gap-2">
               <div>
-                <span class="d-flex align-items-center gap-1">
-                  <i class="bi bi-star-fill text-warning"></i>
-                  {{ getPopularityScore(prompt.promptId) }}/5
-                  <span class="text-muted">({{ getPopularityCount(prompt.promptId) }} ratings)</span>
+                <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill text-bg-light border">
+                  Overall Quality: {{ getPromptScoreSummary(prompt.promptId) }}
                 </span>
+                <span v-else class="badge rounded-pill text-bg-light border">Not tested yet</span>
               </div>
               <label class="form-check mb-0 d-flex align-items-center gap-2">
                 <input
@@ -130,8 +129,10 @@
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { fetchUserByEmailRequest } from '../lib/authApi';
 import { addOrUpdateFavorite, fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
 import { fetchCategories, fetchPrompts, type PromptRecord } from '../lib/promptsApi';
+import { fetchPromptResultsSummaryRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
 
 const searchTerm = ref('');
@@ -144,6 +145,7 @@ const totalPrompts = ref(0);
 const currentPage = ref(1);
 const isLoading = ref(false);
 const errorMessage = ref('');
+const promptScoreMap = ref<Record<number, { avg: number; count: number }>>({});
 const pageSize = 9;
 const router = useRouter();
 
@@ -250,6 +252,55 @@ function isFavorite(promptId: number): boolean {
   return favoritePromptIds.value.includes(promptId);
 }
 
+function getPromptScoreSummary(promptId: number): string | null {
+  const score = promptScoreMap.value[promptId];
+  if (!score) {
+    return null;
+  }
+
+  return `${score.avg}/100 (${score.count} run${score.count > 1 ? 's' : ''})`;
+}
+
+async function loadPromptScores(): Promise<void> {
+  let resolvedUserId = appStore.state.user?.id || '';
+
+  if (!resolvedUserId) {
+    const savedEmail = window.localStorage.getItem('promptlab_user_email');
+    if (savedEmail) {
+      try {
+        const userData = await fetchUserByEmailRequest(savedEmail);
+        if (userData.user?.id) {
+          resolvedUserId = userData.user.id;
+        }
+      } catch {
+        promptScoreMap.value = {};
+        return;
+      }
+    }
+  }
+
+  if (!resolvedUserId) {
+    promptScoreMap.value = {};
+    return;
+  }
+
+  try {
+    const averaged: Record<number, { avg: number; count: number }> = {};
+    const response = await fetchPromptResultsSummaryRequest(resolvedUserId);
+    for (const item of response.prompts) {
+      averaged[item.promptId] = {
+        avg: item.avgQualityScore,
+        count: item.testCount,
+      };
+    }
+
+    promptScoreMap.value = averaged;
+  } catch (error) {
+    console.error('Failed to load prompt score summaries:', error);
+    promptScoreMap.value = {};
+  }
+}
+
 async function toggleFavorite(promptId: number): Promise<void> {
   const userId = appStore.state.user?.id;
   if (!userId) {
@@ -270,14 +321,6 @@ async function toggleFavorite(promptId: number): Promise<void> {
   } catch (error) {
     appStore.showToast(error instanceof Error ? error.message : 'Failed to update favorites.', 'danger');
   }
-}
-
-function getPopularityScore(promptId: number): string {
-  return (3.6 + (promptId % 15) / 10).toFixed(1);
-}
-
-function getPopularityCount(promptId: number): number {
-  return 80 + (promptId % 220);
 }
 
 function clearSelection(): void {
@@ -310,5 +353,6 @@ onMounted(async () => {
 
   loadCategories();
   loadPrompts(1);
+  loadPromptScores();
 });
 </script>

@@ -1,3 +1,16 @@
+export type ExperimentPromptScore = {
+  promptId: number;
+  overallQuality: number;
+};
+
+export type ExperimentSummaryPayload = {
+  status: 'draft' | 'completed';
+  avgQualityScore: number | null;
+  avgResponseTimeMs: number | null;
+  totalTokens: number;
+  promptScores?: ExperimentPromptScore[];
+};
+
 type CreateExperimentResponse = {
   message?: string;
   experiment?: {
@@ -5,6 +18,11 @@ type CreateExperimentResponse = {
     userId: string;
     prompts: number[];
     createdAt: string;
+    status?: 'draft' | 'completed';
+    avgQualityScore?: number | null;
+    avgResponseTimeMs?: number | null;
+    totalTokens?: number;
+    promptScores?: ExperimentPromptScore[];
   };
 };
 
@@ -13,6 +31,11 @@ export type ExperimentRecord = {
   userId: string;
   prompts: number[];
   createdAt: string;
+  status?: 'draft' | 'completed';
+  avgQualityScore?: number | null;
+  avgResponseTimeMs?: number | null;
+  totalTokens?: number;
+  promptScores?: ExperimentPromptScore[];
 };
 
 type ExperimentsListResponse = {
@@ -20,7 +43,16 @@ type ExperimentsListResponse = {
   message?: string;
 };
 
-export async function createExperimentRequest(userId: string, promptIds: number[]): Promise<CreateExperimentResponse> {
+type ExperimentDetailResponse = {
+  experiment?: ExperimentRecord;
+  message?: string;
+};
+
+export async function createExperimentRequest(
+  userId: string,
+  promptIds: number[],
+  summary?: ExperimentSummaryPayload
+): Promise<CreateExperimentResponse> {
   const response = await fetch('/api/experiments', {
     method: 'POST',
     headers: {
@@ -29,6 +61,7 @@ export async function createExperimentRequest(userId: string, promptIds: number[
     body: JSON.stringify({
       userId,
       prompts: promptIds,
+      summary,
     }),
   });
 
@@ -50,4 +83,17 @@ export async function fetchExperimentsRequest(userId: string): Promise<Experimen
   }
 
   return data.experiments || [];
+}
+
+export async function fetchExperimentByIdRequest(userId: string, experimentId: string): Promise<ExperimentRecord> {
+  const response = await fetch(
+    `/api/experiments/${encodeURIComponent(experimentId)}?userId=${encodeURIComponent(userId)}`
+  );
+  const data = (await response.json()) as ExperimentDetailResponse;
+
+  if (!response.ok || !data.experiment) {
+    throw new Error(data.message || 'Failed to fetch experiment details.');
+  }
+
+  return data.experiment;
 }

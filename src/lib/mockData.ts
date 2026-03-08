@@ -17,7 +17,6 @@ export type ExperimentResult = {
   id: string;
   promptId: string;
   aiResponse: string;
-  userRating: number;
   aiScore: number;
   responseLength: number;
   responseTimeMs: number;
@@ -84,7 +83,6 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
         id: 'r-1',
         promptId: 'p-3',
         aiResponse: "Subject: New Feature Alert!\n\nHi there,\n\nWe're excited to announce our newest feature. It's designed to save you time and make your workflow smoother. Try it out today by clicking the link below!\n\nBest,\nThe Team",
-        userRating: 3,
         aiScore: 72,
         responseLength: 39,
         responseTimeMs: 1200,
@@ -93,7 +91,6 @@ export const MOCK_EXPERIMENTS: Experiment[] = [
         id: 'r-2',
         promptId: 'p-4',
         aiResponse: "Subject: Stop wasting hours on manual tasks 🛑\n\nHey,\n\nAre you tired of repetitive busywork? We've just launched a new feature that automates your entire workflow in seconds. Imagine getting 5 hours back every week.\n\nReady to see it in action? Click here to try it now.\n\nCheers!",
-        userRating: 5,
         aiScore: 94,
         responseLength: 48,
         responseTimeMs: 1450,

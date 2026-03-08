@@ -17,6 +17,9 @@ async function ensureIndexes() {
   await db.collection('prompt_library').createIndex({ promptId: 1 }, { unique: true });
   await db.collection('prompt_library').createIndex({ category: 1 });
   await db.collection('experiments').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('results').createIndex({ userId: 1, createdAt: -1 });
+  await db.collection('results').createIndex({ userId: 1, promptId: 1, createdAt: -1 });
+  await db.collection('results').createIndex({ userId: 1, experimentId: 1 });
   await db.collection('favorite_prompts').createIndex({ userId: 1, sourcePromptId: 1 }, { unique: true });
   await db.collection('favorite_prompts').createIndex({ userId: 1, updatedAt: -1 });
 }
@@ -48,6 +51,78 @@ function validateCredentials(email, password) {
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+// Proxy endpoint for HKBU GenAI API to bypass CORS
+app.post('/api/ai/chat', async (req, res) => {
+  try {
+    const { messages, model, temperature, max_tokens } = req.body;
+    
+    const apiKey = process.env.VITE_CUSTOM_API_KEY;
+    const baseUrl = process.env.VITE_CUSTOM_BASE_URL || 'https://genai.hkbu.edu.hk/api/v0/rest';
+    const deploymentModel = process.env.VITE_CUSTOM_MODEL || model || 'gpt-5-mini';
+    const apiVersion = process.env.VITE_CUSTOM_API_VERSION || '2024-12-01-preview';
+    
+    if (!apiKey) {
+      return res.status(500).json({ 
+        error: { message: 'AI API key not configured on server' }
+      });
+    }
+
+    // Construct Azure OpenAI-style URL: /deployments/{model}/chat/completions?api-version={version}
+    const apiUrl = `${baseUrl}/deployments/${deploymentModel}/chat/completions?api-version=${apiVersion}`;
+
+    console.log('Proxying request to HKBU GenAI API:', apiUrl);
+    console.log('Request body:', JSON.stringify({ temperature, max_tokens, messages: messages?.length }));
+
+    const startTime = Date.now();
+    
+    // HKBU API only supports temperature=1 (default), so we don't send it
+    const requestBody = {
+      messages: messages,
+      max_tokens: max_tokens ?? 1000,
+    };
+    
+    console.log('Sending request body:', JSON.stringify(requestBody));
+    
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const responseTime = Date.now() - startTime;
+    console.log(`HKBU API response: ${response.status} (${responseTime}ms)`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('HKBU API error:', errorText);
+      
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        return res.status(response.status).json({ 
+          error: { message: `API returned ${response.status}: ${errorText.substring(0, 200)}` }
+        });
+      }
+      
+      return res.status(response.status).json(errorData);
+    }
+
+    const data = await response.json();
+    console.log('HKBU API success:', JSON.stringify(data).substring(0, 200));
+    
+    return res.json(data);
+  } catch (error) {
+    console.error('Proxy error:', error);
+    return res.status(500).json({ 
+      error: { message: error.message || 'Failed to proxy request to AI API' }
+    });
+  }
 });
 
 app.get('/api/prompts', async (req, res) => {
@@ -98,6 +173,37 @@ app.get('/api/prompts/categories', async (_req, res) => {
   } catch (error) {
     console.error('Fetch categories error:', error);
     return res.status(500).json({ message: 'Failed to fetch categories.' });
+  }
+});
+
+app.get('/api/prompts/category-stats', async (_req, res) => {
+  try {
+    const db = await getDb();
+    const promptsCollection = db.collection('prompt_library');
+
+    const stats = await promptsCollection
+      .aggregate([
+        {
+          $group: {
+            _id: { $ifNull: ['$category', 'uncategorized'] },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            name: '$_id',
+            count: 1,
+          },
+        },
+        { $sort: { count: -1, name: 1 } },
+      ])
+      .toArray();
+
+    return res.json({ categories: stats });
+  } catch (error) {
+    console.error('Fetch category stats error:', error);
+    return res.status(500).json({ message: 'Failed to fetch category stats.' });
   }
 });
 
@@ -216,7 +322,7 @@ app.post('/api/prompts', async (req, res) => {
 
 app.post('/api/experiments', async (req, res) => {
   try {
-    const { userId, prompts } = req.body || {};
+    const { userId, prompts, summary } = req.body || {};
 
     if (!userId || !ObjectId.isValid(String(userId))) {
       return res.status(400).json({ message: 'Valid userId is required.' });
@@ -244,10 +350,47 @@ app.post('/api/experiments', async (req, res) => {
     }
 
     const createdAt = new Date().toISOString();
+    const normalizedSummary = summary && typeof summary === 'object'
+      ? {
+          status: summary.status === 'completed' ? 'completed' : 'draft',
+          avgQualityScore:
+            typeof summary.avgQualityScore === 'number' && Number.isFinite(summary.avgQualityScore)
+              ? Math.round(summary.avgQualityScore)
+              : null,
+          avgResponseTimeMs:
+            typeof summary.avgResponseTimeMs === 'number' && Number.isFinite(summary.avgResponseTimeMs)
+              ? Math.round(summary.avgResponseTimeMs)
+              : null,
+          totalTokens:
+            typeof summary.totalTokens === 'number' && Number.isFinite(summary.totalTokens)
+              ? Math.max(0, Math.round(summary.totalTokens))
+              : 0,
+          promptScores: Array.isArray(summary.promptScores)
+            ? summary.promptScores
+                .map((entry) => ({
+                  promptId: Number(entry?.promptId),
+                  overallQuality: Number(entry?.overallQuality),
+                }))
+                .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
+                .map((entry) => ({
+                  promptId: entry.promptId,
+                  overallQuality: Math.max(0, Math.min(100, Math.round(entry.overallQuality))),
+                }))
+            : [],
+        }
+      : {
+          status: 'draft',
+          avgQualityScore: null,
+          avgResponseTimeMs: null,
+          totalTokens: 0,
+          promptScores: [],
+        };
+
     const insertResult = await experimentsCollection.insertOne({
       userId: String(user._id),
       prompts: normalizedPrompts,
       createdAt,
+      ...normalizedSummary,
     });
 
     return res.status(201).json({
@@ -257,6 +400,7 @@ app.post('/api/experiments', async (req, res) => {
         userId: String(user._id),
         prompts: normalizedPrompts,
         createdAt,
+        ...normalizedSummary,
       },
     });
   } catch (error) {
@@ -285,6 +429,274 @@ app.get('/api/experiments', async (req, res) => {
   } catch (error) {
     console.error('Fetch experiments error:', error);
     return res.status(500).json({ message: 'Failed to fetch experiments.' });
+  }
+});
+
+app.get('/api/experiments/:id', async (req, res) => {
+  try {
+    const experimentId = String(req.params.id || '');
+    const userId = String(req.query.userId || '');
+
+    if (!experimentId || !ObjectId.isValid(experimentId)) {
+      return res.status(400).json({ message: 'Valid experiment ID is required.' });
+    }
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const experimentsCollection = db.collection('experiments');
+
+    const experiment = await experimentsCollection.findOne({
+      _id: new ObjectId(experimentId),
+      userId,
+    });
+
+    if (!experiment) {
+      return res.status(404).json({ message: 'Experiment not found.' });
+    }
+
+    return res.json({ experiment });
+  } catch (error) {
+    console.error('Fetch experiment detail error:', error);
+    return res.status(500).json({ message: 'Failed to fetch experiment details.' });
+  }
+});
+
+app.post('/api/results/batch', async (req, res) => {
+  try {
+    const { userId, experimentId, promptResults } = req.body || {};
+
+    if (!userId || !ObjectId.isValid(String(userId))) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    if (!experimentId || !ObjectId.isValid(String(experimentId))) {
+      return res.status(400).json({ message: 'Valid experimentId is required.' });
+    }
+
+    if (!Array.isArray(promptResults) || promptResults.length === 0) {
+      return res.status(400).json({ message: 'promptResults must be a non-empty array.' });
+    }
+
+    const createdAt = new Date().toISOString();
+    const normalized = promptResults
+      .map((entry) => ({
+        userId: String(userId),
+        experimentId: String(experimentId),
+        promptId: Number(entry?.promptId),
+        aiResponse: typeof entry?.aiResponse === 'string' ? entry.aiResponse : '',
+        overallQuality: Number(entry?.overallQuality),
+        responseTimeMs: Number(entry?.responseTimeMs || 0),
+        clarity: Number(entry?.clarity || 0),
+        relevance: Number(entry?.relevance || 0),
+        coherence: Number(entry?.coherence || 0),
+        completeness: Number(entry?.completeness || 0),
+        tokensUsed: Number(entry?.tokensUsed || 0),
+        createdAt,
+      }))
+      .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
+      .map((entry) => ({
+        ...entry,
+        aiResponse: String(entry.aiResponse || ''),
+        overallQuality: Math.max(0, Math.min(100, Math.round(entry.overallQuality))),
+        responseTimeMs: Math.max(0, Math.round(entry.responseTimeMs)),
+        clarity: Math.max(0, Math.min(100, Math.round(entry.clarity))),
+        relevance: Math.max(0, Math.min(100, Math.round(entry.relevance))),
+        coherence: Math.max(0, Math.min(100, Math.round(entry.coherence))),
+        completeness: Math.max(0, Math.min(100, Math.round(entry.completeness))),
+        tokensUsed: Math.max(0, Math.round(entry.tokensUsed)),
+      }));
+
+    if (!normalized.length) {
+      return res.status(400).json({ message: 'No valid prompt results to save.' });
+    }
+
+    const db = await getDb();
+    const resultsCollection = db.collection('results');
+    const insertResult = await resultsCollection.insertMany(normalized);
+
+    return res.status(201).json({
+      message: 'Results saved successfully.',
+      insertedCount: insertResult.insertedCount,
+    });
+  } catch (error) {
+    console.error('Save results error:', error);
+    return res.status(500).json({ message: 'Failed to save results.' });
+  }
+});
+
+app.get('/api/results/summary', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const resultsCollection = db.collection('results');
+    const promptsCollection = db.collection('prompt_library');
+
+    const [overall] = await resultsCollection
+      .aggregate([
+        { $match: { userId } },
+        {
+          $group: {
+            _id: null,
+            avgQualityScore: { $avg: '$overallQuality' },
+            experiments: { $addToSet: '$experimentId' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            avgQualityScore: {
+              $cond: [{ $gt: [{ $size: '$experiments' }, 0] }, { $round: ['$avgQualityScore', 0] }, null],
+            },
+            experimentsRun: { $size: '$experiments' },
+          },
+        },
+      ])
+      .toArray();
+
+    const topCategoriesByPrompt = await resultsCollection
+      .aggregate([
+        { $match: { userId } },
+        {
+          $group: {
+            _id: '$promptId',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $lookup: {
+            from: 'prompt_library',
+            localField: '_id',
+            foreignField: 'promptId',
+            as: 'prompt',
+          },
+        },
+        { $unwind: { path: '$prompt', preserveNullAndEmptyArrays: true } },
+        {
+          $group: {
+            _id: { $ifNull: ['$prompt.category', 'uncategorized'] },
+            count: { $sum: '$count' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            name: '$_id',
+            count: 1,
+          },
+        },
+        { $sort: { count: -1, name: 1 } },
+        { $limit: 6 },
+      ])
+      .toArray();
+
+    if (!topCategoriesByPrompt.length) {
+      const fallbackCategories = await promptsCollection
+        .aggregate([
+          {
+            $group: {
+              _id: { $ifNull: ['$category', 'uncategorized'] },
+              count: { $sum: 1 },
+            },
+          },
+          { $project: { _id: 0, name: '$_id', count: 1 } },
+          { $sort: { count: -1, name: 1 } },
+          { $limit: 6 },
+        ])
+        .toArray();
+
+      return res.json({
+        experimentsRun: overall?.experimentsRun || 0,
+        avgQualityScore: typeof overall?.avgQualityScore === 'number' ? overall.avgQualityScore : null,
+        topCategories: fallbackCategories,
+      });
+    }
+
+    return res.json({
+      experimentsRun: overall?.experimentsRun || 0,
+      avgQualityScore: typeof overall?.avgQualityScore === 'number' ? overall.avgQualityScore : null,
+      topCategories: topCategoriesByPrompt,
+    });
+  } catch (error) {
+    console.error('Fetch results summary error:', error);
+    return res.status(500).json({ message: 'Failed to fetch results summary.' });
+  }
+});
+
+app.get('/api/results/prompt-summary', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    const db = await getDb();
+    const resultsCollection = db.collection('results');
+
+    const summary = await resultsCollection
+      .aggregate([
+        { $match: { userId } },
+        {
+          $group: {
+            _id: '$promptId',
+            avgQualityScore: { $avg: '$overallQuality' },
+            testCount: { $sum: 1 },
+            lastTestedAt: { $max: '$createdAt' },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            promptId: '$_id',
+            avgQualityScore: { $round: ['$avgQualityScore', 0] },
+            testCount: 1,
+            lastTestedAt: 1,
+          },
+        },
+        { $sort: { promptId: 1 } },
+      ])
+      .toArray();
+
+    return res.json({ prompts: summary });
+  } catch (error) {
+    console.error('Fetch prompt result summary error:', error);
+    return res.status(500).json({ message: 'Failed to fetch prompt result summary.' });
+  }
+});
+
+app.get('/api/results/by-experiment', async (req, res) => {
+  try {
+    const userId = String(req.query.userId || '');
+    const experimentId = String(req.query.experimentId || '');
+
+    if (!userId || !ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: 'Valid userId is required.' });
+    }
+
+    if (!experimentId || !ObjectId.isValid(experimentId)) {
+      return res.status(400).json({ message: 'Valid experimentId is required.' });
+    }
+
+    const db = await getDb();
+    const resultsCollection = db.collection('results');
+
+    const results = await resultsCollection
+      .find({ userId, experimentId })
+      .sort({ promptId: 1 })
+      .toArray();
+
+    return res.json({ results });
+  } catch (error) {
+    console.error('Fetch results by experiment error:', error);
+    return res.status(500).json({ message: 'Failed to fetch experiment results.' });
   }
 });
 

@@ -35,11 +35,7 @@
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
-            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center small text-secondary">
-              <span>
-                <i class="bi bi-star-fill text-warning me-1"></i>
-                {{ getPopularityScore(prompt.promptId) }}/5
-              </span>
+            <div class="mt-auto pt-2 border-top d-flex justify-content-end align-items-center small text-secondary">
               <div class="d-flex gap-2">
                 <button class="btn btn-outline-primary btn-sm" @click="openEditModal(prompt)">
                   <i class="bi bi-pencil-square me-1"></i>
@@ -189,10 +185,6 @@ async function removeFavorite(promptId: number): Promise<void> {
   } catch (error) {
     appStore.showToast(error instanceof Error ? error.message : 'Failed to remove favorite.', 'danger');
   }
-}
-
-function getPopularityScore(promptId: number): string {
-  return (3.6 + (promptId % 15) / 10).toFixed(1);
 }
 
 function openEditModal(prompt: FavoritePromptWithMerged): void {
