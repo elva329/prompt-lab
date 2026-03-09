@@ -86,14 +86,27 @@
             />
           </div>
           <div>
-            <label class="form-label login-label">Password</label>
+            <label class="form-label login-label login-password-label">
+              Password
+              <span
+                v-if="isRegisterMode"
+                class="login-tooltip-trigger ms-1"
+                tabindex="0"
+                role="button"
+                :data-tooltip="passwordRuleHint"
+                aria-label="Password rule info"
+              >
+                <i class="bi bi-info-circle-fill"></i>
+              </span>
+            </label>
             <input
               v-model="form.password"
               type="password"
               class="form-control login-input"
               required
-              minlength="6"
-              autocomplete="current-password"
+              :minlength="isRegisterMode ? 8 : 1"
+              :maxlength="isRegisterMode ? 16 : undefined"
+              :autocomplete="isRegisterMode ? 'new-password' : 'current-password'"
             />
           </div>
           <div class="login-confirm-slot" :class="{ 'is-hidden': !isRegisterMode }">
@@ -104,7 +117,8 @@
               class="form-control login-input"
               :required="isRegisterMode"
               :disabled="!isRegisterMode"
-              minlength="6"
+              :minlength="isRegisterMode ? 8 : 1"
+              :maxlength="isRegisterMode ? 16 : undefined"
               autocomplete="new-password"
             />
           </div>
@@ -131,6 +145,22 @@ const router = useRouter();
 const isRegisterMode = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref('');
+const passwordRuleHint =
+  'Use 8-16 characters, with at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol (no spaces).';
+
+function isStrongPassword(password: string): boolean {
+  if (password.length < 8 || password.length > 16) {
+    return false;
+  }
+
+  const hasUpper = /[A-Z]/.test(password);
+  const hasLower = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSymbol = /[^A-Za-z0-9]/.test(password);
+  const hasNoSpaces = !/\s/.test(password);
+
+  return hasUpper && hasLower && hasNumber && hasSymbol && hasNoSpaces;
+}
 
 const form = reactive({
   email: '',
@@ -141,6 +171,10 @@ const form = reactive({
 function validateForm(): string | null {
   if (!form.email || !form.password) {
     return 'Email and password are required.';
+  }
+
+  if (isRegisterMode.value && !isStrongPassword(form.password)) {
+    return 'Password must be 8-16 characters and include uppercase, lowercase, number, and special symbol (no spaces).';
   }
 
   if (isRegisterMode.value && form.password !== form.confirmPassword) {

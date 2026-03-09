@@ -90,9 +90,9 @@
               <p v-else class="small text-secondary mb-0">No response time data yet.</p>
               
               <!-- Legend -->
-              <div v-if="trendResponseData.length" class="d-flex justify-content-center gap-4 mt-3">
+              <div v-if="trendResponseData.length" class="d-flex justify-content-center gap-4 mt-3 dashboard-trend-legend">
                 <div class="d-flex align-items-center gap-2">
-                  <span style="display: inline-block; width: 12px; height: 3px; background: #e74c3c; border-radius: 2px;"></span>
+                  <span class="dashboard-trend-legend-dot"></span>
                   <span class="small text-secondary">Response Time (ms)</span>
                 </div>
               </div>
@@ -117,12 +117,12 @@
                   <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
                     <div class="grow">
                       <p class="mb-0 fw-semibold small">Experiment {{ shortId(exp._id) }}</p>
-                      <p class="small text-secondary mb-0" style="font-size: 0.75rem;">{{ formatDate(exp.createdAt) }}</p>
+                      <p class="small text-secondary mb-0 dashboard-exp-date">{{ formatDate(exp.createdAt) }}</p>
                     </div>
                     <i class="bi bi-arrow-up-right small"></i>
                   </div>
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary" style="font-size: 0.7rem;">
+                    <span class="badge dashboard-exp-prompts-badge">
                       <i class="bi bi-zoom"></i> {{ exp.prompts.length }} prompts
                     </span>
                     <span v-if="typeof exp.avgQualityScore === 'number'" class="small text-secondary">{{ exp.avgQualityScore }}/100</span>
@@ -131,7 +131,7 @@
               </div>
               <p v-else class="small text-secondary mb-0">No experiments yet.</p>
               
-              <button class="btn btn-link p-0 text-decoration-none small mt-2" @click="router.push('/experiments')">
+              <button class="btn btn-link p-0 text-decoration-none small mt-2 dashboard-link-cta" @click="router.push('/experiments')">
                 See all experiments <i class="bi bi-chevron-right"></i>
               </button>
             </div>
