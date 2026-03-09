@@ -2128,7 +2128,7 @@ h6 {
 
 .prompts-scrollable-grid {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   min-height: 0;
   padding-right: 0.25rem;
@@ -2170,6 +2170,8 @@ h6 {
   .prompts-page .prompts-scrollable-grid {
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden;
+    padding-right: 0;
   }
 
   .prompts-grid > [class*="col-"] {
@@ -2178,7 +2180,7 @@ h6 {
 
   .prompts-grid .prompt-card {
     width: 100%;
-    min-height: 240px;
+    min-height: 300px;
   }
 
   .prompts-grid .prompt-card .card-body {
@@ -2187,9 +2189,9 @@ h6 {
 
   .prompts-grid .prompt-content-preview {
     font-size: 0.82rem;
-    padding: 0.68rem;
-    min-height: 118px;
-    max-height: 118px;
+    padding: 0.65rem;
+    min-height: 170px;
+    max-height: 170px;
   }
 
   .prompts-pagination {

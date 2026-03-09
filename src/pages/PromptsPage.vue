@@ -63,7 +63,7 @@
     <section v-else-if="errorMessage && prompts.length === 0" class="alert alert-danger">{{ errorMessage }}</section>
 
     <section v-if="prompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
-      <div v-for="prompt in prompts" :key="prompt.promptId" class="col-md-6 col-lg-6">
+      <div v-for="prompt in prompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
         <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
           <div class="card-body d-flex flex-column gap-1">
             <div class="d-flex justify-content-between align-items-start gap-2">
@@ -165,7 +165,7 @@ const currentPage = ref(1);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const promptScoreMap = ref<Record<number, { avg: number; count: number }>>({});
-const pageSize = 4;
+const pageSize = 3;
 const router = useRouter();
 const route = useRoute();
 
