@@ -15,13 +15,9 @@
               <i class="bi bi-grid-3x3-gap-fill"></i>
             </div>
             <div class="text-start">
-              <p class="landing-brand-kicker mb-1">Prompt Engineering Studio</p>
-              <h2 class="landing-brand-name mb-0">Experiment Workspace</h2>
+              <p class="landing-brand-kicker mb-1">Experiment Workspace</p>
+              <h2 class="landing-brand-name mb-0">Prompt Lab</h2>
             </div>
-          </div>
-
-          <div class="floating-card floating-note d-none d-md-block">
-            <p class="mb-0">Compare prompt variants with reliable metrics and clear winners.</p>
           </div>
 
           <div class="landing-content text-center">
@@ -51,7 +47,12 @@
             </div>
 
             <div class="landing-showcase text-start">
-              <aside class="showcase-side">
+              <div class="showcase-left">
+                <div class="workspace-corner-note">
+                  <p class="mb-0">Compare prompt variants with reliable metrics and clear winners.</p>
+                </div>
+
+                <aside class="showcase-side">
                 <p class="showcase-side-title mb-2">Workspace</p>
                 <article v-for="feature in features" :key="feature.title" class="landing-feature mb-2">
                   <div class="landing-feature-icon">
@@ -68,7 +69,8 @@
                   <span class="landing-module-pill">Scoreboard</span>
                   <span class="landing-module-pill">Insights</span>
                 </div>
-              </aside>
+                </aside>
+              </div>
 
               <section class="showcase-main">
                 <div class="showcase-main-top">

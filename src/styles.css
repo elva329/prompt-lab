@@ -441,15 +441,15 @@ h6 {
 }
 
 .floating-note {
-  left: 1.2rem;
-  top: 6.2rem;
+  left: 1.1rem;
+  top: 5.2rem;
   max-width: 220px;
   padding: 0.9rem;
   background: linear-gradient(145deg, #fbf6e6, #f4e9c8);
   color: #61532b;
   font-size: 0.84rem;
   font-weight: 700;
-  transform: rotate(-2deg);
+  transform: rotate(-12deg);
 }
 
 .floating-integrations {
@@ -492,11 +492,29 @@ h6 {
   gap: 0.9rem;
 }
 
+.showcase-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .showcase-side {
   border-radius: 18px;
   border: 1px solid rgba(224, 231, 247, 0.95);
   background: rgba(247, 249, 255, 0.88);
   padding: 0.85rem;
+}
+
+.workspace-corner-note {
+  max-width: 260px;
+  padding: 0.72rem 0.78rem;
+  background: linear-gradient(145deg, #fbf6e6, #f4e9c8);
+  color: #61532b;
+  font-size: 0.79rem;
+  font-weight: 700;
+  border: 1px solid rgba(229, 220, 171, 0.95);
+  border-radius: 12px;
+  box-shadow: var(--app-shadow-card);
 }
 
 .showcase-side-title {
@@ -645,6 +663,10 @@ h6 {
 
   .landing-showcase {
     grid-template-columns: 1fr;
+  }
+
+  .workspace-corner-note {
+    max-width: none;
   }
 
   .landing-brand-cluster {
