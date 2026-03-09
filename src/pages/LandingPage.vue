@@ -4,7 +4,7 @@
       <div class="w-100 py-3 py-md-4 px-3 px-md-4 px-xl-5">
         <div class="landing-shell w-100">
           <div class="landing-entrybar">
-            <div class="d-flex align-items-center gap-2">
+            <div class="landing-entry-actions d-flex align-items-center gap-2">
               <button class="btn btn-link landing-login-link" @click="goLogin">Login</button>
               <button class="btn landing-register-btn" @click="goLogin">Register</button>
             </div>
@@ -48,9 +48,9 @@
 
             <div class="landing-showcase text-start">
               <div class="showcase-left">
-                <div class="workspace-corner-note">
+                <!-- <div class="workspace-corner-note">
                   <p class="mb-0">Compare prompt variants with reliable metrics and clear winners.</p>
-                </div>
+                </div> -->
 
                 <aside class="showcase-side">
                 <p class="showcase-side-title mb-2">Workspace</p>

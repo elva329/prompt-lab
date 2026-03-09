@@ -56,8 +56,6 @@
             <i class="bi bi-arrow-right ms-2"></i>
           </button>
         </form>
-
-        <p class="text-center text-muted small mt-4 mb-0">Passwords are securely hashed before being stored as <code>passwordHash</code>.</p>
       </div>
     </div>
   </div>

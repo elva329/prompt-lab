@@ -258,21 +258,42 @@ h6 {
   margin-bottom: 0.85rem;
 }
 
+.landing-entry-actions {
+  padding: 0.2rem;
+}
+
 .landing-login-link {
-  color: #4b5773;
-  font-size: 0.86rem;
+  color: #43506e;
+  font-size: 0.82rem;
   font-weight: 700;
-  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(197, 209, 236, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  text-decoration: none;
+  padding: 0.34rem 0.76rem;
+}
+
+.landing-login-link:hover {
+  color: #2f3f63;
+  border-color: rgba(164, 186, 233, 0.95);
+  background: rgba(236, 242, 255, 0.95);
 }
 
 .landing-register-btn {
   border-radius: 999px;
-  border: 1px solid rgba(199, 210, 235, 0.95);
-  background: rgba(243, 248, 255, 0.95);
-  color: #2f3f63;
-  font-size: 0.82rem;
+  border: 1px solid rgba(105, 131, 210, 0.35);
+  background: linear-gradient(130deg, #7a61dc, #5a85f1);
+  color: #f7f9ff;
+  font-size: 0.8rem;
   font-weight: 700;
-  padding: 0.35rem 0.78rem;
+  letter-spacing: 0.01em;
+  padding: 0.34rem 0.84rem;
+  box-shadow: 0 6px 14px rgba(95, 112, 189, 0.24);
+}
+
+.landing-register-btn:hover {
+  color: #ffffff;
+  filter: brightness(1.03);
 }
 
 .landing-brand-cluster {
@@ -652,8 +673,12 @@ h6 {
     margin-bottom: 0.6rem;
   }
 
+  .landing-entry-actions {
+    gap: 0.35rem;
+  }
+
   .landing-register-btn {
-    padding: 0.3rem 0.65rem;
+    padding: 0.3rem 0.7rem;
     font-size: 0.78rem;
   }
 
