@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isAuthenticated" class="d-flex flex-column min-vh-100 app-marketing-shell">
-    <main class="grow d-flex flex-column">
+    <main class="flex-grow-1 d-flex flex-column">
       <RouterView />
     </main>
     <footer class="marketing-footer py-3">

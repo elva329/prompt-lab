@@ -88,6 +88,7 @@ h6 {
 
 .app-marketing-shell {
   background: transparent;
+  min-height: 100dvh;
 }
 
 .marketing-brand {
@@ -709,11 +710,16 @@ h6 {
 }
 
 .login-wrapper {
-  min-height: calc(100vh - 72px);
+  min-height: 100%;
+  position: relative;
 }
 
 .login-card {
   max-width: 480px;
+}
+
+.login-confirm-slot.is-hidden {
+  visibility: hidden;
 }
 
 .icon-circle {
@@ -1378,9 +1384,88 @@ h6 {
   border-radius: 20px;
 }
 
+.login-home-brand-block {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0.15rem 0.25rem;
+}
+
+.login-home-brand-block:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 767.98px) {
+  .login-home-brand-block {
+    top: 0.5rem;
+    left: 0.5rem;
+    transform: scale(0.94);
+    transform-origin: top left;
+  }
+}
+
 .login-brand-orb {
   background: linear-gradient(145deg, #e8f0ff, #e2f8ff);
   color: #2567db;
+}
+
+.login-mode-switch {
+  background: rgba(246, 249, 255, 0.9);
+  border: 1px solid rgba(214, 223, 243, 0.95);
+  border-radius: 999px;
+  padding: 0.2rem;
+}
+
+.login-mode-btn {
+  border-radius: 999px;
+  color: #4b5773;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 0.42rem 0.7rem;
+  border: none;
+}
+
+.login-mode-btn.active {
+  color: #f7f9ff;
+  background: linear-gradient(130deg, #7a61dc, #5a85f1);
+  box-shadow: 0 6px 14px rgba(95, 112, 189, 0.22);
+}
+
+.login-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6e7992;
+}
+
+.login-input {
+  border-radius: 12px;
+  border: 1px solid rgba(206, 216, 238, 0.95);
+  background: rgba(253, 254, 255, 0.95);
+  color: #2a3248;
+  padding: 0.6rem 0.75rem;
+}
+
+.login-input:focus {
+  border-color: #9bb7ee;
+  box-shadow: 0 0 0 0.18rem rgba(110, 146, 220, 0.18);
+}
+
+.login-error {
+  color: #be3d4f;
+  font-weight: 600;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.76;
 }
 
 @media (min-width: 992px) {

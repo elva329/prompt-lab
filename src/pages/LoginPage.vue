@@ -1,5 +1,15 @@
 <template>
-  <div class="login-wrapper d-flex align-items-center justify-content-center py-5 px-3">
+  <div class="login-wrapper d-flex align-items-center justify-content-center py-4 px-3">
+    <button type="button" class="login-home-brand-block" @click="goHome">
+      <span class="landing-brand-mark">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+      </span>
+      <span class="text-start">
+        <span class="landing-brand-kicker d-block mb-1">Experiment Workspace</span>
+        <span class="landing-brand-name d-block">Prompt Lab</span>
+      </span>
+    </button>
+
     <div class="card shadow-sm border-0 login-card w-100 login-surface-card">
       <div class="card-body p-4 p-md-5">
         <div class="text-center mb-4">
@@ -12,46 +22,53 @@
           </p>
         </div>
 
-        <div class="btn-group w-100 mb-3" role="group">
-          <button class="btn" :class="isRegisterMode ? 'btn-outline-secondary' : 'btn-dark'" @click="isRegisterMode = false">
+        <div class="btn-group w-100 mb-3 login-mode-switch" role="group">
+          <button class="btn login-mode-btn" :class="{ active: !isRegisterMode }" @click="isRegisterMode = false">
             Login
           </button>
-          <button class="btn" :class="isRegisterMode ? 'btn-dark' : 'btn-outline-secondary'" @click="isRegisterMode = true">
+          <button class="btn login-mode-btn" :class="{ active: isRegisterMode }" @click="isRegisterMode = true">
             Register
           </button>
         </div>
 
         <form class="vstack gap-3" @submit.prevent="handleSubmit">
           <div>
-            <label class="form-label">Email</label>
-            <input v-model.trim="form.email" type="email" class="form-control" required autocomplete="email" />
+            <label class="form-label login-label">Email</label>
+            <input
+              v-model.trim="form.email"
+              type="email"
+              class="form-control login-input"
+              required
+              autocomplete="email"
+            />
           </div>
           <div>
-            <label class="form-label">Password</label>
+            <label class="form-label login-label">Password</label>
             <input
               v-model="form.password"
               type="password"
-              class="form-control"
+              class="form-control login-input"
               required
               minlength="6"
               autocomplete="current-password"
             />
           </div>
-          <div v-if="isRegisterMode">
-            <label class="form-label">Confirm Password</label>
+          <div class="login-confirm-slot" :class="{ 'is-hidden': !isRegisterMode }">
+            <label class="form-label login-label">Confirm Password</label>
             <input
               v-model="form.confirmPassword"
               type="password"
-              class="form-control"
-              required
+              class="form-control login-input"
+              :required="isRegisterMode"
+              :disabled="!isRegisterMode"
               minlength="6"
               autocomplete="new-password"
             />
           </div>
 
-          <p v-if="errorMessage" class="mb-0 text-danger small">{{ errorMessage }}</p>
+          <p v-if="errorMessage" class="mb-0 login-error small">{{ errorMessage }}</p>
 
-          <button type="submit" class="btn landing-primary-btn w-100 py-2 mt-2" :disabled="isLoading">
+          <button type="submit" class="btn landing-primary-btn login-submit-btn w-100 py-2 mt-2" :disabled="isLoading">
             {{ isLoading ? 'Please wait...' : isRegisterMode ? 'Create Account' : 'Sign In to Dashboard' }}
             <i class="bi bi-arrow-right ms-2"></i>
           </button>
@@ -88,6 +105,10 @@ function validateForm(): string | null {
   }
 
   return null;
+}
+
+function goHome(): void {
+  router.push('/');
 }
 
 async function handleSubmit(): Promise<void> {
