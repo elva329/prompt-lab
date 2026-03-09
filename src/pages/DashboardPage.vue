@@ -19,13 +19,12 @@
       </div>
 
       <div class="page-content-scrollable">
-      <div class="dashboard-topbar">
+      <!-- <div class="dashboard-topbar">
         <div>
-          <h1 class="h3 fw-bold mb-1">Welcome back, {{ firstName }}</h1>
           <p class="text-secondary mb-0 small">Monitor prompt performance, compare runs, and improve quality faster.</p>
         </div>
   
-      </div>
+      </div> -->
 
       <div class="row g-2 dashboard-main-grid">
         <div class="col-lg-9">

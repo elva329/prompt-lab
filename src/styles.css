@@ -33,9 +33,10 @@ body {
   font-family: "Manrope", sans-serif;
   color: var(--app-text);
   background:
-    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 36%),
-    radial-gradient(circle at 86% 84%, rgba(236, 229, 255, 0.55), rgba(236, 229, 255, 0) 34%),
-    linear-gradient(155deg, #f5f6fb 0%, #eceff8 56%, #e9edf7 100%);
+    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 82% 14%, rgba(205, 194, 255, 0.56), rgba(205, 194, 255, 0) 40%),
+    radial-gradient(circle at 88% 82%, rgba(196, 224, 255, 0.58), rgba(196, 224, 255, 0) 38%),
+    linear-gradient(155deg, #f3f0ff 0%, #ebe9ff 48%, #e7edff 100%);
 }
 
 h1,
@@ -68,7 +69,28 @@ h6 {
 }
 
 .app-shell {
-  background: transparent;
+  position: relative;
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 84% 18%, rgba(203, 191, 255, 0.3), rgba(203, 191, 255, 0) 42%),
+    linear-gradient(150deg, rgba(239, 235, 255, 0.7), rgba(231, 238, 255, 0.62));
+}
+
+.app-marketing-shell {
+  position: relative;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0) 35%),
+    radial-gradient(circle at 86% 20%, rgba(204, 191, 255, 0.34), rgba(204, 191, 255, 0) 42%),
+    linear-gradient(150deg, rgba(240, 236, 255, 0.7), rgba(231, 238, 255, 0.62));
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.global-home-brand-block {
+  position: absolute;
+  top: 0.9rem;
+  left: 1.1rem;
+  z-index: 12;
 }
 
 .app-fullscreen {
@@ -84,12 +106,6 @@ h6 {
 
 .app-main-fullscreen .container-xl {
   height: 100%;
-}
-
-.app-marketing-shell {
-  background: transparent;
-  min-height: 100vh;
-  min-height: 100dvh;
 }
 
 .app-marketing-shell > main {
@@ -251,7 +267,7 @@ h6 {
   border-radius: 0;
   border: none;
   box-shadow: none;
-  background: rgba(250, 252, 255, 0.25);
+  background: transparent;
   padding: 1.8rem 0.2rem 1.4rem;
   overflow: hidden;
 }
@@ -352,15 +368,7 @@ h6 {
 }
 
 .landing-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0) 40%),
-    radial-gradient(circle at 84% 15%, rgba(228, 214, 255, 0.42), rgba(228, 214, 255, 0) 38%),
-    radial-gradient(circle at 55% 86%, rgba(214, 226, 255, 0.55), rgba(214, 226, 255, 0) 44%);
-  opacity: 1;
-  pointer-events: none;
+  content: none;
 }
 
 .landing-content {
@@ -722,9 +730,9 @@ h6 {
   overflow: hidden;
   isolation: isolate;
   background:
-    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 34%),
-    radial-gradient(circle at 88% 88%, rgba(215, 229, 255, 0.75), rgba(215, 229, 255, 0) 42%),
-    linear-gradient(160deg, #f4f7ff 0%, #eef2fb 54%, #edf0f8 100%);
+    radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 86% 84%, rgba(202, 192, 255, 0.56), rgba(202, 192, 255, 0) 42%),
+    linear-gradient(160deg, #f3efff 0%, #ece9ff 52%, #e8eeff 100%);
 }
 
 .login-card {
@@ -773,13 +781,17 @@ h6 {
 }
 
 .dashboard-surface {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 36%),
-    linear-gradient(155deg, rgba(246, 249, 255, 0.9), rgba(237, 243, 255, 0.84));
-  border: 1px solid rgba(223, 231, 247, 0.9);
-  border-radius: 22px;
-  padding: 1rem;
-  box-shadow: 0 14px 30px rgba(56, 73, 115, 0.12);
+  position: relative;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* Deprecated local dashboard entry; kept harmless if class still appears in stale markup. */
+.dashboard-home-brand-block {
+  display: none;
 }
 
 .dashboard-menu-row {
@@ -1322,6 +1334,7 @@ h6 {
   gap: 0.3rem;
   padding-right: 0.25rem;
   padding-bottom: 0.3rem;
+  margin-top: 1rem;
 }
 
 .page-content-scrollable::-webkit-scrollbar {
@@ -1346,9 +1359,10 @@ h6 {
 .page-surface {
   position: relative;
   background:
-    radial-gradient(circle at 8% 10%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0) 34%),
-    linear-gradient(150deg, rgba(245, 249, 255, 0.9), rgba(236, 242, 254, 0.86));
-  border: 1px solid rgba(221, 230, 247, 0.9);
+    radial-gradient(circle at 8% 10%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 86% 18%, rgba(201, 190, 255, 0.22), rgba(201, 190, 255, 0) 42%),
+    linear-gradient(150deg, rgba(243, 239, 255, 0.93), rgba(233, 240, 255, 0.9));
+  border: 1px solid rgba(214, 218, 244, 0.9);
   border-radius: 20px;
   box-shadow: 0 14px 30px rgba(56, 73, 115, 0.12);
   padding: 1rem;
@@ -1360,8 +1374,8 @@ h6 {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 88% 84%, rgba(214, 229, 255, 0.38), rgba(214, 229, 255, 0) 40%),
-    radial-gradient(circle at 52% 18%, rgba(224, 212, 255, 0.28), rgba(224, 212, 255, 0) 44%);
+    radial-gradient(circle at 88% 84%, rgba(214, 225, 255, 0.34), rgba(214, 225, 255, 0) 40%),
+    radial-gradient(circle at 52% 18%, rgba(227, 207, 255, 0.32), rgba(227, 207, 255, 0) 44%);
   pointer-events: none;
 }
 
@@ -1370,12 +1384,26 @@ h6 {
   z-index: 1;
 }
 
+.prompts-page.page-surface,
+.favorites-page.page-surface,
+.experiments-page.page-surface {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+}
+
+.prompts-page.page-surface::before,
+.favorites-page.page-surface::before,
+.experiments-page.page-surface::before {
+  content: none;
+}
+
 .page-header-row {
-  background: rgba(252, 254, 255, 0.82);
-  border: 1px solid rgba(221, 231, 248, 0.95);
   border-radius: 14px;
   padding: 0.85rem 0.95rem;
-  box-shadow: 0 8px 18px rgba(84, 99, 136, 0.08);
 }
 
 .page-header-row h1,
@@ -1389,8 +1417,8 @@ h6 {
 }
 
 .page-filters-row {
-  background: rgba(251, 253, 255, 0.78);
-  border: 1px solid rgba(225, 234, 250, 0.95);
+  background: rgba(252, 251, 255, 0.82);
+  border: 1px solid rgba(218, 224, 247, 0.95);
   border-radius: 14px;
   padding: 0.75rem;
   margin: 0;
@@ -1796,9 +1824,18 @@ h6 {
   opacity: 0.9;
 }
 
+/* Keep dashboard home entry independent from auth-page absolute positioning. */
+.dashboard-page .dashboard-home-brand-block {
+  display: none;
+}
+
 @media (max-width: 767.98px) {
   .login-theme-strip,
   .login-theme-chip {
+    display: none;
+  }
+
+  .dashboard-home-brand-block {
     display: none;
   }
 
@@ -1809,6 +1846,17 @@ h6 {
   .login-home-brand-block {
     top: 0.5rem;
     left: 0.5rem;
+    transform: scale(0.94);
+    transform-origin: top left;
+  }
+
+  .dashboard-page .dashboard-home-brand-block {
+    display: none;
+  }
+
+  .global-home-brand-block {
+    top: 0.55rem;
+    left: 0.55rem;
     transform: scale(0.94);
     transform-origin: top left;
   }
@@ -1977,8 +2025,8 @@ h6 {
   }
 
   .dashboard-surface {
-    border-radius: 18px;
-    padding: 0.85rem;
+    border-radius: 0;
+    padding: 0;
   }
 
   .dashboard-topbar {

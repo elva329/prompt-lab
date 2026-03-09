@@ -1,5 +1,15 @@
 <template>
-  <div v-if="!isAuthenticated" class="d-flex flex-column app-marketing-shell">
+  <div v-if="useMarketingShell" class="d-flex flex-column app-marketing-shell">
+    <RouterLink to="/" class="login-home-brand-block global-home-brand-block text-decoration-none">
+      <span class="landing-brand-mark">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+      </span>
+      <span class="text-start">
+        <span class="landing-brand-kicker d-block mb-1">Experiment Workspace</span>
+        <span class="landing-brand-name d-block">Prompt Lab</span>
+      </span>
+    </RouterLink>
+
     <main class="flex-grow-1 d-flex flex-column">
       <RouterView />
     </main>
@@ -10,7 +20,17 @@
     </footer>
   </div>
 
-  <div v-else class="d-flex flex-column app-shell app-fullscreen">
+  <div v-else class="d-flex flex-column app-shell app-fullscreen auth-shell-with-home-entry">
+    <RouterLink to="/" class="login-home-brand-block global-home-brand-block text-decoration-none">
+      <span class="landing-brand-mark">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+      </span>
+      <span class="text-start">
+        <span class="landing-brand-kicker d-block mb-1">Experiment Workspace</span>
+        <span class="landing-brand-name d-block">Prompt Lab</span>
+      </span>
+    </RouterLink>
+
     <main class="app-main-fullscreen">
       <div class="container-xl h-100">
         <RouterView />
@@ -21,10 +41,13 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterView } from 'vue-router';
+import { RouterLink, RouterView, useRoute } from 'vue-router';
 
 import { appStore } from '../stores/appStore';
 
+const route = useRoute();
 const isAuthenticated = computed(() => appStore.isAuthenticated.value);
+const isMarketingRoute = computed(() => route.name === 'landing' || route.name === 'login');
+const useMarketingShell = computed(() => !isAuthenticated.value || isMarketingRoute.value);
 const currentYear = new Date().getFullYear();
 </script>

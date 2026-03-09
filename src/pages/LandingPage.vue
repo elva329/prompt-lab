@@ -10,16 +10,6 @@
             </div>
           </div>
 
-          <div class="landing-brand-cluster">
-            <div class="landing-brand-mark">
-              <i class="bi bi-grid-3x3-gap-fill"></i>
-            </div>
-            <div class="text-start">
-              <p class="landing-brand-kicker mb-1">Experiment Workspace</p>
-              <h2 class="landing-brand-name mb-0">Prompt Lab</h2>
-            </div>
-          </div>
-
           <div class="landing-content text-center">
             <!-- <div class="landing-project-block mb-3 mb-md-4">
               <p class="landing-project-kicker mb-1">Project</p>
@@ -100,18 +90,9 @@
 </template>
 
 <script setup lang="ts">
-import { watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { appStore } from '../stores/appStore';
-
 const router = useRouter();
-
-watchEffect(() => {
-  if (appStore.isAuthenticated.value) {
-    router.push('/dashboard');
-  }
-});
 
 const features = [
   { icon: 'bi bi-lightning-charge', title: 'Rapid Prototyping', desc: 'Create and iterate on prompts in seconds.' },

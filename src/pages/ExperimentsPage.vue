@@ -1,5 +1,5 @@
 <template>
-  <div class="fade-in-up page-surface page-fullheight">
+  <div class="fade-in-up experiments-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
       <nav class="dashboard-menu-pills">
         <RouterLink
@@ -22,7 +22,7 @@
     <div class="page-content-scrollable">
       <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row">
       <div>
-        <h1 class="h2 fw-bold mb-1">Experiments</h1>
+        <h1 class="h5 fw-bold mb-1">Experiments</h1>
         <p class="text-secondary mb-0">View and re-run your saved prompt experiments.</p>
       </div>
       <button class="btn btn-primary" @click="router.push('/prompts')">

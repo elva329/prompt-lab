@@ -43,16 +43,6 @@
       </div>
     </div>
 
-    <button type="button" class="login-home-brand-block" @click="goHome">
-      <span class="landing-brand-mark">
-        <i class="bi bi-grid-3x3-gap-fill"></i>
-      </span>
-      <span class="text-start">
-        <span class="landing-brand-kicker d-block mb-1">Experiment Workspace</span>
-        <span class="landing-brand-name d-block">Prompt Lab</span>
-      </span>
-    </button>
-
     <div class="card shadow-sm border-0 login-card w-100 login-surface-card mt-4">
       <div class="card-body p-4 p-md-5">
         <div class="text-center mb-4 login-head-copy">
@@ -184,10 +174,6 @@ function validateForm(): string | null {
   return null;
 }
 
-function goHome(): void {
-  router.push('/');
-}
-
 async function handleSubmit(): Promise<void> {
   errorMessage.value = '';
 
@@ -202,10 +188,10 @@ async function handleSubmit(): Promise<void> {
   try {
     if (isRegisterMode.value) {
       await appStore.register(form.email, form.password);
-      appStore.showToast('Account created successfully.', 'success');
+      // appStore.showToast('Account created successfully.', 'success');
     } else {
       await appStore.login(form.email, form.password);
-      appStore.showToast('Login successful.', 'success');
+      // appStore.showToast('Login successful.', 'success');
     }
 
     router.push('/dashboard');

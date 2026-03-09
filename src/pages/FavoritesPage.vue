@@ -1,5 +1,5 @@
 <template>
-  <div class="fade-in-up page-surface page-fullheight">
+  <div class="fade-in-up favorites-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
       <nav class="dashboard-menu-pills">
         <RouterLink
@@ -22,7 +22,7 @@
     <div class="page-content-scrollable">
       <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row">
       <div>
-        <h1 class="h2 fw-bold mb-1">Favorites</h1>
+        <h1 class="h5 fw-bold mb-1">Favorites</h1>
         <p class="text-secondary mb-0">Your saved prompts for quick access.</p>
       </div>
       <div class="d-flex gap-2">

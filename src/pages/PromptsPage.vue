@@ -21,7 +21,7 @@
 
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
       <div>
-        <h1 class="h2 fw-bold mb-1">Prompt Library</h1>
+        <h1 class="h5 fw-bold mb-1">Prompt Library</h1>
         <p class="text-secondary mb-0">Browse and search {{ totalPrompts }} AI prompts.</p>
       </div>
       <div class="d-flex align-items-center gap-2">
