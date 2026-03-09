@@ -1,5 +1,48 @@
 <template>
   <div class="login-wrapper d-flex align-items-center justify-content-center py-4 px-3">
+    <div class="login-theme-decor" aria-hidden="true">
+      <div class="login-theme-strip">
+        <span>Prompt Draft</span>
+        <i class="bi bi-arrow-right"></i>
+        <span>Model Run</span>
+        <i class="bi bi-arrow-right"></i>
+        <span>Scoreboard</span>
+      </div>
+
+      <div class="login-theme-card login-theme-card-left">
+        <p class="login-theme-title mb-2">Prompt Variants</p>
+        <div class="login-theme-bars">
+          <span style="--w: 78%"></span>
+          <span style="--w: 56%"></span>
+          <span style="--w: 88%"></span>
+        </div>
+        <p class="login-theme-note mb-0">A/B/C quality scan running</p>
+      </div>
+
+      <div class="login-theme-card login-theme-card-right">
+        <p class="login-theme-title mb-2">Model Arena</p>
+        <div class="login-theme-models mb-2">
+          <span>GPT</span>
+          <span>Claude</span>
+          <span>Gemini</span>
+        </div>
+        <img src="/experiment-result-preview.svg" alt="" class="login-theme-preview" />
+      </div>
+
+      <div class="login-theme-chip login-theme-chip-1">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>Latency 842ms</span>
+      </div>
+      <div class="login-theme-chip login-theme-chip-2">
+        <i class="bi bi-stars"></i>
+        <span>Quality +9%</span>
+      </div>
+      <div class="login-theme-chip login-theme-chip-3">
+        <i class="bi bi-diagram-3"></i>
+        <span>3-way Compare</span>
+      </div>
+    </div>
+
     <button type="button" class="login-home-brand-block" @click="goHome">
       <span class="landing-brand-mark">
         <i class="bi bi-grid-3x3-gap-fill"></i>
