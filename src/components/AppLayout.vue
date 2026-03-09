@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isAuthenticated" class="d-flex flex-column min-vh-100 app-marketing-shell">
+  <div v-if="!isAuthenticated" class="d-flex flex-column app-marketing-shell">
     <main class="flex-grow-1 d-flex flex-column">
       <RouterView />
     </main>

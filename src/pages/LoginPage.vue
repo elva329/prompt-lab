@@ -10,9 +10,9 @@
       </span>
     </button>
 
-    <div class="card shadow-sm border-0 login-card w-100 login-surface-card">
+    <div class="card shadow-sm border-0 login-card w-100 login-surface-card mt-4">
       <div class="card-body p-4 p-md-5">
-        <div class="text-center mb-4">
+        <div class="text-center mb-4 login-head-copy">
           <div class="rounded-circle d-inline-flex align-items-center justify-content-center icon-circle mb-3 login-brand-orb">
             <i class="bi bi-grid-3x3-gap-fill"></i>
           </div>
