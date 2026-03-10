@@ -11,7 +11,7 @@ export type PromptRecord = {
 export type PromptsResponse = {
   prompts: PromptRecord[];
   total: number;
-  limit: number;
+  limit: number | null;
   offset: number;
 };
 
@@ -44,11 +44,11 @@ export async function fetchPrompts(params?: {
     queryParams.set('search', params.search);
   }
 
-  if (params?.limit) {
+  if (typeof params?.limit === 'number') {
     queryParams.set('limit', String(params.limit));
   }
 
-  if (params?.offset) {
+  if (typeof params?.offset === 'number') {
     queryParams.set('offset', String(params.offset));
   }
 

@@ -141,7 +141,7 @@ app.post('/api/ai/chat', async (req, res) => {
 
 app.get('/api/prompts', async (req, res) => {
   try {
-    const { category, search, limit = 100, offset = 0 } = req.query;
+    const { category, search, limit, offset = 0 } = req.query;
     const db = await getDb();
     const promptsCollection = db.collection('prompt_library');
 
@@ -155,20 +155,27 @@ app.get('/api/prompts', async (req, res) => {
       query.$text = { $search: search };
     }
 
-    const prompts = await promptsCollection
+    const parsedOffset = Number(offset);
+    const parsedLimit = limit === undefined ? null : Number(limit);
+
+    let promptsCursor = promptsCollection
       .find(query)
       .sort({ promptId: 1 })
-      .skip(Number(offset))
-      .limit(Number(limit))
-      .toArray();
+      .skip(Number.isFinite(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0);
+
+    if (Number.isFinite(parsedLimit) && parsedLimit > 0) {
+      promptsCursor = promptsCursor.limit(parsedLimit);
+    }
+
+    const prompts = await promptsCursor.toArray();
 
     const total = await promptsCollection.countDocuments(query);
 
     return res.json({
       prompts,
       total,
-      limit: Number(limit),
-      offset: Number(offset),
+      limit: Number.isFinite(parsedLimit) ? parsedLimit : null,
+      offset: Number.isFinite(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0,
     });
   } catch (error) {
     console.error('Fetch prompts error:', error);

@@ -22,7 +22,7 @@
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
       <div>
         <h1 class="h5 fw-bold mb-1">Prompt Library</h1>
-        <p class="text-secondary mb-0">Browse and search {{ totalPrompts }} AI prompts.</p>
+        <p class="text-secondary mb-0">Browse and search {{ displayedPromptCount }} AI prompts.</p>
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary">Selected: {{ selectedPromptIds.length }}/3</span>
@@ -45,13 +45,20 @@
           @input="handleSearch"
         />
       </div>
-      <div class="col-md-3">
-        <select v-model="selectedCategory" class="form-select" @change="handleCategoryChange">
-          <option value="">All Categories</option>
-          <option v-for="cat in categories" :key="cat" :value="cat">
-            {{ cat }}
-          </option>
-        </select>
+      <div class="col-12">
+        <div class="prompt-category-tabs" role="tablist" aria-label="Prompt categories">
+          <button
+            v-for="cat in tabCategories"
+            :key="cat"
+            type="button"
+            class="btn btn-sm"
+            :class="cat === selectedCategory ? 'btn-primary' : 'btn-outline-secondary'"
+            :aria-selected="cat === selectedCategory"
+            @click="setSelectedCategory(cat)"
+          >
+            {{ formatCategoryName(cat) }}
+          </button>
+        </div>
       </div>
     </section>
 
@@ -62,14 +69,14 @@
 
     <section v-else-if="errorMessage && prompts.length === 0" class="alert alert-danger">{{ errorMessage }}</section>
 
-    <section v-if="prompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
-      <div v-for="prompt in prompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
+    <section v-if="filteredPrompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
+      <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
         <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
           <div class="card-body d-flex flex-column gap-1">
             <div class="d-flex justify-content-between align-items-start gap-2">
               <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
               <div class="d-flex align-items-center gap-2">
-                <span class="badge prompt-badge-category">{{ prompt.category }}</span>
+                <span class="badge prompt-badge-category">{{ simplifyCategory(prompt.category) }}</span>
                 <button
                   class="btn btn-link p-0 text-decoration-none"
                   :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
@@ -108,7 +115,21 @@
 
     </section>
 
-    <section v-if="prompts.length === 0 && !isLoading" class="row g-3">
+    <section v-if="canLoadMore" class="prompts-load-more-wrap">
+      <article
+        class="prompts-load-more-panel"
+        role="button"
+        tabindex="0"
+        @click="handleLoadMore"
+        @keydown.enter.prevent="handleLoadMore"
+        @keydown.space.prevent="handleLoadMore"
+      >
+        <i class="bi bi-chevron-double-down prompts-load-more-icon" aria-hidden="true"></i>
+        <span class="prompts-load-more-label">Load more</span>
+      </article>
+    </section>
+
+    <section v-if="filteredPrompts.length === 0 && !isLoading" class="row g-3">
       <div class="col-12">
         <article class="card border border-secondary-subtle border-dashed">
           <div class="card-body text-center text-secondary py-5">No prompts found matching your criteria.</div>
@@ -116,31 +137,6 @@
       </div>
     </section>
 
-    <section v-if="totalPages > 1" class="d-flex justify-content-center prompts-pagination">
-      <nav aria-label="Prompts pagination">
-        <ul class="pagination pagination-sm mb-0">
-          <li class="page-item" :class="{ disabled: currentPage === 1 || isLoading }">
-            <button class="page-link" @click="goToPage(currentPage - 1)" :disabled="currentPage === 1 || isLoading">
-              Previous
-            </button>
-          </li>
-          <li
-            v-for="(page, index) in pageNumbers"
-            :key="`${page}-${index}`"
-            class="page-item"
-            :class="{ active: page === currentPage, disabled: page === '...' }
-            "
-          >
-            <button class="page-link" @click="goToPage(page)" :disabled="isLoading || page === '...'">{{ page }}</button>
-          </li>
-          <li class="page-item" :class="{ disabled: currentPage === totalPages || isLoading }">
-            <button class="page-link" @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages || isLoading">
-              Next
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </section>
   </div>
 </template>
 
@@ -150,26 +146,56 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { fetchUserByEmailRequest } from '../lib/authApi';
 import { addOrUpdateFavorite, fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
-import { fetchCategories, fetchPrompts, type PromptRecord } from '../lib/promptsApi';
+import { fetchPrompts, type PromptRecord } from '../lib/promptsApi';
 import { fetchPromptResultsSummaryRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
 
 const searchTerm = ref('');
-const selectedCategory = ref('');
-const categories = ref<string[]>([]);
+const selectedCategory = ref('all');
 const prompts = ref<PromptRecord[]>([]);
+const visibleCountByCategory = ref<Record<string, number>>({});
 const selectedPromptIds = ref<number[]>([]);
 const favoritePromptIds = ref<number[]>([]);
-const totalPrompts = ref(0);
-const currentPage = ref(1);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const promptScoreMap = ref<Record<number, { avg: number; count: number }>>({});
-const pageSize = 3;
 const router = useRouter();
 const route = useRoute();
 
 let searchTimeout: number | null = null;
+const INITIAL_VISIBLE_PROMPTS = 12;
+const LOAD_MORE_STEP = 12;
+
+const CATEGORY_LABELS: Record<string, string> = {
+  technology: 'Technology',
+  business: 'Business',
+  learning: 'Learning',
+  creative: 'Creative',
+  lifestyle: 'Lifestyle',
+  general: 'General',
+};
+
+const CATEGORY_GROUP_BY_RAW: Record<string, string> = {
+  'ai-tools': 'technology',
+  programming: 'technology',
+  science: 'technology',
+  business: 'business',
+  education: 'learning',
+  language: 'learning',
+  history: 'learning',
+  philosophy: 'learning',
+  writing: 'creative',
+  design: 'creative',
+  media: 'creative',
+  music: 'creative',
+  entertainment: 'creative',
+  healthcare: 'lifestyle',
+  lifestyle: 'lifestyle',
+  travel: 'lifestyle',
+  general: 'general',
+};
+
+const CATEGORY_TAB_ORDER = ['technology', 'business', 'learning', 'creative', 'lifestyle', 'general'];
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard' },
@@ -190,56 +216,82 @@ function handleLogout(): void {
   router.push('/');
 }
 
-const totalPages = computed(() => Math.max(1, Math.ceil(totalPrompts.value / pageSize)));
-
-const pageNumbers = computed<Array<number | '...'>>(() => {
-  const total = totalPages.value;
-  const current = currentPage.value;
-
-  if (total <= 7) {
-    return Array.from({ length: total }, (_, index) => index + 1);
-  }
-
-  if (current <= 4) {
-    return [1, 2, 3, 4, 5, '...', total];
-  }
-
-  if (current >= total - 3) {
-    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-  }
-
-  return [1, '...', current - 1, current, current + 1, '...', total];
+const tabCategories = computed(() => {
+  const presentGroups = new Set(prompts.value.map((prompt) => simplifyCategory(prompt.category)));
+  const orderedGroups = CATEGORY_TAB_ORDER.filter((group) => presentGroups.has(group));
+  return ['all', ...orderedGroups];
 });
 
-async function loadPrompts(page = 1): Promise<void> {
+const filteredPrompts = computed(() => {
+  if (selectedCategory.value === 'all') {
+    return prompts.value;
+  }
+
+  return prompts.value.filter((prompt) => simplifyCategory(prompt.category) === selectedCategory.value);
+});
+
+const visiblePromptLimit = computed(() => {
+  return visibleCountByCategory.value[selectedCategory.value] || INITIAL_VISIBLE_PROMPTS;
+});
+
+const effectiveVisiblePromptLimit = computed(() => {
+  const total = filteredPrompts.value.length;
+  const configuredLimit = visiblePromptLimit.value;
+  const remaining = total - configuredLimit;
+
+  // If only a few items remain, show all instead of rendering a Load More button.
+  if (remaining <= 3) {
+    return total;
+  }
+
+  return configuredLimit;
+});
+
+const visiblePrompts = computed(() => {
+  return filteredPrompts.value.slice(0, effectiveVisiblePromptLimit.value);
+});
+
+const displayedPromptCount = computed(() => filteredPrompts.value.length);
+
+const remainingPromptCount = computed(() => {
+  return Math.max(0, filteredPrompts.value.length - visiblePrompts.value.length);
+});
+
+const canLoadMore = computed(() => remainingPromptCount.value > 0);
+
+const groupedCategoryCounts = computed<Record<string, number>>(() => {
+  const counts: Record<string, number> = {};
+
+  for (const prompt of prompts.value) {
+    const groupedCategory = simplifyCategory(prompt.category);
+    counts[groupedCategory] = (counts[groupedCategory] || 0) + 1;
+  }
+
+  return counts;
+});
+
+async function loadPrompts(): Promise<void> {
   isLoading.value = true;
   errorMessage.value = '';
 
   try {
     const response = await fetchPrompts({
-      category: selectedCategory.value || undefined,
       search: searchTerm.value || undefined,
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
     });
 
     prompts.value = response.prompts;
-    totalPrompts.value = response.total;
-    currentPage.value = Math.min(page, Math.max(1, Math.ceil(response.total / pageSize)));
+    visibleCountByCategory.value = {};
+
+    if (!tabCategories.value.includes(selectedCategory.value)) {
+      selectedCategory.value = 'all';
+    }
+
+    ensureVisibleCountForCategory(selectedCategory.value);
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load prompts.';
     appStore.showToast(errorMessage.value, 'danger');
   } finally {
     isLoading.value = false;
-  }
-}
-
-async function loadCategories(): Promise<void> {
-  try {
-    const response = await fetchCategories();
-    categories.value = response.categories;
-  } catch (error) {
-    console.error('Failed to load categories:', error);
   }
 }
 
@@ -249,24 +301,43 @@ function handleSearch(): void {
   }
 
   searchTimeout = window.setTimeout(() => {
-    goToPage(1);
+    loadPrompts();
   }, 500);
 }
 
-function handleCategoryChange(): void {
-  goToPage(1);
+function setSelectedCategory(category: string): void {
+  if (selectedCategory.value === category) {
+    return;
+  }
+
+  selectedCategory.value = category;
+  ensureVisibleCountForCategory(category);
 }
 
-function goToPage(page: number | '...'): void {
-  if (page === '...') {
-    return;
+function ensureVisibleCountForCategory(category: string): void {
+  if (!visibleCountByCategory.value[category]) {
+    visibleCountByCategory.value[category] = INITIAL_VISIBLE_PROMPTS;
+  }
+}
+
+function handleLoadMore(): void {
+  ensureVisibleCountForCategory(selectedCategory.value);
+  visibleCountByCategory.value[selectedCategory.value] += LOAD_MORE_STEP;
+}
+
+function formatCategoryName(category: string): string {
+  if (category === 'all') {
+    return `All Categories (${prompts.value.length})`;
   }
 
-  if (page < 1 || page > totalPages.value || page === currentPage.value) {
-    return;
-  }
+  const label = CATEGORY_LABELS[category] || 'General';
+  const count = groupedCategoryCounts.value[category] || 0;
+  return `${label} (${count})`;
+}
 
-  loadPrompts(page);
+function simplifyCategory(rawCategory: string): string {
+  const normalized = String(rawCategory || '').trim().toLowerCase();
+  return CATEGORY_GROUP_BY_RAW[normalized] || 'general';
 }
 
 function isSelected(promptId: number): boolean {
@@ -390,8 +461,7 @@ onMounted(async () => {
     }
   }
 
-  loadCategories();
-  loadPrompts(1);
+  loadPrompts();
   loadPromptScores();
 });
 </script>

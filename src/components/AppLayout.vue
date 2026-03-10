@@ -20,7 +20,11 @@
     </footer>
   </div>
 
-  <div v-else class="d-flex flex-column app-shell app-fullscreen auth-shell-with-home-entry">
+  <div
+    v-else
+    class="d-flex flex-column app-shell app-fullscreen auth-shell-with-home-entry"
+    :class="{ 'app-allow-page-scroll': isPromptRoute }"
+  >
     <RouterLink to="/" class="login-home-brand-block global-home-brand-block text-decoration-none">
       <span class="landing-brand-mark">
         <i class="bi bi-grid-3x3-gap-fill"></i>
@@ -31,8 +35,8 @@
       </span>
     </RouterLink>
 
-    <main class="app-main-fullscreen">
-      <div class="container-xl h-100">
+    <main class="app-main-fullscreen" :class="{ 'app-main-scroll': isPromptRoute }">
+      <div class="container-xl" :class="{ 'h-100': !isPromptRoute }">
         <RouterView />
       </div>
     </main>
@@ -48,6 +52,7 @@ import { appStore } from '../stores/appStore';
 const route = useRoute();
 const isAuthenticated = computed(() => appStore.isAuthenticated.value);
 const isMarketingRoute = computed(() => route.name === 'landing' || route.name === 'login');
+const isPromptRoute = computed(() => route.name === 'prompts');
 const useMarketingShell = computed(() => !isAuthenticated.value || isMarketingRoute.value);
 const currentYear = new Date().getFullYear();
 </script>

@@ -109,6 +109,22 @@ h6 {
   height: 100%;
 }
 
+.app-fullscreen.app-allow-page-scroll {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.app-main-fullscreen.app-main-scroll {
+  height: auto;
+  min-height: calc(100vh - 1.8rem);
+  overflow: visible;
+}
+
+.app-main-fullscreen.app-main-scroll .container-xl {
+  height: auto;
+}
+
 .app-marketing-shell > main {
   flex: 1 1 auto;
   min-height: 0;
@@ -2186,13 +2202,79 @@ h6 {
   border-top-color: rgba(66, 85, 125, 0.16) !important;
 }
 
+.prompt-category-tabs {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.prompt-category-tabs .btn {
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.prompts-page.page-fullheight {
+  height: auto;
+  overflow: visible;
+}
+
 .prompts-scrollable-grid {
-  flex: 1;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  min-height: 0;
-  padding-right: 0.25rem;
+  overflow: visible;
+  min-height: auto;
+  padding-right: 0;
   align-content: start;
+}
+
+.prompts-load-more-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.85rem 0 1.1rem;
+}
+
+.prompts-load-more-panel {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  border: 1px solid rgba(118, 143, 199, 0.38);
+  border-radius: 999px;
+  padding: 0.34rem 0.82rem;
+  background: rgba(241, 247, 255, 0.92);
+  box-shadow: 0 4px 10px rgba(82, 106, 160, 0.13);
+  transition: color 0.16s ease, transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.prompts-load-more-panel:hover,
+.prompts-load-more-panel:focus-visible {
+  transform: translateY(-1px);
+  color: #294f97;
+  border-color: rgba(88, 120, 201, 0.58);
+  background: rgba(232, 241, 255, 0.96);
+  outline: none;
+}
+
+.prompts-load-more-icon {
+  color: #4166ad;
+  font-size: 0.74rem;
+  line-height: 1;
+}
+
+.prompts-load-more-label {
+  color: #35579e;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.01em;
+}
+
+.prompts-loading-more {
+  display: none;
+  color: #526a9d;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
 .prompts-scrollable-grid::-webkit-scrollbar {
@@ -2215,22 +2297,17 @@ h6 {
 
 @media (min-width: 992px) {
   .prompts-page.page-surface {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    display: block;
     gap: 0.45rem;
   }
 
   .prompts-page .page-header-row,
-  .prompts-page .page-filters-row,
-  .prompts-page .prompts-pagination {
+  .prompts-page .page-filters-row {
     flex-shrink: 0;
   }
 
   .prompts-page .prompts-scrollable-grid {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     padding-right: 0;
   }
 
