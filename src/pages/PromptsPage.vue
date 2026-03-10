@@ -73,27 +73,35 @@
       <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
         <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
           <div class="card-body d-flex flex-column prompt-card-body">
-            <div class="prompt-card-header">
-              <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
-              <div class="prompt-card-actions">
-                <span class="badge prompt-badge-category">{{ simplifyCategory(prompt.category) }}</span>
-                <button
-                  type="button"
-                  class="prompt-favorite-btn"
-                  :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
-                  @click="toggleFavorite(prompt.promptId)"
-                >
-                  <i
-                    class="bi fs-6"
-                    :class="isFavorite(prompt.promptId) ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
-                  ></i>
-                </button>
-              </div>
+            <div class="prompt-card-top-row">
+              <label class="form-check mb-0 prompt-select-wrap" :aria-label="`Select ${prompt.title}`">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  :checked="isSelected(prompt.promptId)"
+                  @change="togglePromptSelection(prompt.promptId)"
+                />
+              </label>
+              <span class="badge prompt-badge-category">{{ simplifyCategory(prompt.category) }}</span>
             </div>
+
+            <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
             <div class="prompt-card-footer mt-auto">
+              <button
+                type="button"
+                class="prompt-favorite-btn"
+                :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
+                @click="toggleFavorite(prompt.promptId)"
+              >
+                <i
+                  class="bi fs-6"
+                  :class="isFavorite(prompt.promptId) ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
+                ></i>
+              </button>
+
               <div class="prompt-score-wrap">
                 <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill prompt-badge-score">
                   <i class="bi bi-bar-chart-line-fill"></i>
@@ -104,15 +112,6 @@
                   <span>Not tested yet</span>
                 </span>
               </div>
-              <label class="form-check mb-0 prompt-select-wrap">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  :checked="isSelected(prompt.promptId)"
-                  @change="togglePromptSelection(prompt.promptId)"
-                />
-                <span class="form-check-label">Select</span>
-              </label>
             </div>
           </div>
         </article>
