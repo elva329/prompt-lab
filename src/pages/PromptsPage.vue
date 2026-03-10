@@ -72,18 +72,19 @@
     <section v-if="filteredPrompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
       <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
         <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
-          <div class="card-body d-flex flex-column gap-1">
-            <div class="d-flex justify-content-between align-items-start gap-2">
+          <div class="card-body d-flex flex-column prompt-card-body">
+            <div class="prompt-card-header">
               <h2 class="h6 fw-semibold mb-0 prompt-title">{{ prompt.title }}</h2>
-              <div class="d-flex align-items-center gap-2">
+              <div class="prompt-card-actions">
                 <span class="badge prompt-badge-category">{{ simplifyCategory(prompt.category) }}</span>
                 <button
-                  class="btn btn-link p-0 text-decoration-none"
+                  type="button"
+                  class="prompt-favorite-btn"
                   :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
                   @click="toggleFavorite(prompt.promptId)"
                 >
                   <i
-                    class="bi fs-5"
+                    class="bi fs-6"
                     :class="isFavorite(prompt.promptId) ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
                   ></i>
                 </button>
@@ -92,21 +93,25 @@
 
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
-            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center text-secondary small gap-2">
-              <div>
+            <div class="prompt-card-footer mt-auto">
+              <div class="prompt-score-wrap">
                 <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill prompt-badge-score">
-                  Overall Quality: {{ getPromptScoreSummary(prompt.promptId) }}
+                  <i class="bi bi-bar-chart-line-fill"></i>
+                  <span>{{ getPromptScoreSummary(prompt.promptId) }}</span>
                 </span>
-                <span v-else class="badge rounded-pill prompt-badge-muted">Not tested yet</span>
+                <span v-else class="badge rounded-pill prompt-badge-muted">
+                  <i class="bi bi-hourglass-split"></i>
+                  <span>Not tested yet</span>
+                </span>
               </div>
-              <label class="form-check mb-0 d-flex align-items-center gap-2">
+              <label class="form-check mb-0 prompt-select-wrap">
                 <input
                   class="form-check-input"
                   type="checkbox"
                   :checked="isSelected(prompt.promptId)"
                   @change="togglePromptSelection(prompt.promptId)"
                 />
-                <span class="form-check-label">Select Prompt</span>
+                <span class="form-check-label">Select</span>
               </label>
             </div>
           </div>

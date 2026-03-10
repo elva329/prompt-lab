@@ -2124,7 +2124,7 @@ h6 {
 
 .prompts-page .prompt-card-modern {
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.52);
   box-shadow: 0 14px 28px rgba(66, 78, 110, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -2167,8 +2167,8 @@ h6 {
   font-size: 0.9rem;
   line-height: 1.4;
   color: #4c5a78;
-  background: rgba(255, 255, 255, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: 14px;
   padding: 0.75rem;
   overflow-y: auto;
@@ -2177,17 +2177,17 @@ h6 {
 }
 
 .prompts-page .prompt-badge-category {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.7);
   color: #274a8f;
-  border: 1px solid rgba(88, 120, 188, 0.28);
+  border: 1px solid rgba(88, 120, 188, 0.18);
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
 .prompts-page .prompt-badge-score,
 .prompts-page .prompt-badge-muted {
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(86, 104, 145, 0.2);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(86, 104, 145, 0.14);
 }
 
 .prompts-page .prompt-badge-score {
@@ -2200,6 +2200,83 @@ h6 {
 
 .prompts-page .prompt-card-modern .border-top {
   border-top-color: rgba(66, 85, 125, 0.16) !important;
+}
+
+.prompts-page .prompt-card-body {
+  gap: 0.65rem;
+}
+
+.prompts-page .prompt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.prompts-page .prompt-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.prompts-page .prompt-favorite-btn {
+  border: 1px solid rgba(121, 139, 183, 0.18);
+  background: rgba(255, 255, 255, 0.66);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.prompts-page .prompt-favorite-btn:hover {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(102, 129, 189, 0.26);
+}
+
+.prompts-page .prompt-card-footer {
+  border-top: 1px solid rgba(66, 85, 125, 0.1);
+  padding-top: 0.55rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.prompts-page .prompt-score-wrap {
+  min-width: 0;
+}
+
+.prompts-page .prompt-badge-score,
+.prompts-page .prompt-badge-muted {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  max-width: 100%;
+}
+
+.prompts-page .prompt-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(121, 137, 178, 0.16);
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  padding: 0.16rem 0.5rem;
+  white-space: nowrap;
+}
+
+.prompts-page .prompt-select-wrap .form-check-input {
+  margin: 0;
+}
+
+.prompts-page .prompt-select-wrap .form-check-label {
+  color: #455674;
+  font-weight: 700;
+  font-size: 0.76rem;
 }
 
 .prompt-category-tabs {
@@ -2240,10 +2317,10 @@ h6 {
   align-items: center;
   gap: 0.35rem;
   cursor: pointer;
-  border: 1px solid rgba(118, 143, 199, 0.38);
+  border: 1px solid rgba(118, 143, 199, 0.22);
   border-radius: 999px;
   padding: 0.34rem 0.82rem;
-  background: rgba(241, 247, 255, 0.92);
+  background: rgba(241, 247, 255, 0.74);
   box-shadow: 0 4px 10px rgba(82, 106, 160, 0.13);
   transition: color 0.16s ease, transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
 }
@@ -2252,8 +2329,8 @@ h6 {
 .prompts-load-more-panel:focus-visible {
   transform: translateY(-1px);
   color: #294f97;
-  border-color: rgba(88, 120, 201, 0.58);
-  background: rgba(232, 241, 255, 0.96);
+  border-color: rgba(88, 120, 201, 0.34);
+  background: rgba(232, 241, 255, 0.82);
   outline: none;
 }
 
