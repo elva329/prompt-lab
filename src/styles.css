@@ -2124,8 +2124,8 @@ h6 {
 
 .prompts-page .prompt-card-modern {
   border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.52);
-  box-shadow: 0 14px 28px rgba(66, 78, 110, 0.1);
+  border: none;
+  box-shadow: 0 12px 26px rgba(66, 78, 110, 0.11);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -2168,7 +2168,7 @@ h6 {
   line-height: 1.4;
   color: #4c5a78;
   background: rgba(255, 255, 255, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: none;
   border-radius: 14px;
   padding: 0.75rem;
   overflow-y: auto;
@@ -2179,7 +2179,7 @@ h6 {
 .prompts-page .prompt-badge-category {
   background: rgba(255, 255, 255, 0.7);
   color: #274a8f;
-  border: 1px solid rgba(88, 120, 188, 0.18);
+  border: none;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -2187,7 +2187,7 @@ h6 {
 .prompts-page .prompt-badge-score,
 .prompts-page .prompt-badge-muted {
   background: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(86, 104, 145, 0.14);
+  border: none;
 }
 
 .prompts-page .prompt-badge-score {
@@ -2221,7 +2221,7 @@ h6 {
 }
 
 .prompts-page .prompt-favorite-btn {
-  border: 1px solid rgba(121, 139, 183, 0.18);
+  border: none;
   background: rgba(255, 255, 255, 0.66);
   width: 30px;
   height: 30px;
@@ -2234,7 +2234,6 @@ h6 {
 
 .prompts-page .prompt-favorite-btn:hover {
   background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(102, 129, 189, 0.26);
 }
 
 .prompts-page .prompt-card-footer {
@@ -2262,7 +2261,7 @@ h6 {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border: 1px solid rgba(121, 137, 178, 0.16);
+  border: none;
   background: rgba(255, 255, 255, 0.62);
   border-radius: 999px;
   padding: 0.16rem 0.5rem;
@@ -2317,11 +2316,11 @@ h6 {
   align-items: center;
   gap: 0.35rem;
   cursor: pointer;
-  border: 1px solid rgba(118, 143, 199, 0.22);
+  border: none;
   border-radius: 999px;
   padding: 0.34rem 0.82rem;
   background: rgba(241, 247, 255, 0.74);
-  box-shadow: 0 4px 10px rgba(82, 106, 160, 0.13);
+  box-shadow: 0 4px 10px rgba(82, 106, 160, 0.1);
   transition: color 0.16s ease, transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
 }
 
@@ -2329,7 +2328,6 @@ h6 {
 .prompts-load-more-panel:focus-visible {
   transform: translateY(-1px);
   color: #294f97;
-  border-color: rgba(88, 120, 201, 0.34);
   background: rgba(232, 241, 255, 0.82);
   outline: none;
 }
@@ -2637,6 +2635,51 @@ h6 {
 
 .toast-container-custom {
   max-width: 360px;
+}
+
+/* Global borderless pass: prioritize soft fills and depth over outlines. */
+.card,
+.btn,
+.form-control,
+.form-select,
+.form-check-input,
+.badge,
+.modal-card,
+.prompt-pre,
+.response-text-scroll,
+.metric-card,
+.dashboard-menu-link,
+.dashboard-meeting-row,
+.prompts-load-more-panel,
+.prompt-favorite-btn,
+.prompt-select-wrap,
+.prompt-badge-category,
+.prompt-badge-score,
+.prompt-badge-muted,
+.landing-top-brand-pill,
+.landing-login-link,
+.landing-register-btn,
+.page-link,
+.border,
+.border-top,
+.border-bottom,
+.border-start,
+.border-end,
+.border-dashed {
+  border: none !important;
+}
+
+.form-control,
+.form-select,
+.response-text-scroll,
+.prompt-pre {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 3px 10px rgba(80, 104, 158, 0.08);
+}
+
+.card,
+.modal-card,
+.metric-card {
+  box-shadow: 0 10px 24px rgba(44, 60, 101, 0.1);
 }
 
 @keyframes fadeInUp {
