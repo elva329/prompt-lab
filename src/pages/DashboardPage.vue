@@ -26,11 +26,11 @@
   
       </div> -->
 
-      <div class="row g-2 dashboard-main-grid">
+      <div class="row dashboard-main-grid">
         <div class="col-lg-9">
           <div class="dashboard-mosaic-heading mb-1">
           </div>
-          <div class="dashboard-mosaic mb-2">
+          <div class="dashboard-mosaic">
             <article class="card border-0 shadow-sm dashboard-profile-card dashboard-profile-highlight dashboard-card-primary">
               <div class="card-body text-center d-flex flex-column justify-content-center">
                 <div class="dashboard-avatar-ring mx-auto mb-2">
@@ -101,7 +101,7 @@
           </article>
         </div>
 
-        <div class="col-lg-3">
+        <div class="col-lg-3 ps-0">
           <article class="card border-0 shadow-sm dashboard-side-card mb-2">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
