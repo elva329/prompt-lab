@@ -29,8 +29,6 @@
       <div class="row g-2 dashboard-main-grid">
         <div class="col-lg-9">
           <div class="dashboard-mosaic-heading mb-1">
-            <h2 class="h6 mb-0 fw-semibold text-secondary">Best Scores by Category</h2>
-            <span class="small text-secondary dashboard-mosaic-subtitle">Highest score achieved per prompt category</span>
           </div>
           <div class="dashboard-mosaic mb-2">
             <article class="card border-0 shadow-sm dashboard-profile-card dashboard-profile-highlight dashboard-card-primary">
@@ -48,7 +46,7 @@
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Clarity</h3>
                 <div v-if="clarityBestByCategoryChartData.length">
-                  <div ref="clarityChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                  <div ref="clarityChartEl" class="dashboard-amchart dashboard-amchart-plain"></div>
                 </div>
                 <p v-else class="small text-secondary mb-0">No clarity data yet.</p>
               </div>
@@ -58,7 +56,7 @@
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Relevance</h3>
                 <div v-if="relevanceBestByCategoryChartData.length">
-                  <div ref="relevanceChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                  <div ref="relevanceChartEl" class="dashboard-amchart dashboard-amchart-plain"></div>
                 </div>
                 <p v-else class="small text-secondary mb-0">No relevance data yet.</p>
               </div>
@@ -67,7 +65,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-coherence">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Coherence</h3>
-                <div v-if="coherenceBestByCategoryChartData.length" ref="coherenceChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                <div v-if="coherenceBestByCategoryChartData.length" ref="coherenceChartEl" class="dashboard-amchart dashboard-amchart-plain"></div>
                 <p v-else class="small text-secondary mb-0">No coherence data yet.</p>
               </div>
             </article>
@@ -75,7 +73,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-completeness">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Completeness</h3>
-                <div v-if="completenessBestByCategoryChartData.length" ref="completenessChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                <div v-if="completenessBestByCategoryChartData.length" ref="completenessChartEl" class="dashboard-amchart dashboard-amchart-plain"></div>
                 <p v-else class="small text-secondary mb-0">No completeness data yet.</p>
               </div>
             </article>
@@ -770,7 +768,8 @@ function renderCoherenceChart(): void {
 
   coherenceChartRoot?.dispose();
 
-  coherenceChartEl.value.style.height = `260px`;
+  // Radar needs extra room for circular axis labels.
+  coherenceChartEl.value.style.height = `340px`;
 
   const root = am5.Root.new(coherenceChartEl.value);
   coherenceChartRoot = root;
@@ -844,7 +843,7 @@ function renderCompletenessChart(): void {
 
   completenessChartRoot?.dispose();
 
-  completenessChartEl.value.style.height = `260px`;
+  completenessChartEl.value.style.height = `340px`;
 
   const root = am5.Root.new(completenessChartEl.value);
   completenessChartRoot = root;
@@ -865,8 +864,9 @@ function renderCompletenessChart(): void {
     }),
   );
 
-  series.labels.template.setAll({ fontSize: 10, fill: am5.color(0x5f6a82) });
-  series.ticks.template.setAll({ strokeOpacity: 0.15 });
+  // Prevent clipping inside compact dashboard cards.
+  series.labels.template.setAll({ forceHidden: true });
+  series.ticks.template.setAll({ forceHidden: true });
   series.slices.template.setAll({ strokeOpacity: 0, cornerRadius: 6 });
 
   series.data.setAll(completenessBestByCategoryChartData.value);
