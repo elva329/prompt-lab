@@ -1080,7 +1080,7 @@ h6 {
 
 .dashboard-card-primary {
   grid-area: primary;
-  min-height: 130px;
+  max-height: 230px;
 }
 
 .dashboard-card-clarity {
@@ -1152,7 +1152,7 @@ h6 {
     linear-gradient(125deg, rgba(140, 255, 227, 0.45), rgba(98, 152, 255, 0.6));
 }
 
-.dashboard-chart-only-card {
+/* .dashboard-chart-only-card {
   background: #ffffff;
   border: 1px solid rgba(226, 233, 245, 0.95);
   min-height: 340px;
@@ -1169,6 +1169,29 @@ h6 {
   flex: 1 1 auto;
   min-height: 280px;
   margin-bottom: 0;
+} */
+ 
+.dashboard-chart-only-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 233, 245, 0.95);
+  min-height: 260px;
+  max-height: 280px;
+  width: 100%;
+}
+
+.dashboard-chart-only-card .card-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 0.7rem 0.7rem 0.7rem;
+}
+
+.dashboard-chart-only-card .dashboard-amchart {
+  flex: 1 1 auto;
+  min-height: 200px;
+  max-height: 220px;
+  margin-bottom: 0;
+  width: 100%;
 }
 
 .dashboard-large-metric-card {
