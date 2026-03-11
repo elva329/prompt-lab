@@ -2162,7 +2162,7 @@ h6 {
   color: #2d3f69;
 }
 
-.prompts-page .prompt-content-preview {
+.prompts-page, .prompt-content-preview {
   font-family: "Manrope", sans-serif;
   font-size: 0.9rem;
   line-height: 1.4;

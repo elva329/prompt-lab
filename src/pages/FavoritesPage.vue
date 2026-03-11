@@ -53,7 +53,7 @@
               <span class="badge prompt-badge-category">{{ prompt.category }}</span>
             </div>
 
-            <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
+            <p class="prompt-content-preview mb-0" style="border-radius: 14px;">{{ prompt.promptText }}</p>
 
             <div class="mt-auto pt-2 border-top d-flex justify-content-end align-items-center small text-secondary">
               <div class="d-flex gap-2">
