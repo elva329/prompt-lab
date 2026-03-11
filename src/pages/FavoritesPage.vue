@@ -61,9 +61,14 @@
                   <i class="bi bi-pencil-square me-1"></i>
                   Edit
                 </button>
-                <button class="btn btn-outline-danger btn-sm" @click="removeFavorite(prompt.promptId)">
-                  <i class="bi bi-heartbreak me-1"></i>
-                  Remove
+                <button
+                  type="button"
+                  class="prompt-favorite-btn"
+                  :aria-label="'Remove from favorites'"
+                  @click="removeFavorite(prompt.promptId)"
+                  style="background: none; border: none; box-shadow: none; padding: 0;"
+                >
+                  <i class="bi" :class="'bi-heart-fill text-danger'" style="font-size: 1.25rem;"></i>
                 </button>
               </div>
             </div>
