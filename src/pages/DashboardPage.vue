@@ -28,6 +28,10 @@
 
       <div class="row g-2 dashboard-main-grid">
         <div class="col-lg-9">
+          <div class="dashboard-mosaic-heading mb-1">
+            <h2 class="h6 mb-0 fw-semibold text-secondary">Best Scores by Category</h2>
+            <span class="small text-secondary dashboard-mosaic-subtitle">Highest score achieved per prompt category</span>
+          </div>
           <div class="dashboard-mosaic mb-2">
             <article class="card border-0 shadow-sm dashboard-profile-card dashboard-profile-highlight dashboard-card-primary">
               <div class="card-body text-center d-flex flex-column justify-content-center">
@@ -43,7 +47,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-clarity">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Clarity</h3>
-                <div v-if="metricDailyData.length">
+                <div v-if="clarityBestByCategoryChartData.length">
                   <div ref="clarityChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
                 </div>
                 <p v-else class="small text-secondary mb-0">No clarity data yet.</p>
@@ -53,7 +57,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-relevance">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Relevance</h3>
-                <div v-if="metricDailyData.length">
+                <div v-if="relevanceBestByCategoryChartData.length">
                   <div ref="relevanceChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
                 </div>
                 <p v-else class="small text-secondary mb-0">No relevance data yet.</p>
@@ -63,7 +67,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-coherence">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Coherence</h3>
-                <div v-if="coherenceBandData.length" ref="coherenceChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                <div v-if="coherenceBestByCategoryChartData.length" ref="coherenceChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
                 <p v-else class="small text-secondary mb-0">No coherence data yet.</p>
               </div>
             </article>
@@ -71,7 +75,7 @@
             <article class="card border-0 shadow-sm dashboard-chart-only-card dashboard-card-completeness">
               <div class="card-body">
                 <h3 class="small mb-1 fw-semibold">Completeness</h3>
-                <div v-if="metricResults.length" ref="completenessChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
+                <div v-if="completenessBestByCategoryChartData.length" ref="completenessChartEl" class="dashboard-amchart dashboard-amchart-mini dashboard-amchart-plain"></div>
                 <p v-else class="small text-secondary mb-0">No completeness data yet.</p>
               </div>
             </article>
@@ -155,6 +159,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5percent from '@amcharts/amcharts5/percent';
+import * as am5radar from '@amcharts/amcharts5/radar';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 
@@ -287,6 +292,94 @@ const metricDailyData = computed(() => {
       completeness: Math.round(value.completenessTotal / value.count),
     }));
 });
+
+const clarityBestByCategoryData = computed(() => {
+  const bestByCategory = new Map<string, { category: string; maxClarity: number; tests: number }>();
+
+  for (const result of metricResults.value) {
+    const category = (result.category || 'Uncategorized').trim() || 'Uncategorized';
+    const clarity = typeof result.clarity === 'number' ? result.clarity : 0;
+    const existing = bestByCategory.get(category);
+    if (!existing) {
+      bestByCategory.set(category, { category, maxClarity: clarity, tests: 1 });
+      continue;
+    }
+
+    existing.tests += 1;
+    existing.maxClarity = Math.max(existing.maxClarity, clarity);
+  }
+
+  return Array.from(bestByCategory.values()).sort((a, b) => b.maxClarity - a.maxClarity);
+});
+
+const relevanceBestByCategoryData = computed(() => {
+  const bestByCategory = new Map<string, { category: string; maxRelevance: number; tests: number }>();
+
+  for (const result of metricResults.value) {
+    const category = (result.category || 'Uncategorized').trim() || 'Uncategorized';
+    const relevance = typeof result.relevance === 'number' ? result.relevance : 0;
+    const existing = bestByCategory.get(category);
+    if (!existing) {
+      bestByCategory.set(category, { category, maxRelevance: relevance, tests: 1 });
+      continue;
+    }
+
+    existing.tests += 1;
+    existing.maxRelevance = Math.max(existing.maxRelevance, relevance);
+  }
+
+  return Array.from(bestByCategory.values()).sort((a, b) => b.maxRelevance - a.maxRelevance);
+});
+
+const coherenceBestByCategoryData = computed(() => {
+  const bestByCategory = new Map<string, { category: string; maxCoherence: number; tests: number }>();
+
+  for (const result of metricResults.value) {
+    const category = (result.category || 'Uncategorized').trim() || 'Uncategorized';
+    const coherence = typeof result.coherence === 'number' ? result.coherence : 0;
+    const existing = bestByCategory.get(category);
+    if (!existing) {
+      bestByCategory.set(category, { category, maxCoherence: coherence, tests: 1 });
+      continue;
+    }
+
+    existing.tests += 1;
+    existing.maxCoherence = Math.max(existing.maxCoherence, coherence);
+  }
+
+  return Array.from(bestByCategory.values()).sort((a, b) => b.maxCoherence - a.maxCoherence);
+});
+
+const completenessBestByCategoryData = computed(() => {
+  const bestByCategory = new Map<string, { category: string; maxCompleteness: number; tests: number }>();
+
+  for (const result of metricResults.value) {
+    const category = (result.category || 'Uncategorized').trim() || 'Uncategorized';
+    const completeness = typeof result.completeness === 'number' ? result.completeness : 0;
+    const existing = bestByCategory.get(category);
+    if (!existing) {
+      bestByCategory.set(category, { category, maxCompleteness: completeness, tests: 1 });
+      continue;
+    }
+
+    existing.tests += 1;
+    existing.maxCompleteness = Math.max(existing.maxCompleteness, completeness);
+  }
+
+  return Array.from(bestByCategory.values()).sort((a, b) => b.maxCompleteness - a.maxCompleteness);
+});
+
+const bestByCategoryChartLimit = 7;
+const clarityBestByCategoryChartData = computed(() => clarityBestByCategoryData.value.slice(0, bestByCategoryChartLimit));
+const relevanceBestByCategoryChartData = computed(() =>
+  relevanceBestByCategoryData.value.slice(0, bestByCategoryChartLimit),
+);
+const coherenceBestByCategoryChartData = computed(() =>
+  coherenceBestByCategoryData.value.slice(0, bestByCategoryChartLimit),
+);
+const completenessBestByCategoryChartData = computed(() =>
+  completenessBestByCategoryData.value.slice(0, bestByCategoryChartLimit),
+);
 
 const avgCompleteness = computed(() => {
   if (!metricResults.value.length) {
@@ -532,165 +625,251 @@ function renderCategoryChart(): void {
 }
 
 function renderClarityChart(): void {
-  if (!clarityChartEl.value || !metricDailyData.value.length) {
+  if (!clarityChartEl.value || !clarityBestByCategoryChartData.value.length) {
     return;
   }
 
   clarityChartRoot?.dispose();
+
+  const minHeight = Math.max(160, clarityBestByCategoryChartData.value.length * 34 + 24);
+  clarityChartEl.value.style.height = `${minHeight}px`;
+
   const root = am5.Root.new(clarityChartEl.value);
   clarityChartRoot = root;
   root.setThemes([am5themes_Animated.new(root)]);
 
-  const chart = root.container.children.push(am5xy.XYChart.new(root, { panX: false, panY: false }));
-  const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-    categoryField: 'day',
-    renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 20 }),
-  }));
-  const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-    renderer: am5xy.AxisRendererY.new(root, {}),
+  const chart = root.container.children.push(
+    am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: 'none',
+      wheelY: 'none',
+      layout: root.verticalLayout,
+    }),
+  );
+
+  const yAxis = chart.yAxes.push(
+    am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5xy.AxisRendererY.new(root, { minGridDistance: 10 }),
+    }),
+  );
+
+  const xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+    renderer: am5xy.AxisRendererX.new(root, {}),
     min: 0,
     max: 100,
     strictMinMax: true,
   }));
 
-  xAxis.get('renderer').labels.template.setAll({ fontSize: 9, fill: am5.color(0x65718a) });
-  yAxis.get('renderer').labels.template.setAll({ fontSize: 9, fill: am5.color(0x7a849b) });
+  yAxis.get('renderer').labels.template.setAll({ fontSize: 10, fill: am5.color(0x5f6a82) });
+  xAxis.get('renderer').labels.template.setAll({ fontSize: 10, fill: am5.color(0x7a849b) });
 
-  const series = chart.series.push(am5xy.ColumnSeries.new(root, {
-    xAxis,
-    yAxis,
-    valueYField: 'clarity',
-    categoryXField: 'day',
-    tooltip: am5.Tooltip.new(root, { labelText: 'Clarity: {valueY}/100' }),
-  }));
+  const series = chart.series.push(
+    am5xy.ColumnSeries.new(root, {
+      xAxis,
+      yAxis,
+      valueXField: 'maxClarity',
+      categoryYField: 'category',
+      sequencedInterpolation: true,
+      tooltip: am5.Tooltip.new(root, { labelText: '{categoryY}: {valueX}/100 (best)' }),
+    }),
+  );
 
   series.columns.template.setAll({
-    fill: am5.color(0x4f8cff),
+    height: am5.percent(60),
+    cornerRadiusTR: 8,
+    cornerRadiusBR: 8,
     strokeOpacity: 0,
-    cornerRadiusTL: 5,
-    cornerRadiusTR: 5,
+    fill: am5.color(0x4f8cff),
   });
 
-  xAxis.data.setAll(metricDailyData.value);
-  series.data.setAll(metricDailyData.value);
+  yAxis.data.setAll(clarityBestByCategoryChartData.value);
+  series.data.setAll(clarityBestByCategoryChartData.value);
 }
 
 function renderRelevanceChart(): void {
-  if (!relevanceChartEl.value || !metricDailyData.value.length) {
+  if (!relevanceChartEl.value || !relevanceBestByCategoryChartData.value.length) {
     return;
   }
 
   relevanceChartRoot?.dispose();
+
+  const minHeight = 220;
+  relevanceChartEl.value.style.height = `${minHeight}px`;
+
   const root = am5.Root.new(relevanceChartEl.value);
   relevanceChartRoot = root;
   root.setThemes([am5themes_Animated.new(root)]);
 
-  const chart = root.container.children.push(am5xy.XYChart.new(root, { panX: false, panY: false }));
-  const xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-    categoryField: 'day',
-    renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 20 }),
-  }));
-  const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-    renderer: am5xy.AxisRendererY.new(root, {}),
-    min: 0,
-    max: 100,
-    strictMinMax: true,
-  }));
+  const chart = root.container.children.push(
+    am5xy.XYChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: 'none',
+      wheelY: 'none',
+    }),
+  );
 
-  xAxis.get('renderer').labels.template.setAll({ fontSize: 9, fill: am5.color(0x65718a) });
-  yAxis.get('renderer').labels.template.setAll({ fontSize: 9, fill: am5.color(0x7a849b) });
+  const xAxis = chart.xAxes.push(
+    am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 28 }),
+    }),
+  );
 
-  const series = chart.series.push(am5xy.LineSeries.new(root, {
-    xAxis,
-    yAxis,
-    valueYField: 'relevance',
-    categoryXField: 'day',
-    stroke: am5.color(0x54c5a9),
-    fill: am5.color(0x54c5a9),
-    tooltip: am5.Tooltip.new(root, { labelText: 'Relevance: {valueY}/100' }),
-  }));
+  const yAxis = chart.yAxes.push(
+    am5xy.ValueAxis.new(root, {
+      renderer: am5xy.AxisRendererY.new(root, {}),
+      min: 0,
+      max: 100,
+      strictMinMax: true,
+    }),
+  );
 
-  series.strokes.template.setAll({ strokeWidth: 2.2 });
-  series.fills.template.setAll({ visible: true, fillOpacity: 0.25 });
+  xAxis.get('renderer').labels.template.setAll({
+    fontSize: 10,
+    fill: am5.color(0x5f6a82),
+    rotation: -35,
+    textAlign: 'end',
+  });
+  yAxis.get('renderer').labels.template.setAll({ fontSize: 10, fill: am5.color(0x7a849b) });
 
-  xAxis.data.setAll(metricDailyData.value);
-  series.data.setAll(metricDailyData.value);
+  const series = chart.series.push(
+    am5xy.LineSeries.new(root, {
+      xAxis,
+      yAxis,
+      valueYField: 'maxRelevance',
+      categoryXField: 'category',
+      stroke: am5.color(0x54c5a9),
+      fill: am5.color(0x54c5a9),
+      tooltip: am5.Tooltip.new(root, { labelText: '{categoryX}: {valueY}/100 (best)' }),
+    }),
+  );
+
+  series.strokes.template.setAll({ strokeWidth: 2.6 });
+  series.bullets.push(() =>
+    am5.Bullet.new(root, {
+      sprite: am5.Circle.new(root, {
+        radius: 4,
+        fill: am5.color(0x54c5a9),
+        stroke: am5.color(0xffffff),
+        strokeWidth: 2,
+      }),
+    }),
+  );
+
+  xAxis.data.setAll(relevanceBestByCategoryChartData.value);
+  series.data.setAll(relevanceBestByCategoryChartData.value);
 }
 
 function renderCoherenceChart(): void {
-  if (!coherenceChartEl.value || !coherenceBandData.value.length) {
+  if (!coherenceChartEl.value || !coherenceBestByCategoryChartData.value.length) {
     return;
   }
 
   coherenceChartRoot?.dispose();
+
+  coherenceChartEl.value.style.height = `260px`;
+
   const root = am5.Root.new(coherenceChartEl.value);
   coherenceChartRoot = root;
   root.setThemes([am5themes_Animated.new(root)]);
 
-  const chart = root.container.children.push(am5percent.PieChart.new(root, {
-    innerRadius: am5.percent(55),
-  }));
+  const chart = root.container.children.push(
+    am5radar.RadarChart.new(root, {
+      panX: false,
+      panY: false,
+      wheelX: 'none',
+      wheelY: 'none',
+      innerRadius: am5.percent(15),
+    }),
+  );
 
-  const series = chart.series.push(am5percent.PieSeries.new(root, {
-    valueField: 'value',
-    categoryField: 'band',
-  }));
+  const xRenderer = am5radar.AxisRendererCircular.new(root, {});
+  xRenderer.labels.template.setAll({ fontSize: 10, fill: am5.color(0x5f6a82) });
 
-  series.slices.template.setAll({ strokeOpacity: 0, cornerRadius: 5 });
-  series.labels.template.setAll({ fontSize: 10 });
-  series.ticks.template.setAll({ visible: false });
-  series.data.setAll(coherenceBandData.value);
+  const xAxis = chart.xAxes.push(
+    am5xy.CategoryAxis.new(root, {
+      categoryField: 'category',
+      renderer: xRenderer,
+    }),
+  );
+
+  const yRenderer = am5radar.AxisRendererRadial.new(root, {});
+  yRenderer.labels.template.setAll({ fontSize: 10, fill: am5.color(0x7a849b) });
+
+  const yAxis = chart.yAxes.push(
+    am5xy.ValueAxis.new(root, {
+      min: 0,
+      max: 100,
+      strictMinMax: true,
+      renderer: yRenderer,
+    }),
+  );
+
+  const series = chart.series.push(
+    am5radar.RadarLineSeries.new(root, {
+      xAxis,
+      yAxis,
+      valueYField: 'maxCoherence',
+      categoryXField: 'category',
+      stroke: am5.color(0xf6b73c),
+      fill: am5.color(0xf6b73c),
+      tooltip: am5.Tooltip.new(root, { labelText: '{categoryX}: {valueY}/100 (best)' }),
+    }),
+  );
+
+  series.strokes.template.setAll({ strokeWidth: 2.4 });
+  series.fills.template.setAll({ visible: true, fillOpacity: 0.18 });
+  series.bullets.push(() =>
+    am5.Bullet.new(root, {
+      sprite: am5.Circle.new(root, {
+        radius: 4,
+        fill: am5.color(0xf6b73c),
+        stroke: am5.color(0xffffff),
+        strokeWidth: 2,
+      }),
+    }),
+  );
+
+  xAxis.data.setAll(coherenceBestByCategoryChartData.value);
+  series.data.setAll(coherenceBestByCategoryChartData.value);
 }
 
 function renderCompletenessChart(): void {
-  if (!completenessChartEl.value || !metricResults.value.length) {
+  if (!completenessChartEl.value || !completenessBestByCategoryChartData.value.length) {
     return;
   }
 
   completenessChartRoot?.dispose();
+
+  completenessChartEl.value.style.height = `260px`;
+
   const root = am5.Root.new(completenessChartEl.value);
   completenessChartRoot = root;
   root.setThemes([am5themes_Animated.new(root)]);
 
-  const chart = root.container.children.push(am5percent.PieChart.new(root, {
-    innerRadius: am5.percent(72),
-    startAngle: -180,
-    endAngle: 0,
-  }));
-
-  const series = chart.series.push(am5percent.PieSeries.new(root, {
-    valueField: 'value',
-    categoryField: 'segment',
-    startAngle: -180,
-    endAngle: 0,
-  }));
-
-  series.slices.template.setAll({ strokeOpacity: 0 });
-  series.labels.template.setAll({ forceHidden: true });
-  series.ticks.template.setAll({ forceHidden: true });
-
-  series.data.setAll([
-    { segment: 'Completeness', value: avgCompleteness.value },
-    { segment: 'Remaining', value: Math.max(100 - avgCompleteness.value, 0) },
-  ]);
-
-  series.slices.template.adapters.add('fill', (_fill, target) => {
-    const category = target.dataItem?.dataContext as { segment: string };
-    return category?.segment === 'Completeness' ? am5.color(0x7a70ff) : am5.color(0xe1e5f1);
-  });
-
-  chart.children.push(
-    am5.Label.new(root, {
-      text: `${avgCompleteness.value}%`,
-      centerX: am5.percent(50),
-      x: am5.percent(50),
-      centerY: am5.percent(80),
-      y: am5.percent(80),
-      fontSize: 20,
-      fontWeight: '600',
-      fill: am5.color(0x3a4160),
+  const chart = root.container.children.push(
+    am5percent.PieChart.new(root, {
+      innerRadius: am5.percent(55),
+      layout: root.verticalLayout,
     }),
   );
+
+  const series = chart.series.push(
+    am5percent.PieSeries.new(root, {
+      valueField: 'maxCompleteness',
+      categoryField: 'category',
+      tooltip: am5.Tooltip.new(root, { labelText: '{category}: {value}/100 (best)' }),
+    }),
+  );
+
+  series.labels.template.setAll({ fontSize: 10, fill: am5.color(0x5f6a82) });
+  series.ticks.template.setAll({ strokeOpacity: 0.15 });
+  series.slices.template.setAll({ strokeOpacity: 0, cornerRadius: 6 });
+
+  series.data.setAll(completenessBestByCategoryChartData.value);
 }
 
 function renderCharts(): void {
@@ -784,10 +963,23 @@ onMounted(async () => {
   renderCharts();
 });
 
-watch([metricDailyData, trendResponseData, categoryChartData, coherenceBandData, avgCompleteness], async () => {
+watch(
+  [
+    metricDailyData,
+    clarityBestByCategoryData,
+    relevanceBestByCategoryData,
+    coherenceBestByCategoryData,
+    completenessBestByCategoryData,
+    trendResponseData,
+    categoryChartData,
+    coherenceBandData,
+    avgCompleteness,
+  ],
+  async () => {
   await nextTick();
   renderCharts();
-});
+  },
+);
 
 onBeforeUnmount(() => {
   disposeCharts();
