@@ -2,11 +2,14 @@
 import MetricCard from '../components/MetricCard.vue';
 import QualityDimensionsCard from '../components/QualityDimensionsCard.vue';
 
+import QualityScoreTrendCard from '../components/QualityScoreTrendCard.vue';
+
 export default {
   name: 'AnalyticsPage',
   components: {
     MetricCard,
     QualityDimensionsCard,
+    QualityScoreTrendCard,
   },
 };
 </script>
@@ -73,6 +76,13 @@ export default {
         />
       </div>
     </div>
-    <QualityDimensionsCard />
+    <div class="row mt-4">
+      <div class="col-md-6">
+        <QualityDimensionsCard />
+      </div>
+      <div class="col-md-6">
+        <QualityScoreTrendCard />
+      </div>
+    </div>
   </div>
 </template>

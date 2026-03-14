@@ -1,16 +1,14 @@
 <template>
-  <div class="quality-dimensions-card mb-4 p-0">
-    <div class="quality-dimensions-inner px-4 py-3">
+  <div class="quality-card mb-4">
+    <div class="quality-card-inner px-4 py-3">
       <div class="d-flex align-items-center gap-2 mb-2">
         <div class="dot bg-orange-400"></div>
         <h5 class="quality-title mb-0">Quality Dimensions</h5>
         <span class="quality-subtitle ms-2">Avg scores · 153 runs</span>
       </div>
-      <!-- Radar chart placeholder -->
       <div class="radar-chart mb-3">
         <div id="qualityRadarChart" style="width:100%;height:185px;"></div>
       </div>
-      <!-- Dimension pills -->
       <div class="dimension-pills mt-1">
         <span class="dimension-pill" v-for="d in dimensions" :key="d.subject">
           <span class="dimension-pill-label">{{ d.subject }}</span>
@@ -26,6 +24,7 @@ import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5radar from '@amcharts/amcharts5/radar';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+
 
 export default {
   name: 'QualityDimensionsCard',
@@ -136,26 +135,23 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css?family=Inter:wght@400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css?family=Inter:wght@400;500;600;700;800&display=swap');
-.quality-dimensions-card {
+.quality-card {
   border-radius: 1.5rem;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.90);
   backdrop-filter: blur(6px);
-  box-shadow: none;
-  border: none;
-  transition: box-shadow 0.3s, transform 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(255,255,255,0.6);
+  transition: box-shadow 0.2s;
   min-width: 0;
   width: 100%;
-  max-width: 480px;
   margin-left: 0;
   margin-right: 0;
-  float: left;
 }
-.quality-dimensions-card:hover {
-  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.14);
+.quality-card:hover {
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.14);
   transform: translateY(-2px);
 }
-.quality-dimensions-inner {
+.quality-card-inner {
   padding: 1.2rem 1.5rem 1.2rem 1.5rem;
   font-family: 'Inter', sans-serif;
 }
@@ -169,13 +165,13 @@ export default {
   background: #f97316;
 }
 .quality-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #2d3748;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #334155;
 }
 .quality-subtitle {
-  color: #94a3b8;
-  font-size: 0.68rem;
+  color: #a0aec0;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 .radar-chart {
@@ -203,18 +199,15 @@ export default {
   padding: 0.2rem 0.7rem;
 }
 .dimension-pill-label {
-  color: #f97316;
-  /* Ensure orange color is applied and not overridden */
-  font-weight: 700;
-  font-size: 0.75rem;
+  color: #fb923c;
+  font-weight: 600;
+  font-size: 0.7rem;
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 0.65rem;
 }
 .dimension-pill-value {
   color: #b45309;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
 }
 </style>
