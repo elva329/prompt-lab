@@ -54,65 +54,89 @@ export default {
       am5themes_Animated.new(root)
     ]);
     let chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      wheelX: 'panX',
-      wheelY: 'zoomX',
-      paddingTop: 20,
-      paddingBottom: 20,
-      paddingLeft: 20,
-      paddingRight: 20,
+      panX: true,
+      panY: true,
+      wheelX: "panX",
+      wheelY: "zoomX",
+      pinchZoomX: true,
+      paddingLeft: 0
     }));
-    let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-      categoryField: 'date',
+    let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
+      behavior: "none"
+    }));
+    cursor.lineY.set("visible", false);
+
+    // Convert trendData to date format
+    let trendData = this.trendData.map((d, i) => {
+      // Use index as day offset from Mar 7, 2026
+      let base = new Date(2026, 2, 7); // Mar is month 2 (0-indexed)
+      base.setDate(base.getDate() + i);
+      return {
+        date: base.getTime(),
+        value: d.score
+      };
+    });
+
+    let xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
+      maxDeviation: 0.5,
+      baseInterval: {
+        timeUnit: "day",
+        count: 1
+      },
       renderer: am5xy.AxisRendererX.new(root, {
-        minGridDistance: 20,
+        minGridDistance: 80,
+        minorGridEnabled: true,
+        pan: "zoom",
         labels: {
-          fill: am5.color('#cbd5e1'), // lighter color
+          fill: am5.color('#687083'),
           fontSize: 8,
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: '400',
-        },
+          fontFamily: 'Manrope, sans-serif',
+          fontWeight: '700',
+        }
       }),
+      tooltip: am5.Tooltip.new(root, {})
     }));
-    xAxis.data.setAll(this.trendData);
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+      maxDeviation: 1,
       renderer: am5xy.AxisRendererY.new(root, {
+        pan: "zoom",
         labels: {
-          fill: am5.color('#cbd5e1'), // lighter color
+          fill: am5.color('#687083'),
           fontSize: 8,
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: '400',
-        },
-      }),
-      min: 55,
-      max: 75,
+          fontFamily: 'Manrope, sans-serif',
+          fontWeight: '700',
+        }
+      })
     }));
-    let series = chart.series.push(am5xy.LineSeries.new(root, {
-      name: 'Score',
+    let series = chart.series.push(am5xy.SmoothedXLineSeries.new(root, {
+      name: "Score",
       xAxis: xAxis,
       yAxis: yAxis,
-      valueYField: 'score',
-      categoryXField: 'date',
-      stroke: am5.color('#14b8a6'),
-      strokeWidth: 2.5,
-      fill: am5.color('#14b8a6'),
-      tension: 0.8,
+      valueYField: "value",
+      valueXField: "date",
+      sequencedInterpolation: true,
+      tooltip: am5.Tooltip.new(root, {
+        labelText: "{valueY}"
+      })
     }));
-    series.data.setAll(this.trendData);
-    series.strokes.template.setAll({ strokeOpacity: 1 });
-    series.fills.template.setAll({ fillOpacity: 0.15 });
-    series.bullets.push(() => {
+    series.strokes.template.setAll({ strokeWidth: 2 });
+    series.bullets.push(function () {
       return am5.Bullet.new(root, {
+        locationY: 0,
         sprite: am5.Circle.new(root, {
-          radius: 3.5,
-          fill: am5.color('#14b8a6'),
-          stroke: am5.color('#fff'),
+          radius: 4,
+          stroke: root.interfaceColors.get("background"),
           strokeWidth: 2,
+          fill: series.get("fill")
         })
       });
     });
-    chart.set('cursor', am5xy.XYCursor.new(root, {}));
+    chart.set("scrollbarX", am5.Scrollbar.new(root, {
+      orientation: "horizontal"
+    }));
+    series.data.setAll(trendData);
+    series.appear(1000);
+    chart.appear(1000, 100);
     this._am5Root = root;
   },
   beforeUnmount() {
@@ -155,14 +179,16 @@ export default {
   background: #14b8a6;
 }
 .quality-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #687083;
+  font-family: 'Sora', sans-serif;
 }
 .quality-subtitle {
-  color: #a0aec0;
-  font-size: 0.75rem;
-  font-weight: 500;
+  color: #687083;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
 }
 .trend-line-chart {
   width: 100%;
@@ -190,8 +216,9 @@ export default {
   border-radius: 50%;
 }
 .trend-stat-label {
-  color: #64748b;
-  font-size: 0.75rem;
-  font-family: 'Inter', sans-serif;
+  color: #687083;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
 }
 </style>

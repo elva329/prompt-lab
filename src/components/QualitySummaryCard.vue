@@ -12,13 +12,14 @@
           <circle cx="40" cy="40" r="32" fill="none" stroke="#fbbf24" stroke-width="12" stroke-dasharray="16.1 100" stroke-dashoffset="71.2" />
           <circle cx="40" cy="40" r="32" fill="none" stroke="#f87171" stroke-width="12" stroke-dasharray="12.7 100" stroke-dashoffset="87.3" />
         </svg>
-        <div class="donut-legend">
+      </div>
+          <div class="donut-legend">
           <div class="legend-row"><span class="legend-dot pass"></span>Pass ≥60 <span class="legend-value">71%</span></div>
           <div class="legend-row"><span class="legend-dot borderline"></span>Borderline <span class="legend-value">16%</span></div>
           <div class="legend-row"><span class="legend-dot fail"></span>Fail &lt;50 <span class="legend-value">13%</span></div>
         </div>
-      </div>
-      <div class="summary-scores">
+    </div>
+        <div class="summary-scores">
         <div class="scores-title">AVG. DIMENSION SCORES</div>
         <div class="score-row"><span class="score-label">Clarity</span><span class="score-bar clarity"></span><span class="score-value">72</span></div>
         <div class="score-row"><span class="score-label">Coherence</span><span class="score-bar coherence"></span><span class="score-value">69</span></div>
@@ -26,7 +27,6 @@
         <div class="score-row"><span class="score-label">Completeness</span><span class="score-bar completeness"></span><span class="score-value">61</span></div>
         <div class="score-row"><span class="score-label">Relevance</span><span class="score-bar relevance"></span><span class="score-value">58</span></div>
       </div>
-    </div>
     <div class="summary-warning">
       <span class="warning-icon">⚠️</span> <span class="warning-text">Relevance is the weakest — 14pt below Clarity</span>
     </div>
@@ -42,9 +42,9 @@ export default {
 <style scoped>
 .quality-summary-card {
   background: #fff;
-  border-radius: 1.2rem;
+  border-radius: 1.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
   width: 100%;
   height: 100%;
   display: flex;
@@ -66,19 +66,19 @@ export default {
   display: inline-block;
 }
 .summary-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #687083;
+  font-family: 'Sora', sans-serif;
 }
 .summary-subtitle {
   color: #a0aec0;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 .summary-main {
   display: flex;
   gap: 2rem;
-  align-items: flex-start;
 }
 .summary-donut {
   display: flex;
@@ -88,8 +88,7 @@ export default {
 }
 .donut-legend {
   margin-top: 0.5rem;
-  font-size: 0.85rem;
-  font-family: 'Inter', sans-serif;
+  font-size: 0.68rem;
 }
 .legend-row {
   display: flex;
@@ -110,6 +109,7 @@ export default {
   font-weight: 700;
   margin-left: 0.5rem;
   color: #334155;
+  font-size: 0.68rem;
 }
 .summary-scores {
   flex: 1;
@@ -117,7 +117,7 @@ export default {
 }
 .scores-title {
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 0.62rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
@@ -125,13 +125,13 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  margin-bottom: 0.3rem;
+  /* margin-bottom: 0.3rem; */
 }
 .score-label {
   width: 100px;
   color: #334155;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 .score-bar {
   height: 8px;
@@ -186,7 +186,7 @@ export default {
   position: absolute;
 }
 .score-value {
-  font-size: 1rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: #334155;
   width: 32px;
@@ -194,12 +194,10 @@ export default {
 }
 .summary-warning {
   color: #fbbf24;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
 }
 .warning-icon {
   font-size: 1.1rem;

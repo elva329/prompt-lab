@@ -102,10 +102,10 @@ export default {
   display: inline-block;
 }
 .rankings-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #334155;
-  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #687083;
+  font-family: 'Sora', sans-serif;
 }
 .rankings-section {
   margin-bottom: 0.5rem;

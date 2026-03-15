@@ -165,14 +165,16 @@ export default {
   background: #f97316;
 }
 .quality-title {
-  font-size: 1rem;
-  font-weight: 800;
-  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #687083;
+  font-family: 'Sora', sans-serif;
 }
 .quality-subtitle {
-  color: #a0aec0;
-  font-size: 0.75rem;
-  font-weight: 500;
+  color: #687083;
+  font-size: 0.68rem;
+  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
 }
 .radar-chart {
   width: 100%;
@@ -200,14 +202,14 @@ export default {
 }
 .dimension-pill-label {
   color: #fb923c;
-  font-weight: 600;
-  font-size: 0.7rem;
-  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.68rem;
+  font-family: 'Manrope', sans-serif;
 }
 .dimension-pill-value {
   color: #b45309;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 0.68rem;
 }
 </style>

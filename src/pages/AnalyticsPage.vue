@@ -20,14 +20,14 @@
         </div>
 
         <!-- ROW 2: 3 cards - height 379px each -->
-        <div class="card-row-container">
-          <div class="bordered-card card-row2">
+        <div class="card-row2-container">
+          <div class="bordered-card card-row2 left">
             <QualityDimensionsCard />
           </div>
-          <div class="bordered-card card-row2">
+          <div class="bordered-card card-row2 middle">
             <QualityScoreTrendCard />
           </div>
-          <div class="bordered-card card-row2">
+          <div class="bordered-card card-row2 right">
             <QualitySummaryCard />
           </div>
         </div>
@@ -115,6 +115,13 @@ export default defineComponent({
   flex-wrap: wrap;
 }
 
+.card-row2-container {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 /* All cards flex equally */
 .card-row-container > * {
   flex: 1;
@@ -127,9 +134,17 @@ export default defineComponent({
 }
 
 .card-row2 {
-  height: 379px;
+  flex-shrink: 1;
+  flex-basis: 0;
 }
 
+.left, .right {
+  flex-grow: 1; /* Takes 1 part of space */
+}
+
+.middle {
+  flex-grow: 2; /* Takes 2 parts of space */
+}
 .card-row3 {
   height: 547px;
 }

@@ -73,7 +73,7 @@ export default defineComponent({
   gap: 0.3rem;
   background: #e6fcf7;
   color: #13b8d2;
-  font-size: 0.5rem;
+  font-size: 0.68rem; /* Trend label/percentage */
   font-weight: 700;
   border-radius: 999px;
   padding: 0.18rem 0.7rem;
@@ -81,7 +81,7 @@ export default defineComponent({
 }
 .card-title {
   font-family: 'Sora', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.8rem; /* Card label */
   font-weight: 700;
   color: #687083;
   margin-bottom: 0.2rem;
@@ -95,20 +95,20 @@ export default defineComponent({
 }
 .card-value {
   font-family: 'Manrope', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.7rem; /* Metric primary value */
   font-weight: 800;
   color: #151922;
 }
 .card-value-max {
   font-family: 'Manrope', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.68rem; /* Value label */
+  font-weight: 700;
   color: #687083;
   margin-left: 0.3rem;
 }
 .card-subtitle {
- font-family: 'Manrope', sans-serif;
-  font-size: 0.8rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem; /* Card subtitle */
   color: #687083;
   margin-bottom: 0.7rem;
 }
