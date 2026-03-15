@@ -10,7 +10,7 @@
       </span>
     </RouterLink>
 
-    <main class="flex-grow-1 d-flex flex-column">
+    <main class="grow d-flex flex-column">
       <RouterView />
     </main>
     <footer class="marketing-footer py-3">
@@ -28,10 +28,6 @@
     <RouterLink to="/" class="login-home-brand-block global-home-brand-block text-decoration-none">
       <span class="landing-brand-mark">
         <i class="bi bi-grid-3x3-gap-fill"></i>
-      </span>
-      <span class="text-start">
-        <span class="landing-brand-kicker d-block mb-1">Experiment Workspace</span>
-        <span class="landing-brand-name d-block">Prompt Lab</span>
       </span>
     </RouterLink>
 
