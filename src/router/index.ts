@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import AppLayout from '../components/AppLayout.vue';
-import DashboardPage from '../pages/DashboardPage.vue';
+// import DashboardPage from '../pages/DashboardPage.vue';
 import ExperimentsPage from '../pages/ExperimentsPage.vue';
 import ExperimentRunnerPage from '../pages/ExperimentRunnerPage.vue';
 import FavoritesPage from '../pages/FavoritesPage.vue';
@@ -19,7 +19,7 @@ const routes = [
     children: [
       { path: '', name: 'landing', component: LandingPage },
       { path: 'login', name: 'login', component: LoginPage },
-      { path: 'dashboard', name: 'dashboard', component: DashboardPage, meta: { requiresAuth: true } },
+      // { path: 'dashboard', name: 'dashboard', component: DashboardPage, meta: { requiresAuth: true } },
       { path: 'prompts', name: 'prompts', component: PromptsPage, meta: { requiresAuth: true } },
       { path: 'favorites', name: 'favorites', component: FavoritesPage, meta: { requiresAuth: true } },
       { path: 'analytics', name: 'analytics', component: AnalyticsPage, meta: { requiresAuth: true } },
