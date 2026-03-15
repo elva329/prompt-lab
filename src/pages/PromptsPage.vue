@@ -20,9 +20,14 @@
     </div>
 
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
-      <div>
-        <h1 class="h5 fw-bold mb-1">Prompt Library</h1>
-        <p class="text-secondary mb-0">Browse and search {{ displayedPromptCount }} AI prompts.</p>
+      <div class="col-4">
+         <input
+          v-model.trim="searchTerm"
+          type="text"
+          class="form-control"
+          placeholder="Search prompts..."
+          @input="handleSearch"
+        />
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary">Selected: {{ selectedPromptIds.length }}/3</span>
@@ -36,15 +41,6 @@
     </section>
 
     <section class="row g-2 page-filters-row">
-      <div class="col-md-3">
-        <input
-          v-model.trim="searchTerm"
-          type="text"
-          class="form-control"
-          placeholder="Search prompts..."
-          @input="handleSearch"
-        />
-      </div>
       <div class="col-12">
         <div class="prompt-category-tabs" role="tablist" aria-label="Prompt categories">
           <button
@@ -201,9 +197,9 @@ const CATEGORY_GROUP_BY_RAW: Record<string, string> = {
 
 const CATEGORY_TAB_ORDER = ['technology', 'business', 'learning', 'creative', 'lifestyle', 'general'];
 
-  const navItems = [
+ const navItems = [
       { name: 'Analytics', path: '/analytics' },
-      { name: 'Prompts', path: '/prompts' },
+      { name: 'Prompt Library', path: '/prompts' },
       { name: 'Favorites', path: '/favorites' },
       { name: 'Experiments', path: '/experiments' }
     ]

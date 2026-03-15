@@ -95,12 +95,13 @@ export default defineComponent({
     const router = useRouter()
     const route = useRoute()
     // appStore is imported directly
-    const navItems = [
+   const navItems = [
       { name: 'Analytics', path: '/analytics' },
-      { name: 'Prompts', path: '/prompts' },
+      { name: 'Prompt Library', path: '/prompts' },
       { name: 'Favorites', path: '/favorites' },
       { name: 'Experiments', path: '/experiments' }
     ]
+    
     function isNavItemActive(path: string): boolean {
       if (path === '/experiments') {
         return route.path === '/experiments' || route.path.startsWith('/experiments/')

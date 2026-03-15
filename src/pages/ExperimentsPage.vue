@@ -103,7 +103,7 @@ function formatDate(value: string): string {
 
   const navItems = [
       { name: 'Analytics', path: '/analytics' },
-      { name: 'Prompts', path: '/prompts' },
+      { name: 'Prompt Library', path: '/prompts' },
       { name: 'Favorites', path: '/favorites' },
       { name: 'Experiments', path: '/experiments' }
     ]
