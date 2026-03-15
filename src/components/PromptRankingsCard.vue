@@ -210,13 +210,12 @@ export default {
 .rankings-divider {
   border: none;
   border-top: 1px solid #e5e7eb;
-  margin: 1rem 0;
+  margin: 0.5rem 0;
 }
 .rankings-subtitle.attention {
   color: #f87171;
   font-size: 1rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -228,6 +227,5 @@ export default {
   color: #a0aec0;
   font-size: 0.85rem;
   font-weight: 500;
-  margin-top: 0.5rem;
 }
 </style>

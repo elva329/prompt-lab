@@ -178,12 +178,12 @@ const createForm = ref({
   promptText: '',
 });
 
-const navItems = [
-  { name: 'Dashboard', path: '/dashboard' },
-  { name: 'Prompts', path: '/prompts' },
-  { name: 'Favorites', path: '/favorites' },
-  { name: 'Experiments', path: '/experiments' },
-];
+  const navItems = [
+      { name: 'Analytics', path: '/analytics' },
+      { name: 'Prompts', path: '/prompts' },
+      { name: 'Favorites', path: '/favorites' },
+      { name: 'Experiments', path: '/experiments' }
+    ]
 
 function isNavItemActive(path: string): boolean {
   if (path === '/experiments') {

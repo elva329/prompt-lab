@@ -194,7 +194,7 @@ async function handleSubmit(): Promise<void> {
       // appStore.showToast('Login successful.', 'success');
     }
 
-    router.push('/dashboard');
+    router.push('/analytics');
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Authentication failed.';
   } finally {

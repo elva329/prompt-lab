@@ -201,12 +201,12 @@ const CATEGORY_GROUP_BY_RAW: Record<string, string> = {
 
 const CATEGORY_TAB_ORDER = ['technology', 'business', 'learning', 'creative', 'lifestyle', 'general'];
 
-const navItems = [
-  { name: 'Dashboard', path: '/dashboard' },
-  { name: 'Prompts', path: '/prompts' },
-  { name: 'Favorites', path: '/favorites' },
-  { name: 'Experiments', path: '/experiments' },
-];
+  const navItems = [
+      { name: 'Analytics', path: '/analytics' },
+      { name: 'Prompts', path: '/prompts' },
+      { name: 'Favorites', path: '/favorites' },
+      { name: 'Experiments', path: '/experiments' }
+    ]
 
 function isNavItemActive(path: string): boolean {
   if (path === '/experiments') {

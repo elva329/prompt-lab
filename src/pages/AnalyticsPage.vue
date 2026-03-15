@@ -1,5 +1,23 @@
 <template>
   <div class="analytics-page">
+    <div class="dashboard-menu-row">
+      <nav class="dashboard-menu-pills">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.name"
+          :to="item.path"
+          class="dashboard-menu-link"
+          :class="{ active: isNavItemActive(item.path) }"
+        >
+          {{ item.name }}
+        </RouterLink>
+      </nav>
+      <div class="dashboard-user-controls">
+        <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
+          <i class="bi bi-person-circle"></i>
+        </button>
+      </div>
+    </div>
     <div class="analytics-container">
       <!-- SECTION 1 -->
       <div class="section-1">
@@ -48,6 +66,8 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { appStore } from '../stores/appStore'
 import AvgOverallQualityCard from '../components/AvgOverallQualityCard.vue'
 import AvgResponseTimeCard from '../components/AvgResponseTimeCard.vue'
 import PromptsEvaluatedCard from '../components/PromptsEvaluatedCard.vue'
@@ -70,6 +90,32 @@ export default defineComponent({
     QualitySummaryCard,
     ResponseTimeByPromptCard,
     PromptRankingsCard
+  },
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+    // appStore is imported directly
+    const navItems = [
+      { name: 'Analytics', path: '/analytics' },
+      { name: 'Prompts', path: '/prompts' },
+      { name: 'Favorites', path: '/favorites' },
+      { name: 'Experiments', path: '/experiments' }
+    ]
+    function isNavItemActive(path: string): boolean {
+      if (path === '/experiments') {
+        return route.path === '/experiments' || route.path.startsWith('/experiments/')
+      }
+      return route.path === path
+    }
+    function handleLogout(): void {
+      appStore.logout()
+      router.push('/')
+    }
+    return {
+      navItems,
+      isNavItemActive,
+      handleLogout
+    }
   }
 })
 </script>
