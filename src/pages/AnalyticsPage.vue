@@ -1,5 +1,5 @@
 <template>
-  <div class="analytics-page">
+  <div class="analytics-page fade-in-up favorites-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
       <nav class="dashboard-menu-pills">
         <RouterLink
