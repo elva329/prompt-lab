@@ -103,7 +103,7 @@ h6 {
 .app-main-fullscreen {
   height: 100vh;
   padding: 1.5rem;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .app-main-fullscreen .container-xl {

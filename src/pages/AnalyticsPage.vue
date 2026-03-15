@@ -76,8 +76,7 @@ export default defineComponent({
 
 <style scoped>
 .analytics-page {
-  height: 100vh;
-  overflow-y: auto;
+  /* height: 100vh; */
   padding: 1rem;
   box-sizing: border-box;
 }
