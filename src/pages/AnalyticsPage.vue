@@ -1,88 +1,169 @@
-<script>
-import MetricCard from '../components/MetricCard.vue';
-import QualityDimensionsCard from '../components/QualityDimensionsCard.vue';
-
-import QualityScoreTrendCard from '../components/QualityScoreTrendCard.vue';
-
-export default {
-  name: 'AnalyticsPage',
-  components: {
-    MetricCard,
-    QualityDimensionsCard,
-    QualityScoreTrendCard,
-  },
-};
-</script>
 <template>
-  <div class="container mt-4">
-    <h2 class="mb-4">Analytics</h2>
-    <div class="row">
-      <div class="col-md-3">
-        <MetricCard
-          iconName="flask"
-          iconBg="#e7f1ff"
-          iconColor="#3b82f6"
-          label="AVG. OVERALL QUALITY"
-          value="67.3"
-          subValue="/ 100"
-          trend="+4.1%"
-          trendLabel="vs. last experiment batch"
-          :trendUp="true"
-          :progressValue="67.3"
-          progressGradient="linear-gradient(90deg, #3b82f6, #2563eb)"
-        />
-      </div>
-      <div class="col-md-3">
-        <MetricCard
-          iconName="stopwatch"
-          iconBg="#fff7e6"
-          iconColor="#f59e42"
-          label="AVG. RESPONSE TIME"
-          value="3,842"
-          subValue="ms"
-          trend="-2.3%"
-          trendLabel="vs. last experiment batch"
-          :trendUp="false"
-          :progressValue="38"
-          progressGradient="linear-gradient(90deg, #fbbf24, #f59e42)"
-        />
-      </div>
-      <div class="col-md-3">
-        <MetricCard
-          iconName="list-alt"
-          iconBg="#e6f7ff"
-          iconColor="#0ea5e9"
-          label="PROMPTS EVALUATED"
-          value="1,250"
-          trend="+120"
-          trendLabel="since last batch"
-          :trendUp="true"
-          :progressValue="100"
-          progressGradient="linear-gradient(90deg, #38bdf8, #0ea5e9)"
-        />
-      </div>
-      <div class="col-md-3">
-        <MetricCard
-          iconName="check-double"
-          iconBg="#e6fff7"
-          iconColor="#059669"
-          label="PASS RATE (≥60)"
-          value="85%"
-          trend="+2.5%"
-          trendLabel="vs. last batch"
-          :trendUp="true"
-          :progressValue="85"
-          progressGradient="linear-gradient(90deg, #10b981, #059669)"
-        />
-      </div>
-    </div>
-    <div class="row mt-4">
-      <div class="col-md-6">
-        <QualityDimensionsCard />
-      </div>
-      <div class="col-md-6">
-        <QualityScoreTrendCard />
+  <div class="analytics-page">
+    <div class="analytics-container">
+      <!-- SECTION 1 -->
+      <div class="section-1">
+        <!-- ROW 1: 4 cards - 271*164 each -->
+        <div class="card-row-container">
+          <div class="bordered-card card-row1">
+            <AvgOverallQualityCard />
+          </div>
+          <div class="bordered-card card-row1">
+            <AvgResponseTimeCard />
+          </div>
+          <div class="bordered-card card-row1">
+            <PromptsEvaluatedCard />
+          </div>
+          <div class="bordered-card card-row1">
+            <PassRateCard />
+          </div>
+        </div>
+
+        <!-- ROW 2: 3 cards - height 379px each -->
+        <div class="card-row-container">
+          <div class="bordered-card card-row2">
+            <QualityDimensionsCard />
+          </div>
+          <div class="bordered-card card-row2">
+            <QualityScoreTrendCard />
+          </div>
+          <div class="bordered-card card-row2">
+            <QualitySummaryCard />
+          </div>
+        </div>
+
+        <!-- ROW 3: 2 cards - height 547px each -->
+        <div class="card-row-container">
+          <div class="bordered-card card-row3">
+            <ResponseTimeByPromptCard />
+          </div>
+          <div class="bordered-card card-row3">
+            <PromptRankingsCard />
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<script lang="ts">
+import { defineComponent } from 'vue'
+import AvgOverallQualityCard from '../components/AvgOverallQualityCard.vue'
+import AvgResponseTimeCard from '../components/AvgResponseTimeCard.vue'
+import PromptsEvaluatedCard from '../components/PromptsEvaluatedCard.vue'
+import PassRateCard from '../components/PassRateCard.vue'
+import QualityDimensionsCard from '../components/QualityDimensionsCard.vue'
+import QualityScoreTrendCard from '../components/QualityScoreTrendCard.vue'
+import QualitySummaryCard from '../components/QualitySummaryCard.vue'
+import ResponseTimeByPromptCard from '../components/ResponseTimeByPromptCard.vue'
+import PromptRankingsCard from '../components/PromptRankingsCard.vue'
+
+export default defineComponent({
+  name: 'AnalyticsPage',
+  components: {
+    AvgOverallQualityCard,
+    AvgResponseTimeCard,
+    PromptsEvaluatedCard,
+    PassRateCard,
+    QualityDimensionsCard,
+    QualityScoreTrendCard,
+    QualitySummaryCard,
+    ResponseTimeByPromptCard,
+    PromptRankingsCard
+  }
+})
+</script>
+
+<style scoped>
+.analytics-page {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.analytics-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Border styles with radius - NO PADDING */
+.bordered-card {
+  /* border: 2px solid #000; */
+  border-radius: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+.bordered-card > * {
+  width: 100%;
+  height: 100%;
+}
+
+.section-1 {
+  margin-bottom: 2rem;
+}
+
+/* ALL ROWS use the same container with consistent gap */
+.card-row-container {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+/* All cards flex equally */
+.card-row-container > * {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Card dimensions */
+.card-row1 {
+  height: 164px;
+}
+
+.card-row2 {
+  height: 379px;
+}
+
+.card-row3 {
+  height: 547px;
+}
+
+/* Force all cards in row 2 to have exactly 379px */
+.card-row2,
+.card-row2 > * {
+  height: 379px !important;
+  min-height: 379px !important;
+  max-height: 379px !important;
+}
+
+/* Force all cards in row 3 to have exactly 547px */
+.card-row3,
+.card-row3 > * {
+  height: 547px !important;
+  min-height: 547px !important;
+  max-height: 547px !important;
+}
+
+/* Force all cards in row 1 to have exactly 164px */
+.card-row1,
+.card-row1 > * {
+  height: 164px !important;
+  min-height: 164px !important;
+  max-height: 164px !important;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .card-row-container > * {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+</style>

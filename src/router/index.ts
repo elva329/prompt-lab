@@ -9,6 +9,7 @@ import LandingPage from '../pages/LandingPage.vue';
 import LoginPage from '../pages/LoginPage.vue';
 import NotFoundPage from '../pages/NotFoundPage.vue';
 import PromptsPage from '../pages/PromptsPage.vue';
+import AnalyticsPage from '../pages/AnalyticsPage.vue';
 import { appStore } from '../stores/appStore';
 
 const routes = [
@@ -21,6 +22,7 @@ const routes = [
       { path: 'dashboard', name: 'dashboard', component: DashboardPage, meta: { requiresAuth: true } },
       { path: 'prompts', name: 'prompts', component: PromptsPage, meta: { requiresAuth: true } },
       { path: 'favorites', name: 'favorites', component: FavoritesPage, meta: { requiresAuth: true } },
+      { path: 'analytics', name: 'analytics', component: AnalyticsPage, meta: { requiresAuth: true } },
       {
         path: 'experiments',
         name: 'experiments',

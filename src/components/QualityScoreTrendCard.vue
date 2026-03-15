@@ -68,9 +68,10 @@ export default {
       renderer: am5xy.AxisRendererX.new(root, {
         minGridDistance: 20,
         labels: {
-          fill: am5.color('#94a3b8'),
-          fontSize: 9.5,
+          fill: am5.color('#cbd5e1'), // lighter color
+          fontSize: 8,
           fontFamily: 'Inter, sans-serif',
+          fontWeight: '400',
         },
       }),
     }));
@@ -78,9 +79,10 @@ export default {
     let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
       renderer: am5xy.AxisRendererY.new(root, {
         labels: {
-          fill: am5.color('#94a3b8'),
-          fontSize: 9.5,
+          fill: am5.color('#cbd5e1'), // lighter color
+          fontSize: 8,
           fontFamily: 'Inter, sans-serif',
+          fontWeight: '400',
         },
       }),
       min: 55,
@@ -153,7 +155,7 @@ export default {
   background: #14b8a6;
 }
 .quality-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #334155;
 }

@@ -67,9 +67,9 @@ export default {
     });
     xRenderer.labels.template.setAll({
       radius: 18,
-      fontSize: 13,
-      fontWeight: '600',
-      fill: am5.color(0xf97316),
+      fontSize: 11,
+
+      fill: am5.color(0xa0aec0),
       paddingBottom: 6
     });
     let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
@@ -165,7 +165,7 @@ export default {
   background: #f97316;
 }
 .quality-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 800;
   color: #334155;
 }
