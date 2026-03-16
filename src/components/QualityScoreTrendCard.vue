@@ -197,7 +197,7 @@ export default {
     // Add more space between the scroll bar and the chart
     chart.set('scrollbarX', am5.Scrollbar.new(root, {
       orientation: 'horizontal',
-      marginTop: -10, // Add space above scrollbar
+      marginTop:-5, // Add space above scrollbar
       marginBottom: 40 // Add space above scrollbar
     }));
     series.appear(1000, 100);
