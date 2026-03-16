@@ -14,6 +14,9 @@ export type PromptResultPayload = {
 export type ResultsSummaryResponse = {
   experimentsRun: number;
   avgQualityScore: number | null;
+  avgResponseTimeMs?: number | null;
+  promptsEvaluated?: number;
+  passRate?: number | null;
   topCategories: Array<{
     name: string;
     count: number;

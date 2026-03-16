@@ -573,7 +573,15 @@ app.get('/api/results/summary', async (req, res) => {
           $group: {
             _id: null,
             avgQualityScore: { $avg: '$overallQuality' },
+            avgResponseTimeMs: { $avg: '$responseTimeMs' },
             experiments: { $addToSet: '$experimentId' },
+            promptsEvaluated: { $addToSet: '$promptId' },
+            passCount: {
+              $sum: {
+                $cond: [{ $gte: ['$overallQuality', 60] }, 1, 0]
+              }
+            },
+            totalCount: { $sum: 1 },
           },
         },
         {
@@ -582,7 +590,18 @@ app.get('/api/results/summary', async (req, res) => {
             avgQualityScore: {
               $cond: [{ $gt: [{ $size: '$experiments' }, 0] }, { $round: ['$avgQualityScore', 0] }, null],
             },
+            avgResponseTimeMs: {
+              $cond: [{ $gt: [{ $size: '$experiments' }, 0] }, { $round: ['$avgResponseTimeMs', 0] }, null],
+            },
             experimentsRun: { $size: '$experiments' },
+            promptsEvaluated: { $size: '$promptsEvaluated' },
+            passRate: {
+              $cond: [
+                { $gt: ['$totalCount', 0] },
+                { $round: [{ $multiply: [{ $divide: ['$passCount', '$totalCount'] }, 100] }, 1] },
+                null
+              ]
+            },
           },
         },
       ])
@@ -618,6 +637,9 @@ app.get('/api/results/summary', async (req, res) => {
     return res.json({
       experimentsRun: overall?.experimentsRun || 0,
       avgQualityScore: typeof overall?.avgQualityScore === 'number' ? overall.avgQualityScore : null,
+      avgResponseTimeMs: typeof overall?.avgResponseTimeMs === 'number' ? overall.avgResponseTimeMs : null,
+      promptsEvaluated: typeof overall?.promptsEvaluated === 'number' ? overall.promptsEvaluated : 0,
+      passRate: typeof overall?.passRate === 'number' ? overall.passRate : null,
       topCategories: topCategoriesByPrompt,
     });
   } catch (error) {

@@ -12,12 +12,12 @@
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M2 10l4-4 3 3 5-5" stroke="#13b8d2" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span>+4.1%</span>
+        <span>{{ trend }}</span>
       </div>
     </div>
     <div class="card-title">AVG. OVERALL QUALITY</div>
     <div class="card-value-row">
-      <span class="card-value">67.3</span>
+      <span class="card-value">{{ avgQualityScore !== null ? avgQualityScore : 'N/A' }}</span>
       <span class="card-value-max">/ 100</span>
     </div>
     <div class="card-subtitle">vs. last experiment batch</div>
@@ -28,9 +28,54 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
+import { fetchResultsSummaryRequest } from '../lib/resultsApi'
+import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
+import { appStore } from '../stores/appStore'
+
 export default defineComponent({
-  name: 'AvgOverallQualityCard'
+  name: 'AvgOverallQualityCard',
+  setup() {
+    const avgQualityScore = ref<number | null>(null)
+    const trend = ref<string>("N/A")
+    const userId = appStore.state.user?.id || ''
+
+    const fetchAvgQuality = async () => {
+      if (!userId) return
+      try {
+        const summary = await fetchResultsSummaryRequest(userId)
+        avgQualityScore.value = summary.avgQualityScore
+
+        // Fetch previous experiment's avgQualityScore for trend calculation
+        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsPayload = await experimentsRes.json()
+        const experiments = experimentsPayload.experiments || []
+        if (experiments.length > 1) {
+          // Get previous experiment id
+          const prevExperimentId = experiments[1]._id
+          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevScores = prevResults.map(r => r.overallQuality).filter(v => typeof v === 'number')
+          if (prevScores.length > 0) {
+            const prevAvg = Math.round(prevScores.reduce((a, b) => a + b, 0) / prevScores.length)
+            if (typeof summary.avgQualityScore === 'number' && typeof prevAvg === 'number') {
+              const diff = summary.avgQualityScore - prevAvg
+              const percent = prevAvg !== 0 ? (diff / prevAvg) * 100 : 0
+              trend.value = (percent >= 0 ? '+' : '') + percent.toFixed(1) + '%'
+            }
+          }
+        } else {
+          trend.value = 'N/A'
+        }
+      } catch (e) {
+        avgQualityScore.value = null
+        trend.value = 'N/A'
+      }
+    }
+
+    onMounted(fetchAvgQuality)
+
+    return { avgQualityScore, trend }
+  }
 })
 </script>
 

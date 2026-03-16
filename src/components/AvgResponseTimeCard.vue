@@ -10,12 +10,12 @@
       </div>
       <div class="trend-badge">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l4-4 3 3 5-5" stroke="#13b8d2" stroke-width="2" stroke-linecap="round"/></svg>
-        <span>-12.3%</span>
+        <span>{{ trend }}</span>
       </div>
     </div>
     <div class="card-title">AVG. RESPONSE TIME</div>
     <div class="card-value-row">
-      <span class="card-value">3,842</span>
+      <span class="card-value">{{ avgResponseTimeMs !== null ? avgResponseTimeMs.toLocaleString() : 'N/A' }}</span>
       <span class="card-value-max">ms</span>
     </div>
     <div class="card-subtitle">faster than baseline</div>
@@ -26,9 +26,58 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
+import { fetchResultsSummaryRequest } from '../lib/resultsApi'
+import { appStore } from '../stores/appStore'
+import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
+
 export default defineComponent({
-  name: 'AvgResponseTimeCard'
+  name: 'AvgResponseTimeCard',
+  setup() {
+    const avgResponseTimeMs = ref<number | null>(null)
+    const trend = ref<string>("N/A")
+    const userId = appStore.state.user?.id || ''
+
+    const fetchAvgResponseTime = async () => {
+      if (!userId) return
+      try {
+        const summary = await fetchResultsSummaryRequest(userId)
+        if (typeof summary.avgResponseTimeMs === 'number' && Number.isFinite(summary.avgResponseTimeMs)) {
+          avgResponseTimeMs.value = summary.avgResponseTimeMs
+        } else {
+          avgResponseTimeMs.value = null
+        }
+
+        // Fetch previous experiment's avgResponseTimeMs for trend calculation
+        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsPayload = await experimentsRes.json()
+        const experiments = experimentsPayload.experiments || []
+        if (experiments.length > 1) {
+          // Get previous experiment id
+          const prevExperimentId = experiments[1]._id
+          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevTimes = prevResults.map(r => r.responseTimeMs).filter(v => typeof v === 'number')
+          if (prevTimes.length > 0) {
+            const prevAvg = Math.round(prevTimes.reduce((a, b) => a + b, 0) / prevTimes.length)
+            if (typeof summary.avgResponseTimeMs === 'number' && typeof prevAvg === 'number') {
+              const diff = summary.avgResponseTimeMs - prevAvg
+              const percent = prevAvg !== 0 ? (diff / prevAvg) * 100 : 0
+              trend.value = (percent >= 0 ? '+' : '') + percent.toFixed(1) + '%'
+            }
+          }
+        } else {
+          trend.value = 'N/A'
+        }
+      } catch (e) {
+        avgResponseTimeMs.value = null
+        trend.value = 'N/A'
+      }
+    }
+
+    onMounted(fetchAvgResponseTime)
+
+    return { avgResponseTimeMs, trend }
+  }
 })
 </script>
 

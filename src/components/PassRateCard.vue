@@ -10,12 +10,12 @@
       </div>
       <div class="trend-badge">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l4-4 3 3 5-5" stroke="#13b8d2" stroke-width="2" stroke-linecap="round"/></svg>
-        <span>+2.4%</span>
+        <span>{{ trend }}</span>
       </div>
     </div>
     <div class="card-title">PASS RATE (≥60)</div>
     <div class="card-value-row">
-      <span class="card-value">71.2</span>
+      <span class="card-value">{{ passRate !== null ? passRate : 'N/A' }}</span>
       <span class="card-value-max">%</span>
     </div>
     <div class="card-subtitle">quality threshold met</div>
@@ -26,9 +26,54 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
+import { fetchResultsSummaryRequest } from '../lib/resultsApi'
+import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
+import { appStore } from '../stores/appStore'
+
 export default defineComponent({
-  name: 'PassRateCard'
+  name: 'PassRateCard',
+  setup() {
+    const passRate = ref<number | null>(null)
+    const trend = ref<string>("N/A")
+    const userId = appStore.state.user?.id || ''
+
+    const fetchPassRate = async () => {
+      if (!userId) return
+      try {
+        const summary = await fetchResultsSummaryRequest(userId)
+        passRate.value = summary.passRate ?? null
+
+        // Fetch previous experiment's passRate for trend calculation
+        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsPayload = await experimentsRes.json()
+        const experiments = experimentsPayload.experiments || []
+        if (experiments.length > 1) {
+          // Get previous experiment id
+          const prevExperimentId = experiments[1]._id
+          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          // Calculate previous pass rate
+          const prevTotal = prevResults.length
+          const prevPass = prevResults.filter(r => typeof r.overallQuality === 'number' && r.overallQuality >= 60).length
+          const prevRate = prevTotal > 0 ? Math.round((prevPass / prevTotal) * 100 * 10) / 10 : null
+          if (typeof summary.passRate === 'number' && typeof prevRate === 'number') {
+            const diff = summary.passRate - prevRate
+            const percent = prevRate !== 0 ? (diff / prevRate) * 100 : 0
+            trend.value = (percent >= 0 ? '+' : '') + percent.toFixed(1) + '%'
+          }
+        } else {
+          trend.value = 'N/A'
+        }
+      } catch (e) {
+        passRate.value = null
+        trend.value = 'N/A'
+      }
+    }
+
+    onMounted(fetchPassRate)
+
+    return { passRate, trend }
+  }
 })
 </script>
 

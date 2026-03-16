@@ -4,8 +4,8 @@
       <div class="d-flex align-items-center gap-2 mb-2">
         <div class="dot bg-orange-400"></div>
         <h5 class="quality-title mb-0">Quality Dimensions</h5>
-        <span class="quality-subtitle ms-2">Avg scores · 153 runs</span>
       </div>
+      <div class="quality-subtitle ms-2">Avg scores · {{ runsCount }} runs</div>
       <div class="radar-chart mb-3">
         <div id="qualityRadarChart" style="width:100%;height:185px;"></div>
       </div>
@@ -24,6 +24,8 @@ import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import * as am5radar from '@amcharts/amcharts5/radar';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+import { fetchResultsByUserRequest } from '../lib/resultsApi'
+import { appStore } from '../stores/appStore'
 
 
 export default {
@@ -37,10 +39,36 @@ export default {
         { subject: 'Completeness', score: 61 },
         { subject: 'Overall', score: 67 },
       ],
+      runsCount: 0,
       _am5Root: null,
     };
   },
-  mounted() {
+  async mounted() {
+    // Fetch actual data from database
+    const userId = appStore.state.user?.id || ''
+    if (userId) {
+      try {
+        const results = await fetchResultsByUserRequest(userId)
+        if (results.length > 0) {
+          // Calculate averages for each dimension
+          const clarityAvg = Math.round(results.map(r => r.clarity).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0) / results.length)
+          const relevanceAvg = Math.round(results.map(r => r.relevance).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0) / results.length)
+          const coherenceAvg = Math.round(results.map(r => r.coherence).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0) / results.length)
+          const completenessAvg = Math.round(results.map(r => r.completeness).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0) / results.length)
+          const overallAvg = Math.round(results.map(r => r.overallQuality).filter(v => typeof v === 'number').reduce((a, b) => a + b, 0) / results.length)
+          this.dimensions = [
+            { subject: 'Clarity', score: clarityAvg },
+            { subject: 'Relevance', score: relevanceAvg },
+            { subject: 'Coherence', score: coherenceAvg },
+            { subject: 'Completeness', score: completenessAvg },
+            { subject: 'Overall', score: overallAvg },
+          ]
+          this.runsCount = results.length
+        }
+      } catch (e) {
+        // fallback to mock data
+      }
+    }
     let root = am5.Root.new('qualityRadarChart');
     root.setThemes([
       am5themes_Animated.new(root)
@@ -171,9 +199,8 @@ export default {
   font-family: 'Sora', sans-serif;
 }
 .quality-subtitle {
-  color: #687083;
+  color: #90a1b9;
   font-size: 0.68rem;
-  font-weight: 700;
   font-family: 'Manrope', sans-serif;
 }
 .radar-chart {
@@ -203,13 +230,13 @@ export default {
 .dimension-pill-label {
   color: #fb923c;
   font-weight: 700;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   font-family: 'Manrope', sans-serif;
 }
 .dimension-pill-value {
   color: #b45309;
   font-family: 'Manrope', sans-serif;
   font-weight: 800;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
 }
 </style>

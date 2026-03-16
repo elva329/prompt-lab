@@ -9,12 +9,12 @@
       </div>
       <div class="trend-badge">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l4-4 3 3 5-5" stroke="#13b8d2" stroke-width="2" stroke-linecap="round"/></svg>
-        <span>+18</span>
+        <span>{{ trend }}</span>
       </div>
     </div>
     <div class="card-title">PROMPTS EVALUATED</div>
     <div class="card-value-row">
-      <span class="card-value">153</span>
+      <span class="card-value">{{ promptsEvaluated }}</span>
       <span class="card-value-max">runs</span>
     </div>
     <div class="card-subtitle">since last session</div>
@@ -25,9 +25,52 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
+import { fetchResultsSummaryRequest } from '../lib/resultsApi'
+import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
+import { appStore } from '../stores/appStore'
+
 export default defineComponent({
-  name: 'PromptsEvaluatedCard'
+  name: 'PromptsEvaluatedCard',
+  setup() {
+    const promptsEvaluated = ref<number>(0)
+    const trend = ref<string>("N/A")
+    const userId = appStore.state.user?.id || ''
+
+    const fetchPromptsEvaluated = async () => {
+      if (!userId) return
+      try {
+        const summary = await fetchResultsSummaryRequest(userId)
+        promptsEvaluated.value = summary.promptsEvaluated ?? 0
+
+        // Fetch previous experiment's promptsEvaluated for trend calculation
+        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsPayload = await experimentsRes.json()
+        const experiments = experimentsPayload.experiments || []
+        if (experiments.length > 1) {
+          // Get previous experiment id
+          const prevExperimentId = experiments[1]._id
+          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevPromptIds = prevResults.map(r => r.promptId)
+          const prevCount = new Set(prevPromptIds).size
+          if (typeof summary.promptsEvaluated === 'number' && typeof prevCount === 'number') {
+            const diff = summary.promptsEvaluated - prevCount
+            const percent = prevCount !== 0 ? (diff / prevCount) * 100 : 0
+            trend.value = (percent >= 0 ? '+' : '') + percent.toFixed(1) + '%'
+          }
+        } else {
+          trend.value = 'N/A'
+        }
+      } catch (e) {
+        promptsEvaluated.value = 0
+        trend.value = 'N/A'
+      }
+    }
+
+    onMounted(fetchPromptsEvaluated)
+
+    return { promptsEvaluated, trend }
+  }
 })
 </script>
 
