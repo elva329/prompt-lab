@@ -1470,7 +1470,8 @@ h6 {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
 }
 
-.prompts-page .page-filters-row {
+.prompts-page .page-filters-row,
+.experiments-page .page-filters-row {
   background: transparent;
   border: none;
   border-radius: 0;
@@ -2133,6 +2134,11 @@ h6 {
 
 .experiment-row {
   cursor: pointer;
+  border-bottom: 1px solid rgba(220, 227, 242, 0.6);
+}
+
+.experiment-row:last-child {
+  border-bottom: none;
 }
 
 .experiment-row:hover {
@@ -2159,6 +2165,18 @@ h6 {
 }
 
 .prompts-page .prompt-card-modern:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 34px rgba(66, 78, 110, 0.14);
+}
+
+.experiments-page .experiment-card-modern {
+  border-radius: 24px;
+  border: none;
+  box-shadow: 0 12px 26px rgba(66, 78, 110, 0.11);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.experiments-page .experiment-card-modern:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 34px rgba(66, 78, 110, 0.14);
 }
