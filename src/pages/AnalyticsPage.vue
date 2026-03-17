@@ -156,7 +156,7 @@ export default defineComponent({
 /* ALL ROWS use the same container with consistent gap */
 .card-row-container {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
@@ -164,14 +164,15 @@ export default defineComponent({
 .card-row2-container {
   display: flex;
   width: 100%;
-  gap: 1rem;
+  gap: 1.5rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 /* All cards flex equally */
 .card-row-container > * {
   flex: 1;
-  min-width: 200px;
+  min-width: 250px; /* Prevent cards from getting too small */
 }
 
 /* Card dimensions */
@@ -180,6 +181,7 @@ export default defineComponent({
 }
 
 .card-row2 {
+  height: 379px;
   flex-shrink: 1;
   flex-basis: 0;
 }
@@ -195,36 +197,32 @@ export default defineComponent({
   height: 547px;
 }
 
-/* Force all cards in row 2 to have exactly 379px */
-.card-row2,
-.card-row2 > * {
-  height: 379px !important;
-  min-height: 379px !important;
-  max-height: 379px !important;
-}
-
-/* Force all cards in row 3 to have exactly 547px */
-.card-row3,
-.card-row3 > * {
-  height: 547px !important;
-  min-height: 547px !important;
-  max-height: 547px !important;
-}
-
-/* Force all cards in row 1 to have exactly 164px */
-.card-row1,
-.card-row1 > * {
-  height: 164px !important;
-  min-height: 164px !important;
-  max-height: 164px !important;
-}
-
 /* Responsive adjustments */
+@media screen and (max-width: 1200px) {
+  .card-row-container > .card-row1 {
+    flex-basis: calc(50% - 0.75rem); /* 2 cards per row, accounting for 1.5rem gap */
+  }
+  .card-row2-container > .card-row2,
+  .card-row-container > .card-row3 {
+    flex-basis: 100%; /* Stack cards in row 2 and 3 */
+  }
+}
+
 @media screen and (max-width: 768px) {
-  .card-row-container > * {
+  .card-row-container > *,
+  .card-row2-container > * {
     flex: 1 1 100%;
     width: 100%;
     max-width: 100%;
+    height: auto; /* Let height be determined by content */
+  }
+
+  /* Ensure specific card heights are also auto */
+  .card-row1,
+  .card-row2,
+  .card-row3 {
+    height: auto;
+    min-height: 200px; /* Give cards a minimum height on mobile */
   }
 }
 </style>
