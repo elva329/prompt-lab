@@ -5,45 +5,10 @@
       <span class="response-title">Response Time by Prompt</span>
     </div>
     <div class="response-subtitle">Prompt speed & distribution</div>
-    <div class="response-main">
-      <div class="response-donut">
-        <svg width="80" height="80" viewBox="0 0 80 80">
-          <circle cx="40" cy="40" r="32" fill="none" stroke="#f1f5f9" stroke-width="12" />
-          <circle cx="40" cy="40" r="32" fill="none" stroke="#f87171" stroke-width="12" 
-                  :stroke-dasharray="`${slowPercent} 100`" 
-                  pathLength="100" transform="rotate(-90 40 40)" />
-          <circle cx="40" cy="40" r="32" fill="none" stroke="#fbbf24" stroke-width="12" 
-                  :stroke-dasharray="`${mediumPercent} 100`" 
-                  :stroke-dashoffset="-slowPercent" 
-                  pathLength="100" transform="rotate(-90 40 40)" />
-          <circle cx="40" cy="40" r="32" fill="none" stroke="#38bdf8" stroke-width="12" 
-                  :stroke-dasharray="`${fastPercent} 100`" 
-                  :stroke-dashoffset="-(slowPercent + mediumPercent)" 
-                  pathLength="100" transform="rotate(-90 40 40)" />
-        </svg>
-        <div class="donut-legend">
-          <div class="legend-row"><span class="legend-dot fast"></span>Fast <span class="legend-value">{{ fastPercent }}%</span></div>
-          <div class="legend-row"><span class="legend-dot medium"></span>Medium <span class="legend-value">{{ mediumPercent }}%</span></div>
-          <div class="legend-row"><span class="legend-dot slow"></span>Slow <span class="legend-value">{{ slowPercent }}%</span></div>
-        </div>
-      </div>
-      <div class="response-scores">
-        <div class="scores-title">AVG. RESPONSE TIMES</div>
-        <div v-if="loading" class="loading-state">Loading...</div>
-        <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
-        <div v-else>
-          <div v-for="item in sortedAvgTimes" :key="item.promptId" class="score-row">
-            <span class="score-label">{{ getPromptTitle(item.promptId) }}</span>
-            <div class="score-bar-wrapper">
-              <div class="score-bar" :class="getSpeedClass(item.avg)" :style="{ width: calcBarWidth(item.avg) }"></div>
-            </div>
-            <span class="score-value">{{ item.avg.toFixed(1) }}s</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div v-if="warningMessage" class="response-warning">
-      <span class="warning-icon">⚠️</span> <span class="warning-text">{{ warningMessage }}</span>
+    <div class="chart-container">
+      <div v-if="loading" class="loading-state">Loading...</div>
+      <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
+      <div v-else id="responseTimeChart" style="width: 100%; height: 250px;"></div>
     </div>
   </div>
 </template>
@@ -51,6 +16,9 @@
 <script>
 import { fetchResultsByUserRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
+import * as am5 from "@amcharts/amcharts5";
+import * as am5xy from "@amcharts/amcharts5/xy";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 export default {
   name: 'ResponseTimeByPromptCard',
@@ -58,32 +26,13 @@ export default {
     return {
       avgTimes: [],
       loading: true,
-      warningMessage: '',
-      fastCount: 0,
-      mediumCount: 0,
-      slowCount: 0,
-      totalRuns: 0,
+      _am5Root: null,
     };
   },
   computed: {
     sortedAvgTimes() {
       return [...this.avgTimes].sort((a, b) => a.avg - b.avg);
     },
-    totalPrompts() {
-      return this.avgTimes.length;
-    },
-    fastPercent() {
-      if (this.totalPrompts === 0) return 0;
-      return Math.round((this.fastCount / this.totalPrompts) * 100);
-    },
-    mediumPercent() {
-      if (this.totalPrompts === 0) return 0;
-      return Math.round((this.mediumCount / this.totalPrompts) * 100);
-    },
-    slowPercent() {
-      if (this.totalPrompts === 0) return 0;
-      return 100 - this.fastPercent - this.mediumPercent;
-    }
   },
   async mounted() {
     this.loading = true;
@@ -109,60 +58,101 @@ export default {
         const avg = times.reduce((a, b) => a + b, 0) / times.length;
         return {
           promptId,
+          promptIdLabel: `Prompt ${promptId}`,
           avg: avg / 1000, // ms to s
           count: times.length
         };
       }).filter(item => item.count > 0);
 
       this.avgTimes = avgTimesData;
-      this.totalRuns = results.length;
 
-      // Calculate distribution
-      let fast = 0, medium = 0, slow = 0;
-      avgTimesData.forEach(item => {
-        if (item.avg <= 1.5) fast++;
-        else if (item.avg <= 3) medium++;
-        else slow++;
-      });
-      this.fastCount = fast;
-      this.mediumCount = medium;
-      this.slowCount = slow;
-
-      // Generate warning message
-      if (avgTimesData.length > 1) {
-        const sorted = [...avgTimesData].sort((a, b) => a.avg - b.avg);
-        const fastest = sorted[0];
-        const slowest = sorted[sorted.length - 1];
-        const diff = slowest.avg - fastest.avg;
-        if (diff > 0.5) {
-          const slowestTitle = this.getPromptTitle(slowest.promptId);
-          const fastestTitle = this.getPromptTitle(fastest.promptId);
-          this.warningMessage = `Prompt ${slowestTitle} is the slowest — ${diff.toFixed(1)}s slower than Prompt ${fastestTitle}`;
+      this.loading = false;
+      this.$nextTick(() => {
+        if (this.avgTimes.length > 0) {
+          this.createChart();
         }
-      }
+      });
     } catch (e) {
       console.error("Failed to fetch response times:", e);
       this.avgTimes = [];
+      this.loading = false;
     }
-    this.loading = false;
+  },
+  beforeUnmount() {
+    if (this._am5Root) {
+      this._am5Root.dispose();
+    }
   },
   methods: {
-    getPromptTitle(promptId) {
-      // Per user request, display the promptId directly instead of resolving to a title from the prompts library.
-      // This ensures the data shown directly reflects the 'results' collection from the database.
-      return promptId;
+    createChart() {
+      let root = am5.Root.new("responseTimeChart");
+      this._am5Root = root;
+
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: true,
+        panY: false,
+        wheelX: "panX",
+        wheelY: "zoomX",
+        pinchZoomX: true,
+        paddingLeft: 0,
+      }));
+
+      let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
+      cursor.lineY.set("visible", false);
+
+      let xRenderer = am5xy.AxisRendererX.new(root, { minGridDistance: 30, minorGridEnabled: true });
+      xRenderer.labels.template.setAll({
+        rotation: -45,
+        centerY: am5.p50,
+        centerX: am5.p100,
+        paddingRight: 10,
+        fontSize: '0.8rem'
+      });
+
+      let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        maxDeviation: 0.3,
+        categoryField: "promptIdLabel",
+        renderer: xRenderer,
+        tooltip: am5.Tooltip.new(root, {})
+      }));
+
+      let yRenderer = am5xy.AxisRendererY.new(root, {
+        minGridDistance: 40
+      });
+
+      let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        maxDeviation: 0.3,
+        min: 0,
+        extraMax: 0.1,
+        renderer: yRenderer,
+        numberFormat: "#.0's'"
+      }));
+      yAxis.children.moveValue(am5.Label.new(root, { text: "Avg. Time (s)", rotation: -90, y: am5.p50, centerX: am5.p50 }), 0);
+
+      let series = chart.series.push(am5xy.LineSeries.new(root, {
+        name: "Response Time",
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "avg",
+        categoryXField: "promptIdLabel",
+        tooltip: am5.Tooltip.new(root, {
+          labelText: "{categoryX}: {valueY.formatNumber('#.00')}s"
+        })
+      }));
+      
+      series.strokes.template.setAll({ strokeWidth: 2 });
+      series.bullets.push(() => am5.Bullet.new(root, {
+        sprite: am5.Circle.new(root, { radius: 4, fill: series.get("fill"), stroke: root.interfaceColors.get("background"), strokeWidth: 2 })
+      }));
+
+      xAxis.data.setAll(this.sortedAvgTimes);
+      series.data.setAll(this.sortedAvgTimes);
+
+      series.appear(1000);
+      chart.appear(1000, 100);
     },
-    getSpeedClass(avg) {
-      if (avg <= 1.5) return 'fast';
-      if (avg <= 3) return 'medium';
-      return 'slow';
-    },
-    calcBarWidth(avg) {
-      const max = this.avgTimes.length ? Math.max(...this.avgTimes.map(a => a.avg)) : 1;
-      if (max === 0) return '0%';
-      const percent = (avg / max) * 100;
-      return Math.max(5, percent) + '%';
-    }
   }
 };
 </script>
@@ -204,114 +194,18 @@ export default {
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
-.response-main {
-  display: flex;
-  gap: 2rem;
-  align-items: flex-start;
+.chart-container {
   flex: 1;
-}
-.response-donut {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 120px;
-}
-.donut-legend {
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  width: 100%;
-}
-.legend-row {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.2rem;
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.legend-dot.fast { background: #38bdf8; }
-.legend-dot.medium { background: #fbbf24; }
-.legend-dot.slow { background: #f87171; }
-.legend-value {
-  font-weight: 700;
-  margin-left: auto;
-  color: #334155;
-}
-.response-scores {
-  flex: 1;
-  min-width: 180px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.scores-title {
-  color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  justify-content: center;
+  min-height: 250px;
 }
 .loading-state, .empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
   color: #94a3b8;
   font-size: 0.9rem;
-}
-.score-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-.score-label {
-  width: 100px;
-  color: #334155;
-  font-size: 0.95rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.score-bar-wrapper {
-  flex: 1;
-  height: 8px;
-  background: #f1f5f9;
-  border-radius: 6px;
-  overflow: hidden;
-}
-.score-bar {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.3s ease-in-out;
-}
-.score-bar.fast { background: #38bdf8; }
-.score-bar.medium { background: #fbbf24; }
-.score-bar.slow { background: #f87171; }
-.score-value {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #334155;
-  width: 48px;
-  text-align: right;
-}
-.response-warning {
-  color: #f87171;
-  font-size: 0.95rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: auto;
-  padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
-}
-.warning-icon {
-  font-size: 1.1rem;
-}
-.warning-text {
-  color: #f87171;
 }
 </style>
