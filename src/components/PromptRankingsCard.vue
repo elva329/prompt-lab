@@ -18,7 +18,7 @@
               <span class="prompt-value">{{ item.score }}</span>
             </div>
             <div class="bar-container">
-              <div class="bar-fill top" :style="{ width: item.score + '%' }"></div>
+              <div :id="'chart-' + item.id" class="chart-div"></div>
             </div>
           </div>
         </div>
@@ -31,7 +31,7 @@
               <span class="prompt-value">{{ item.score }}</span>
             </div>
             <div class="bar-container">
-              <div class="bar-fill attention" :style="{ width: item.score + '%' }"></div>
+              <div :id="'chart-' + item.id" class="chart-div"></div>
             </div>
           </div>
         </div>
@@ -42,6 +42,9 @@
 </template>
 
 <script>
+import * as am5 from '@amcharts/amcharts5';
+import * as am5xy from '@amcharts/amcharts5/xy';
+import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { fetchResultsByUserRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
 
@@ -52,6 +55,7 @@ export default {
       topPerformers: [],
       needsAttention: [],
       loading: true,
+      roots: [],
     };
   },
   async mounted() {
@@ -94,6 +98,10 @@ export default {
         .sort((a, b) => b.score - a.score);
 
       this.loading = false;
+
+      this.$nextTick(() => {
+        this.initCharts();
+      });
     } catch (e) {
       console.error("Failed to fetch prompt rankings:", e);
       this.topPerformers = [];
@@ -101,6 +109,83 @@ export default {
       this.loading = false;
     }
   },
+  beforeUnmount() {
+    this.roots.forEach(root => root.dispose());
+  },
+  methods: {
+    initCharts() {
+      this.roots.forEach(root => root.dispose());
+      this.roots = [];
+
+      this.topPerformers.forEach(item => {
+        this.createBarChart(`chart-${item.id}`, item.score, 0x10b981); // Green
+      });
+
+      this.needsAttention.forEach(item => {
+        this.createBarChart(`chart-${item.id}`, item.score, 0xef4444); // Red
+      });
+    },
+    createBarChart(divId, value, colorHex) {
+      let root = am5.Root.new(divId);
+      this.roots.push(root);
+
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "none",
+        wheelY: "none",
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingTop: 0,
+        paddingBottom: 0,
+        layout: root.verticalLayout
+      }));
+
+      let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "category",
+        renderer: am5xy.AxisRendererY.new(root, {
+          minGridDistance: 10,
+          inversed: true
+        })
+      }));
+      yAxis.get("renderer").grid.template.set("forceHidden", true);
+      yAxis.get("renderer").labels.template.set("forceHidden", true);
+      yAxis.data.setAll([{ category: "1" }]);
+
+      let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+        min: 0,
+        max: 100,
+        strictMinMax: true,
+        renderer: am5xy.AxisRendererX.new(root, {})
+      }));
+      xAxis.get("renderer").grid.template.set("forceHidden", true);
+      xAxis.get("renderer").labels.template.set("forceHidden", true);
+
+      let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueXField: "value",
+        categoryYField: "category",
+        fill: am5.color(colorHex),
+        stroke: am5.color(colorHex)
+      }));
+
+      series.columns.template.setAll({
+        height: am5.percent(100),
+        cornerRadiusBR: 3,
+        cornerRadiusTR: 3,
+        cornerRadiusBL: 3,
+        cornerRadiusTL: 3,
+        strokeOpacity: 0
+      });
+
+      series.data.setAll([{ category: "1", value: value }]);
+      series.appear(1000);
+      chart.appear(1000, 100);
+    }
+  }
 };
 </script>
 
@@ -184,12 +269,8 @@ export default {
   border-radius: 3px;
   overflow: hidden;
 }
-.bar-fill {
+.chart-div {
   height: 100%;
-  background-color: #10b981;
-  border-radius: 3px;
-}
-.bar-fill.attention {
-  background-color: #ef4444;
+  width: 100%;
 }
 </style>
