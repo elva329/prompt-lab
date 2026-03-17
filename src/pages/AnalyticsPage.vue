@@ -157,7 +157,7 @@ export default defineComponent({
 .card-row-container {
   display: flex;
   gap: 1.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
@@ -165,7 +165,7 @@ export default defineComponent({
   display: flex;
   width: 100%;
   gap: 1.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 

@@ -65,9 +65,9 @@
 
     <section v-else-if="errorMessage && prompts.length === 0" class="alert alert-danger">{{ errorMessage }}</section>
 
-    <section v-if="filteredPrompts.length > 0" class="row g-3 prompts-grid prompts-scrollable-grid">
-      <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
-        <article class="prompt-card h-100">
+    <section v-if="filteredPrompts.length > 0" class="row g-4 prompts-grid prompts-scrollable-grid">
+      <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-xl-4">
+        <article class="prompt-card prompt-card-modern h-100">
           <div class="card-body d-flex flex-column prompt-card-body">
             <div class="prompt-card-top-row">
               <label class="form-check mb-0 prompt-select-wrap" :aria-label="`Select ${prompt.title}`">

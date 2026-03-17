@@ -38,7 +38,7 @@
 
     <section v-else-if="errorMessage" class="alert alert-danger mb-0">{{ errorMessage }}</section>
 
-    <section v-else-if="experiments.length" class="row g-3">
+    <section v-else-if="experiments.length" class="row g-4">
       <div v-for="experiment in experiments" :key="experiment._id" class="col-md-6 col-xl-4">
         <article class="card border-0 shadow-sm h-100 experiment-row experiment-card-modern" @click="viewExperimentDetails(experiment._id)">
           <div class="card-body d-flex flex-column gap-2">
