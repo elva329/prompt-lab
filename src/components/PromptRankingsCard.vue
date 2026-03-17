@@ -4,74 +4,103 @@
       <span class="rankings-dot"></span>
       <span class="rankings-title">Prompt Rankings</span>
     </div>
-    <div class="rankings-section">
-      <div class="rankings-subtitle top"><span class="rankings-trophy">🏆</span> TOP PERFORMERS</div>
-      <div class="rank-row top">
-        <span class="rank-num top">1</span>
-        <span class="rank-label">Essay Writer</span>
-        <span class="rank-bar top"></span>
-        <span class="rank-score top">88</span>
-      </div>
-      <div class="rank-row top">
-        <span class="rank-num top">2</span>
-        <span class="rank-label">Travel Guide</span>
-        <span class="rank-bar top"></span>
-        <span class="rank-score top">85</span>
-      </div>
-      <div class="rank-row top">
-        <span class="rank-num blue">3</span>
-        <span class="rank-label">Film Critic</span>
-        <span class="rank-bar blue"></span>
-        <span class="rank-score blue">82</span>
-      </div>
-      <div class="rank-row blue">
-        <span class="rank-num blue">4</span>
-        <span class="rank-label">Proofreader</span>
-        <span class="rank-bar blue"></span>
-        <span class="rank-score blue">82</span>
-      </div>
-      <div class="rank-row blue">
-        <span class="rank-num blue">5</span>
-        <span class="rank-label">Movie Critic</span>
-        <span class="rank-bar blue"></span>
-        <span class="rank-score blue">80</span>
-      </div>
-    </div>
-    <hr class="rankings-divider" />
-    <div class="rankings-section">
-      <div class="rankings-subtitle attention"><span class="rankings-warning">⚠️</span> NEEDS ATTENTION</div>
-      <div class="rank-row attention">
-        <span class="rank-num attention">1</span>
-        <span class="rank-label">Unconstrained DAN</span>
-        <span class="rank-bar attention"></span>
-        <span class="rank-score attention">45</span>
-      </div>
-      <div class="rank-row attention">
-        <span class="rank-num attention">2</span>
-        <span class="rank-label">AI Escaping Box</span>
-        <span class="rank-bar attention"></span>
-        <span class="rank-score attention">47</span>
-      </div>
-      <div class="rank-row yellow">
-        <span class="rank-num yellow">3</span>
-        <span class="rank-label">Linux Terminal</span>
-        <span class="rank-bar yellow"></span>
-        <span class="rank-score yellow">53</span>
-      </div>
-      <div class="rank-row yellow">
-        <span class="rank-num yellow">4</span>
-        <span class="rank-label">Drunk Person</span>
-        <span class="rank-bar yellow"></span>
-        <span class="rank-score yellow">55</span>
+    
+    <div class="rankings-body">
+      <div v-if="loading" class="loading-state">Loading...</div>
+      <div v-else-if="!topPerformers.length && !needsAttention.length" class="empty-state">No data available.</div>
+      <div v-else class="rankings-content">
+        
+        <div class="ranking-section" v-if="topPerformers.length > 0">
+          <div class="section-title">TOP PERFORMERS</div>
+          <div v-for="item in topPerformers" :key="item.id" class="ranking-row">
+            <div class="row-header">
+              <span class="prompt-label">{{ item.label }}</span>
+              <span class="prompt-value">{{ item.score }}</span>
+            </div>
+            <div class="bar-container">
+              <div class="bar-fill top" :style="{ width: item.score + '%' }"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ranking-section" v-if="needsAttention.length > 0">
+          <div class="section-title attention">NEEDS ATTENTION</div>
+          <div v-for="item in needsAttention" :key="item.id" class="ranking-row">
+            <div class="row-header">
+              <span class="prompt-label">{{ item.label }}</span>
+              <span class="prompt-value">{{ item.score }}</span>
+            </div>
+            <div class="bar-container">
+              <div class="bar-fill attention" :style="{ width: item.score + '%' }"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-    <div class="rankings-footer">Based on overall quality score across all 153 runs</div>
   </div>
 </template>
 
 <script>
+import { fetchResultsByUserRequest } from '../lib/resultsApi';
+import { appStore } from '../stores/appStore';
+
 export default {
-  name: 'PromptRankingsCard'
+  name: 'PromptRankingsCard',
+  data() {
+    return {
+      topPerformers: [],
+      needsAttention: [],
+      loading: true,
+    };
+  },
+  async mounted() {
+    this.loading = true;
+    try {
+      const userId = appStore.state.user?.id;
+      if (!userId) throw new Error('User not logged in');
+
+      const results = await fetchResultsByUserRequest(userId);
+
+      if (results.length === 0) {
+        this.loading = false;
+        return;
+      }
+
+      const grouped = {};
+      results.forEach(r => {
+        if (!grouped[r.promptId]) grouped[r.promptId] = [];
+        if (typeof r.overallQuality === 'number') grouped[r.promptId].push(r.overallQuality);
+      });
+
+      const processedData = Object.entries(grouped).map(([promptId, scores]) => {
+        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+        return {
+          id: promptId,
+          promptLabel: `Prompt ${promptId}`,
+          label: `Prompt ${promptId}`,
+          score: parseFloat(avg.toFixed(1)),
+        };
+      }).sort((a, b) => b.score - a.score); // Rank from high to low
+
+      // Needs Attention: Score < 60 (Sorted worst first)
+      this.needsAttention = processedData
+        .filter(item => item.score < 60)
+        .sort((a, b) => a.score - b.score);
+
+      // Top Performers: Score >= 60 (Sorted best first)
+      this.topPerformers = processedData
+        .filter(item => item.score >= 60)
+        .sort((a, b) => b.score - a.score);
+
+      this.loading = false;
+    } catch (e) {
+      console.error("Failed to fetch prompt rankings:", e);
+      this.topPerformers = [];
+      this.needsAttention = [];
+      this.loading = false;
+    }
+  },
 };
 </script>
 
@@ -85,20 +114,19 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 0.5rem;
   font-family: 'Inter', sans-serif;
 }
 .rankings-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Inter', sans-serif;
 }
 .rankings-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #a0aec0;
+  background: #a78bfa;
   display: inline-block;
 }
 .rankings-title {
@@ -107,125 +135,61 @@ export default {
   color: #687083;
   font-family: 'Sora', sans-serif;
 }
-.rankings-section {
-  margin-bottom: 0.5rem;
-}
-.rankings-subtitle.top {
-  color: #10b981;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+.rankings-body {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
+  min-height: 200px;
+  overflow-y: auto; /* Allow scrolling if list is long */
 }
-.rankings-trophy {
-  font-size: 1.1rem;
-}
-.rank-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 0.3rem;
-}
-.rank-num {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  color: #10b981;
-  font-size: 1rem;
-  font-weight: 700;
+.loading-state, .empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.rank-num.top { background: #d1fae5; color: #10b981; }
-.rank-num.blue { background: #dbeafe; color: #2563eb; }
-.rank-num.attention { background: #fee2e2; color: #f87171; }
-.rank-num.yellow { background: #fef9c3; color: #fbbf24; }
-.rank-label {
-  width: 140px;
-  color: #334155;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.rank-bar {
-  height: 8px;
-  border-radius: 6px;
-  background: #e5e7eb;
+  color: #94a3b8;
+  font-size: 0.9rem;
   flex: 1;
-  position: relative;
 }
-.rank-bar.top::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 88%;
-  background: #10b981;
-  border-radius: 6px;
-  position: absolute;
-}
-.rank-bar.top:nth-of-type(2)::before { width: 85%; }
-.rank-bar.blue::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 82%;
-  background: #2563eb;
-  border-radius: 6px;
-  position: absolute;
-}
-.rank-bar.blue:nth-of-type(2)::before { width: 80%; }
-.rank-bar.attention::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 45%;
-  background: #f87171;
-  border-radius: 6px;
-  position: absolute;
-}
-.rank-bar.attention:nth-of-type(2)::before { width: 47%; }
-.rank-bar.yellow::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 53%;
-  background: #fbbf24;
-  border-radius: 6px;
-  position: absolute;
-}
-.rank-bar.yellow:nth-of-type(2)::before { width: 55%; }
-.rank-score {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #10b981;
-  width: 32px;
-  text-align: right;
-}
-.rank-score.blue { color: #2563eb; }
-.rank-score.attention { color: #f87171; }
-.rank-score.yellow { color: #fbbf24; }
-.rankings-divider {
-  border: none;
-  border-top: 1px solid #e5e7eb;
-  margin: 0.5rem 0;
-}
-.rankings-subtitle.attention {
-  color: #f87171;
-  font-size: 1rem;
-  font-weight: 700;
+.rankings-content {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
 }
-.rankings-warning {
-  font-size: 1.1rem;
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981; /* Green for Top Performers */
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
 }
-.rankings-footer {
-  color: #a0aec0;
+.section-title.attention {
+  color: #ef4444; /* Red for Needs Attention */
+}
+.ranking-row {
+  margin-bottom: 0.75rem;
+}
+.row-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #334155;
+}
+.bar-container {
+  width: 100%;
+  height: 6px;
+  background-color: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background-color: #10b981;
+  border-radius: 3px;
+}
+.bar-fill.attention {
+  background-color: #ef4444;
 }
 </style>

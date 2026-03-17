@@ -15,15 +15,22 @@
         <p class="metric-value mb-0">{{ value }}</p>
         <span v-if="subValue" class="metric-subvalue">{{ subValue }}</span>
       </div>
-      <p class="metric-trend-label mb-3">{{ trendLabel }}</p>
-      <div v-if="progressValue !== undefined" class="metric-progress">
-        <div class="metric-progress-bar" :style="{ width: progressValue + '%', background: progressGradient }"></div>
+      <div v-if="chartData && chartData.length > 0" :id="uniqueChartId" class="metric-chart" style="height: 60px; width: 100%;"></div>
+      <div v-else>
+        <p class="metric-trend-label mb-3">{{ trendLabel }}</p>
+        <div v-if="progressValue !== undefined" class="metric-progress">
+          <div class="metric-progress-bar" :style="{ width: progressValue + '%', background: progressGradient }"></div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import * as am5 from '@amcharts/amcharts5';
+import * as am5xy from '@amcharts/amcharts5/xy';
+import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
+
 export default {
   name: 'MetricCard',
   props: {
@@ -38,7 +45,71 @@ export default {
     trendUp: { type: Boolean, default: true },
     progressValue: { type: Number },
     progressGradient: { type: String, default: 'linear-gradient(90deg, #3b82f6, #2563eb)' },
+    chartData: { type: Array, default: null }, // Array of objects { date: string, value: number }
+    chartColor: { type: String, default: '#3b82f6' }
   },
+  data() {
+    return {
+      uniqueChartId: 'metric-chart-' + Math.random().toString(36).substr(2, 9),
+      _am5Root: null,
+    };
+  },
+  mounted() {
+    if (this.chartData && this.chartData.length > 0) {
+      this.createChart();
+    }
+  },
+  beforeUnmount() {
+    if (this._am5Root) {
+      this._am5Root.dispose();
+    }
+  },
+  methods: {
+    createChart() {
+      let root = am5.Root.new(this.uniqueChartId);
+      this._am5Root = root;
+      root.setThemes([am5themes_Animated.new(root)]);
+
+      let chart = root.container.children.push(am5xy.XYChart.new(root, {
+        panX: false,
+        panY: false,
+        wheelX: "none",
+        wheelY: "none",
+        paddingLeft: 0,
+        paddingRight: 0,
+        paddingBottom: 0,
+        paddingTop: 10
+      }));
+
+      let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+        categoryField: "date",
+        renderer: am5xy.AxisRendererX.new(root, { minGridDistance: 10, visible: false }),
+        visible: false
+      }));
+
+      let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
+        renderer: am5xy.AxisRendererY.new(root, { visible: false }),
+        visible: false
+      }));
+
+      let series = chart.series.push(am5xy.LineSeries.new(root, {
+        xAxis: xAxis,
+        yAxis: yAxis,
+        valueYField: "value",
+        categoryXField: "date",
+        stroke: am5.color(this.chartColor),
+        strokeWidth: 2
+      }));
+      
+      series.strokes.template.set("tension", 0.5); // Curved lines
+
+      xAxis.data.setAll(this.chartData);
+      series.data.setAll(this.chartData);
+      
+      series.appear(1000);
+      chart.appear(1000, 100);
+    }
+  }
 };
 </script>
 
