@@ -1,10 +1,10 @@
 <template>
-  <div class="quality-card mb-4">
-    <div class="quality-card-inner px-4 py-3">
-      <div class="d-flex align-items-center gap-2 mb-2">
-        <div class="dot bg-teal-400"></div>
-        <h5 class="quality-title mb-0">Quality Score Trend</h5>
-        <span class="quality-subtitle ms-2">
+  <div class="ui-card">
+    <div class="card-header">
+      <div class="card-dot"></div>
+      <div class="card-title-section">
+        <h5 class="card-title">Quality Score Trend</h5>
+        <span class="card-subtitle">
          7-day rolling · 
           {{ trendData.length ?
             (new Date(trendData[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
@@ -12,7 +12,9 @@
              ' ' + new Date(trendData[trendData.length-1].date).getFullYear()) : '' }}
         </span>
       </div>
-      <div class="trend-line-chart mb-3">
+    </div>
+    <div class="card-body">
+      <div class="trend-chart-container">
         <div id="qualityTrendLineChart" style="width:100%;height:210px;"></div>
       </div>
       <div class="trend-stat-row mt-1">
@@ -29,8 +31,8 @@
           <span class="trend-stat-label">Avg: <span style="color:#94a3b8;font-weight:600">{{ avg }}</span></span>
         </div>
       </div>
-    </div>
   </div>
+    </div>
 </template>
 
 <script>
@@ -213,66 +215,37 @@ export default {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css?family=Inter:wght@400;500;600;700;800&display=swap');
-.quality-card {
-  border-radius: 1.5rem;
-  background: rgba(255,255,255,0.90);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  border: 1px solid rgba(255,255,255,0.6);
-  transition: box-shadow 0.2s;
-  min-width: 0;
+.card-header {
+  /* Override alignment for this specific card layout */
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+.card-dot {
+  margin-top: 4px;
+}
+.card-title-section {
+  display: flex;
+  flex-direction: column;
+}
+.card-subtitle {
+  color: var(--color-text-title); /* Uses darker color for subtitle here */
+}
+.trend-chart-container {
   width: 100%;
-  margin-left: 0;
-  margin-right: 0;
-}
-.quality-card:hover {
-  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.14);
-  transform: translateY(-2px);
-}
-.quality-card-inner {
-  padding: 1.2rem 1.5rem 1.2rem 1.5rem;
-  font-family: 'Inter', sans-serif;
-}
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  margin-right: 0.5rem;
-}
-.bg-teal-400 {
-  background: #14b8a6;
-}
-.quality-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #687083;
-  font-family: 'Sora', sans-serif;
-}
-.quality-subtitle {
-  color: #687083;
-  font-size: 0.68rem;
-  font-family: 'Manrope', sans-serif;
-}
-.trend-line-chart {
-  width: 100%;
-  height: 220px;
-  border-radius: 1.2rem;
-  background: none;
-  border: none;
-  overflow: hidden;
-  box-shadow: none;
-  padding: 0.5rem 0.5rem 0 0.5rem;
+  flex: 1;
 }
 .trend-stat-row {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--spacing-xl);
+  margin-top: auto; /* Push to bottom */
+  padding-top: 1rem;
 }
 .trend-stat-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 .trend-stat-dot {
   width: 6px;
@@ -280,9 +253,8 @@ export default {
   border-radius: 50%;
 }
 .trend-stat-label {
-  color: #687083;
-  font-size: 0.68rem;
-  font-weight: 700;
-  font-family: 'Manrope', sans-serif;
+  color: var(--color-text-title);
+  font-size: var(--font-size-subtitle);
+  font-weight: 600;
 }
 </style>

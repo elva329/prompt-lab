@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import { router } from './router';
 import './styles.css';
+import './design-system.css'
 
 // Send logs to parent frame (like a preview system)
 function postToParent(level: string, ...args: unknown[]): void {

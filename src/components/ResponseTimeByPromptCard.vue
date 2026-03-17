@@ -1,11 +1,11 @@
 <template>
-  <div class="response-time-card">
-    <div class="response-header">
-      <span class="response-dot"></span>
-      <span class="response-title">Response Time by Prompt</span>
+  <div class="ui-card">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Response Time by Prompt</span>
     </div>
-    <div class="response-subtitle">Prompt speed & distribution</div>
-    <div class="chart-container">
+    <div class="card-subtitle">Prompt speed & distribution</div>
+    <div class="card-body">
       <div v-if="loading" class="loading-state">Loading...</div>
       <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
       <div v-else id="responseTimeChart" style="width: 100%; height: 250px;"></div>
@@ -158,43 +158,48 @@ export default {
 </script>
 
 <style scoped>
-.response-time-card {
+.ui-card {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 1.5rem;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   font-family: 'Inter', sans-serif;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
-.response-header {
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-.response-dot {
+.card-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #38bdf8;
+  background: #38bdf8; /* Standardized primary dot color */
   display: inline-block;
 }
-.response-title {
+.card-title {
   font-size: 0.8rem;
   font-weight: 700;
   color: #687083;
   font-family: 'Sora', sans-serif;
 }
-.response-subtitle {
+.card-subtitle {
   color: #a0aec0;
   font-size: 0.75rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
-.chart-container {
+.card-body {
   flex: 1;
   display: flex;
   align-items: center;

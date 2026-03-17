@@ -1,14 +1,14 @@
 <template>
-  <div class="quality-summary-card">
-    <div class="summary-header">
-      <span class="summary-dot"></span>
-      <span class="summary-title">Quality Summary</span>
+  <div class="ui-card">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Quality Summary</span>
     </div>
-    <div class="summary-subtitle">Pass rate & dimension scores</div>
-    <div class="summary-main">
+    <div class="card-subtitle">Pass rate & dimension scores</div>
+    <div class="card-body">
       <div class="summary-donut">
         <div id="qualitySummaryPieChart" class="pie-chart-center-fit">
-          <span v-if="passRate + borderlineRate + failRate === 0" style="color:#64748b;font-size:0.7rem;">No Data</span>
+          <span v-if="passRate + borderlineRate + failRate === 0" style="color:#64748b;font-size:0.75rem;">No Data</span>
         </div>
       </div>
     </div>
@@ -180,7 +180,7 @@ export default {
           
           // Style the legend labels
           legend.labels.template.setAll({
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '600',
             fill: am5.color(0x334155),
             textAlign: 'left',
@@ -190,7 +190,7 @@ export default {
           
           // Style the value labels (percentages)
           legend.valueLabels.template.setAll({
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '700',
             fill: am5.color(0x334155),
             textAlign: 'right',
@@ -288,7 +288,7 @@ export default {
           }));
           
           legend.labels.template.setAll({
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '600',
             fill: am5.color(0x334155),
             textAlign: 'left',
@@ -297,7 +297,7 @@ export default {
           });
           
           legend.valueLabels.template.setAll({
-            fontSize: 11,
+            fontSize: 12,
             fontWeight: '700',
             fill: am5.color(0x334155),
             textAlign: 'right',
@@ -334,51 +334,8 @@ export default {
 </script>
 
 <style scoped>
-.quality-summary-card {
-  background: #fff;
-  border-radius: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1rem 1.5rem 1.5rem 1.5rem;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* Reduced from 1.2rem to 0.5rem */
-  font-family: 'Inter', sans-serif;
-}
-.summary-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: 'Inter', sans-serif;
-}
-.summary-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #a78bfa;
-  display: inline-block;
-}
-.summary-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #687083;
-  font-family: 'Sora', sans-serif;
-}
-.summary-subtitle {
-  color: #a0aec0;
-  font-size: 0.68rem;
-  font-weight: 700;
-  margin-bottom: -0.2rem; /* Negative margin to pull chart up closer */
-}
-.summary-main {
-  display: flex;
-  gap: 2rem;
-  align-items: center;
-  justify-content: center;
-  min-height: 280px;
-  flex: 1;
-  margin-top: -0.3rem; /* Negative margin to reduce space above chart */
+.card-subtitle {
+  margin-bottom: 0;
 }
 .summary-donut {
   display: flex;
@@ -393,130 +350,11 @@ export default {
   width: 100%;
   height: 100%;
   min-width: 240px;
-  min-height: 280px;
   max-width: 320px;
   max-height: 340px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
-}
-.donut-legend {
-  margin-top: 0.5rem;
-  font-size: 0.68rem;
-}
-.legend-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 0.2rem;
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.legend-dot.pass { background: #2563eb; }
-.legend-dot.borderline { background: #fbbf24; }
-.legend-dot.fail { background: #f87171; }
-.legend-value {
-  font-weight: 700;
-  margin-left: 0.5rem;
-  color: #334155;
-  font-size: 0.68rem;
-}
-.summary-scores {
-  flex: 1;
-  min-width: 180px;
-}
-.scores-title {
-  color: #64748b;
-  font-size: 0.62rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-.score-row {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-}
-.score-label {
-  width: 100px;
-  color: #334155;
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-.score-bar {
-  height: 8px;
-  border-radius: 6px;
-  background: #e5e7eb;
-  flex: 1;
-  position: relative;
-}
-.score-bar.clarity::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 72%;
-  background: #2563eb;
-  border-radius: 6px;
-  position: absolute;
-}
-.score-bar.coherence::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 69%;
-  background: #a78bfa;
-  border-radius: 6px;
-  position: absolute;
-}
-.score-bar.overall::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 67%;
-  background: #38bdf8;
-  border-radius: 6px;
-  position: absolute;
-}
-.score-bar.completeness::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 61%;
-  background: #14b8a6;
-  border-radius: 6px;
-  position: absolute;
-}
-.score-bar.relevance::before {
-  content: '';
-  display: block;
-  height: 8px;
-  width: 58%;
-  background: #fbbf24;
-  border-radius: 6px;
-  position: absolute;
-}
-.score-value {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #334155;
-  width: 32px;
-  text-align: right;
-}
-.summary-warning {
-  color: #fbbf24;
-  font-size: 0.68rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-}
-.warning-icon {
-  font-size: 1.1rem;
-}
-.warning-text {
-  color: #fbbf24;
 }
 </style>

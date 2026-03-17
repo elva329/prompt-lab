@@ -1,14 +1,14 @@
 <template>
-  <div class="prompt-rankings-card">
-    <div class="rankings-header">
-      <span class="rankings-dot"></span>
-      <span class="rankings-title">Prompt Rankings</span>
+  <div class="ui-card">
+    <div class="card-header">
+      <span class="card-dot"></span>
+      <span class="card-title">Prompt Rankings</span>
     </div>
     
-    <div class="rankings-body">
+    <div class="card-body">
       <div v-if="loading" class="loading-state">Loading...</div>
       <div v-else-if="!topPerformers.length && !needsAttention.length" class="empty-state">No data available.</div>
-      <div v-else class="rankings-content">
+      <div v-else class="card-content">
         
         <div class="ranking-section" v-if="topPerformers.length > 0">
           <div class="section-title">TOP PERFORMERS</div>
@@ -190,37 +190,42 @@ export default {
 </script>
 
 <style scoped>
-.prompt-rankings-card {
+.ui-card {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  padding: 1.5rem;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   font-family: 'Inter', sans-serif;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
-.rankings-header {
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-.rankings-dot {
+.card-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #a78bfa;
+  background: #38bdf8; /* Standardized primary dot color */
   display: inline-block;
 }
-.rankings-title {
+.card-title {
   font-size: 0.8rem;
   font-weight: 700;
   color: #687083;
   font-family: 'Sora', sans-serif;
 }
-.rankings-body {
+.card-body {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -235,7 +240,7 @@ export default {
   font-size: 0.9rem;
   flex: 1;
 }
-.rankings-content {
+.card-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
