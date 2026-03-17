@@ -102,13 +102,11 @@ export default defineComponent({
 }
 .icon-bg {
   background: #fff;
-  border-radius: 12px;
   width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(177,138,255,0.08);
 }
 .trend-badge {
   display: flex;
