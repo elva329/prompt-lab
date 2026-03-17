@@ -528,9 +528,7 @@ onMounted(async () => {
   border: none;
   transition: box-shadow 0.2s, transform 0.2s;
   display: flex;
-  height: 320px; /* Fixed height to enable internal scrolling */
   flex-direction: column;
-  overflow: hidden;
 }
 
 .prompt-card:hover {
@@ -541,7 +539,7 @@ onMounted(async () => {
 .prompt-card-body {
   padding: var(--spacing-lg);
   gap: var(--spacing-sm);
-  flex: 1;
+  flex: 1; /* Allow body to grow */
 }
 
 .prompt-card-top-row {
@@ -562,19 +560,9 @@ onMounted(async () => {
   font-family: var(--font-family-base);
   font-size: 0.9rem;
   line-height: 1.6;
-  flex: 1; /* Take available space */
-  overflow-y: auto; /* Enable scrolling */
-  min-height: 0; /* Fix for flex scrolling */
   opacity: 0.85;
-}
-
-.prompt-badge-category {
-  background: #f0f9ff;
-  color: #0369a1;
-  font-weight: 600;
-  font-size: 0.7rem;
-  padding: 0.35em 0.65em;
-  border-radius: 6px;
+  max-height: 140px; /* Constrain height to enable scrolling */
+  overflow-y: auto; /* Enable scrolling for long content */
 }
 
 .prompt-card-footer {

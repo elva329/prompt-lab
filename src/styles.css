@@ -2286,7 +2286,8 @@ h6 {
   max-width: 100%;
 }
 
-.prompts-page .prompt-select-wrap {
+.prompts-page .prompt-select-wrap,
+.favorites-page .prompt-select-wrap {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -2300,7 +2301,8 @@ h6 {
   margin: 0;
 }
 
-.prompts-page .prompt-select-wrap .form-check-input {
+.prompts-page .prompt-select-wrap .form-check-input,
+.favorites-page .prompt-select-wrap .form-check-input {
   margin: 0;
   width: 1.05em;
   height: 1.05em;
@@ -2323,7 +2325,8 @@ h6 {
   overflow: hidden;
 }
 
-.prompts-page .prompt-select-wrap .form-check-input:checked {
+.prompts-page .prompt-select-wrap .form-check-input:checked,
+.favorites-page .prompt-select-wrap .form-check-input:checked {
   background-color: #7a61dc;
   border-color: #7a61dc;
   box-shadow: 0 0 0 1.5px #e3eaff;
@@ -2331,7 +2334,8 @@ h6 {
   color: transparent;
 }
 
-.prompts-page .prompt-select-wrap .form-check-input:after {
+.prompts-page .prompt-select-wrap .form-check-input:after,
+.favorites-page .prompt-select-wrap .form-check-input:after {
   content: '';
   display: block;
   position: absolute;
@@ -2346,12 +2350,14 @@ h6 {
   transition: opacity 0.18s, transform 0.18s;
 }
 
-.prompts-page .prompt-select-wrap .form-check-input:checked:after {
+.prompts-page .prompt-select-wrap .form-check-input:checked:after,
+.favorites-page .prompt-select-wrap .form-check-input:checked:after {
   opacity: 1;
   transform: scale(1) rotate(45deg);
 }
 
-.prompts-page .prompt-select-wrap .form-check-label {
+.prompts-page .prompt-select-wrap .form-check-label,
+.favorites-page .prompt-select-wrap .form-check-label {
   color: #455674;
   font-weight: 700;
   font-size: 0.76rem;

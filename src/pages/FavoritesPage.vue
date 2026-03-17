@@ -19,125 +19,107 @@
       </div>
     </div>
 
-    <div class="page-content-scrollable">
-      <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row">
+    <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row mb-4">
       <div>
-        <h1 class="h5 fw-bold mb-1">Favorites</h1>
-        <p class="text-secondary mb-0">Your saved prompts for quick access.</p>
+        <h1 class="h3 fw-bold mb-1">Your Favorites</h1>
+        <p class="text-secondary mb-0 small">Access and manage your saved prompts.</p>
       </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-outline-secondary" @click="openCreateModal">
-          <i class="bi bi-plus-lg me-1"></i>
-          New Prompt
-        </button>
-        <button class="btn btn-outline-primary" @click="router.push('/prompts')">
-          <i class="bi bi-search me-1"></i>
-          Browse Prompts
+      <div class="d-flex align-items-center gap-2">
+        <span class="small text-secondary" v-if="selectedPromptIds.length">Selected: {{ selectedPromptIds.length }}/3</span>
+        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0" @click="goToTestPrompt">
+          Test Prompts
         </button>
       </div>
     </section>
 
-    <section v-if="isLoading" class="text-center py-5">
+    <div v-if="isLoading" class="loading-state py-5">
       <div class="spinner-border text-primary" role="status"></div>
-      <p class="text-secondary mt-2 mb-0">Loading favorites...</p>
-    </section>
+      <p class="text-secondary mt-2">Loading favorites...</p>
+    </div>
 
-    <section v-else-if="errorMessage" class="alert alert-danger mb-0">{{ errorMessage }}</section>
+    <div v-else-if="favorites.length === 0" class="empty-state-wrapper">
+      <div class="empty-icon mb-3">
+        <i class="bi bi-heart"></i>
+      </div>
+      <h3 class="h5 fw-bold text-secondary mb-2">No favorites yet</h3>
+      <p class="text-muted small mb-4" style="max-width: 300px;">Mark prompts as favorites in the library to see them here.</p>
+      <RouterLink to="/prompts" class="btn btn-primary px-4">Browse Prompts</RouterLink>
+    </div>
 
-    <section v-else-if="favoritePrompts.length" class="row g-3">
-      <div v-for="prompt in favoritePrompts" :key="prompt.promptId" class="col-md-6 col-xl-4">
-        <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern favorite-card-modern">
-          <div class="card-body d-flex flex-column gap-2">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-              <h2 class="h6 fw-semibold mb-0">{{ prompt.title }}</h2>
-              <span class="badge prompt-badge-category">{{ prompt.category }}</span>
+    <section v-else class="row g-2 prompts-grid prompts-scrollable-grid">
+      <div v-for="fav in favorites" :key="fav.promptId" class="col-md-6 col-lg-4">
+        <article class="prompt-card h-100">
+          <div class="card-body d-flex flex-column prompt-card-body">
+            <div class="prompt-card-top-row">
+              <label class="form-check mb-0 prompt-select-wrap" :aria-label="`Select ${fav.title}`">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  :checked="isSelected(fav.promptId)"
+                  @change="toggleSelection(fav.promptId)"
+                >
+              </label>
+              <span class="badge prompt-badge-category ms-auto">{{ fav.category || 'General' }}</span>
             </div>
 
-            <p class="prompt-content-preview mb-0" style="border-radius: 14px;">{{ prompt.promptText }}</p>
+            <h2 class="h6 fw-semibold mb-0 prompt-title">{{ fav.title }}</h2>
 
-            <div class="mt-auto pt-2 border-top d-flex justify-content-end align-items-center small text-secondary">
-              <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" @click="openEditModal(prompt)">
-                  <i class="bi bi-pencil-square me-1"></i>
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  class="prompt-favorite-btn"
-                  :aria-label="'Remove from favorites'"
-                  @click="removeFavorite(prompt.promptId)"
-                  style="background: none; border: none; box-shadow: none; padding: 0;"
-                >
-                  <i class="bi" :class="'bi-heart-fill text-danger'" style="font-size: 1.25rem;"></i>
-                </button>
-              </div>
+            <p class="prompt-content-preview mb-0">{{ fav.promptText }}</p>
+
+            <div class="prompt-card-footer mt-auto">
+              <button class="prompt-action-btn" title="Edit Prompt" @click="handleEdit(fav)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="prompt-action-btn text-danger" title="Remove Favorite" @click="handleRemoveFavorite(fav.promptId)">
+                <i class="bi bi-trash"></i>
+              </button>
             </div>
           </div>
         </article>
       </div>
     </section>
 
-    <section v-else class="card border border-secondary-subtle border-dashed">
-      <div class="card-body text-center text-secondary py-5">
-        No favorites yet. Go to Prompt Library and click the heart icon to save prompts.
-      </div>
-    </section>
-    </div>
-
-    <div v-if="editingPrompt" class="modal-overlay p-3">
-      <div class="card border-0 shadow-lg w-100 modal-card">
-        <div class="card-body p-4">
-          <h2 class="h4 fw-bold mb-3">Edit Favorite Prompt</h2>
-          <div class="vstack gap-3">
-            <div>
-              <label class="form-label">Title</label>
-              <input v-model.trim="editForm.title" type="text" class="form-control" />
-            </div>
-            <div>
-              <label class="form-label">Category</label>
-              <input v-model.trim="editForm.category" type="text" class="form-control" />
-            </div>
-            <div>
-              <label class="form-label">Prompt Text</label>
-              <textarea v-model="editForm.promptText" class="form-control" rows="6"></textarea>
-            </div>
-          </div>
-          <div class="d-flex justify-content-end gap-2 mt-4">
-            <button class="btn btn-outline-secondary" :disabled="isSaving" @click="closeEditModal">Cancel</button>
-            <button class="btn btn-primary" :disabled="isSaving" @click="savePromptEdits">
-              <span v-if="isSaving" class="spinner-border spinner-border-sm me-2" role="status"></span>
-              Save Changes
-            </button>
-          </div>
+    <!-- Edit Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
+      <div class="modal-card p-4" style="width: 500px; max-width: 90vw;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h5 mb-0 fw-bold">Edit Favorite</h3>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeEditModal"></button>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Title</label>
+          <input v-model="editForm.title" class="form-control" placeholder="Prompt Title" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Category</label>
+          <input v-model="editForm.category" class="form-control" placeholder="Category (e.g. Technology)" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Prompt Content</label>
+          <textarea v-model="editForm.promptText" class="form-control prompt-textarea" rows="6"></textarea>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button class="btn btn-outline-secondary btn-sm" @click="closeEditModal">Cancel</button>
+          <button class="btn btn-primary btn-sm" @click="saveEdit" :disabled="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
       </div>
     </div>
 
-    <div v-if="showCreateModal" class="modal-overlay p-3">
-      <div class="card border-0 shadow-lg w-100 modal-card">
-        <div class="card-body p-4">
-          <h2 class="h4 fw-bold mb-3">Create New Prompt</h2>
-          <div class="vstack gap-3">
-            <div>
-              <label class="form-label">Title</label>
-              <input v-model.trim="createForm.title" type="text" class="form-control" placeholder="Enter prompt title" />
-            </div>
-            <div>
-              <label class="form-label">Category</label>
-              <input v-model.trim="createForm.category" type="text" class="form-control" placeholder="e.g., writing, programming, business" />
-            </div>
-            <div>
-              <label class="form-label">Prompt Text</label>
-              <textarea v-model="createForm.promptText" class="form-control" rows="6" placeholder="Enter your prompt text..."></textarea>
-            </div>
-          </div>
-          <div class="d-flex justify-content-end gap-2 mt-4">
-            <button class="btn btn-outline-secondary" :disabled="isCreating" @click="closeCreateModal">Cancel</button>
-            <button class="btn btn-primary" :disabled="isCreating" @click="createNewPrompt">
-              <span v-if="isCreating" class="spinner-border spinner-border-sm me-2" role="status"></span>
-              Create & Add to Favorites
-            </button>
-          </div>
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="cancelDelete">
+      <div class="modal-card p-4" style="width: 400px; max-width: 90vw;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h5 mb-0 fw-bold">Remove Favorite</h3>
+          <button type="button" class="btn-close" aria-label="Close" @click="cancelDelete"></button>
+        </div>
+        <p class="text-secondary mb-4">Are you sure you want to remove this prompt from your favorites?</p>
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-outline-secondary btn-sm" @click="cancelDelete">Cancel</button>
+          <button class="btn btn-primary btn-sm" @click="confirmDelete" :disabled="isDeleting">
+            {{ isDeleting ? 'Removing...' : 'Remove' }}
+          </button>
         </div>
       </div>
     </div>
@@ -145,45 +127,39 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { RouterLink, useRoute, useRouter } from 'vue-router';
-
-import {
-  addOrUpdateFavorite,
-  fetchUserFavorites,
-  type FavoritePromptWithMerged,
-  removeFavorite as removeFavoriteApi,
-} from '../lib/favoritesApi';
-import { createPrompt } from '../lib/promptsApi';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute, RouterLink } from 'vue-router';
 import { appStore } from '../stores/appStore';
+import { fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
 
+// Define interface matching expected data
+interface FavoritePrompt {
+  promptId: number;
+  title: string;
+  promptText: string;
+  category: string;
+}
+
+const favorites = ref<FavoritePrompt[]>([]);
+const selectedPromptIds = ref<number[]>([]);
+const showEditModal = ref(false);
+const isSaving = ref(false);
+const editingPrompt = ref<FavoritePrompt | null>(null);
+const editForm = ref({ title: '', promptText: '', category: '' });
+const showDeleteModal = ref(false);
+const deletingPromptId = ref<number | null>(null);
+const isDeleting = ref(false);
+
+const isLoading = ref(true);
 const router = useRouter();
 const route = useRoute();
 
-const isLoading = ref(false);
-const errorMessage = ref('');
-const favoritePrompts = ref<FavoritePromptWithMerged[]>([]);
-const editingPrompt = ref<FavoritePromptWithMerged | null>(null);
-const isSaving = ref(false);
-const editForm = ref({
-  title: '',
-  category: '',
-  promptText: '',
-});
-const showCreateModal = ref(false);
-const isCreating = ref(false);
-const createForm = ref({
-  title: '',
-  category: '',
-  promptText: '',
-});
-
- const navItems = [
-      { name: 'Analytics', path: '/analytics' },
-      { name: 'Prompt Library', path: '/prompts' },
-      { name: 'Favorites', path: '/favorites' },
-      { name: 'Experiments', path: '/experiments' }
-    ]
+const navItems = [
+  { name: 'Analytics', path: '/analytics' },
+  { name: 'Prompt Library', path: '/prompts' },
+  { name: 'Favorites', path: '/favorites' },
+  { name: 'Experiments', path: '/experiments' }
+];
 
 function isNavItemActive(path: string): boolean {
   if (path === '/experiments') {
@@ -197,149 +173,119 @@ function handleLogout(): void {
   router.push('/');
 }
 
-async function loadFavorites(): Promise<void> {
+async function loadFavorites() {
   const userId = appStore.state.user?.id;
   if (!userId) {
-    errorMessage.value = 'Please log in to view favorites.';
+    isLoading.value = false;
     return;
   }
-
+  
   isLoading.value = true;
-  errorMessage.value = '';
-
   try {
     const response = await fetchUserFavorites(userId);
-    favoritePrompts.value = response.favorites;
+    favorites.value = response.favorites; 
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : 'Failed to load favorites.';
+    console.error('Failed to load favorites', error);
+    appStore.showToast('Failed to load favorites', 'danger');
   } finally {
     isLoading.value = false;
   }
 }
 
-async function removeFavorite(promptId: number): Promise<void> {
+function handleRemoveFavorite(promptId: number) {
+  deletingPromptId.value = promptId;
+  showDeleteModal.value = true;
+}
+
+async function confirmDelete() {
   const userId = appStore.state.user?.id;
-  if (!userId) {
-    appStore.showToast('Please log in to remove favorites.', 'warning');
-    return;
-  }
+  if (!userId || deletingPromptId.value === null) return;
 
+  isDeleting.value = true;
   try {
-    await removeFavoriteApi(userId, promptId);
-    favoritePrompts.value = favoritePrompts.value.filter((entry) => entry.promptId !== promptId);
-    appStore.showToast('Removed from favorites.', 'info');
+    await removeFavorite(userId, deletingPromptId.value);
+    favorites.value = favorites.value.filter(f => f.promptId !== deletingPromptId.value);
+    selectedPromptIds.value = selectedPromptIds.value.filter(id => id !== deletingPromptId.value);
+    appStore.showToast('Removed from favorites', 'info');
+    showDeleteModal.value = false;
   } catch (error) {
-    appStore.showToast(error instanceof Error ? error.message : 'Failed to remove favorite.', 'danger');
+    appStore.showToast('Failed to remove favorite', 'danger');
+  } finally {
+    isDeleting.value = false;
+    deletingPromptId.value = null;
   }
 }
 
-function openEditModal(prompt: FavoritePromptWithMerged): void {
-  editingPrompt.value = prompt;
-  editForm.value = {
-    title: prompt.title,
-    category: prompt.category,
-    promptText: prompt.promptText,
-  };
+function cancelDelete() {
+  showDeleteModal.value = false;
+  deletingPromptId.value = null;
 }
 
-function closeEditModal(): void {
+function isSelected(id: number) {
+  return selectedPromptIds.value.includes(id);
+}
+
+function toggleSelection(id: number) {
+  if (isSelected(id)) {
+    selectedPromptIds.value = selectedPromptIds.value.filter(i => i !== id);
+  } else {
+    if (selectedPromptIds.value.length >= 3) {
+      appStore.showToast('You can select up to 3 prompts.', 'warning');
+      return;
+    }
+    selectedPromptIds.value.push(id);
+  }
+}
+
+function goToTestPrompt() {
+  if (selectedPromptIds.value.length === 0) return;
+  router.push({
+    name: 'experiment-runner',
+    params: { id: 'new' },
+    query: { prompts: selectedPromptIds.value.join(',') },
+  });
+}
+
+function closeEditModal() {
+  showEditModal.value = false;
   editingPrompt.value = null;
 }
 
-function openCreateModal(): void {
-  showCreateModal.value = true;
-  createForm.value = {
-    title: '',
-    category: '',
-    promptText: '',
+function handleEdit(fav: FavoritePrompt) {
+  editingPrompt.value = fav;
+  editForm.value = {
+    title: fav.title,
+    promptText: fav.promptText,
+    category: fav.category
   };
+  showEditModal.value = true;
 }
 
-function closeCreateModal(): void {
-  showCreateModal.value = false;
-}
-
-async function createNewPrompt(): Promise<void> {
-  const userId = appStore.state.user?.id;
-  if (!userId) {
-    appStore.showToast('Please log in to create prompts.', 'warning');
-    return;
-  }
-
-  if (!createForm.value.title.trim() || !createForm.value.promptText.trim() || !createForm.value.category.trim()) {
-    appStore.showToast('Please fill in all fields.', 'warning');
-    return;
-  }
-
-  isCreating.value = true;
-
-  try {
-    const response = await createPrompt({
-      title: createForm.value.title,
-      promptText: createForm.value.promptText,
-      category: createForm.value.category,
-      userId,
-    });
-
-    await addOrUpdateFavorite(userId, response.prompt.promptId);
-
-    await loadFavorites();
-
-    closeCreateModal();
-    appStore.showToast('Prompt created and added to favorites!', 'success');
-  } catch (error) {
-    appStore.showToast(error instanceof Error ? error.message : 'Failed to create prompt.', 'danger');
-  } finally {
-    isCreating.value = false;
-  }
-}
-
-async function savePromptEdits(): Promise<void> {
-  if (!editingPrompt.value) {
-    return;
-  }
-
-  const userId = appStore.state.user?.id;
-  if (!userId) {
-    appStore.showToast('Please log in to edit favorites.', 'warning');
-    return;
-  }
-
-  if (!editForm.value.title.trim() || !editForm.value.promptText.trim() || !editForm.value.category.trim()) {
-    appStore.showToast('Please fill in title, category, and prompt text.', 'warning');
-    return;
-  }
-
+async function saveEdit() {
+  if (!editingPrompt.value) return;
   isSaving.value = true;
-
   try {
-    await addOrUpdateFavorite(userId, editingPrompt.value.sourcePromptId, {
-      customTitle: editForm.value.title,
-      customCategory: editForm.value.category,
-      customPromptText: editForm.value.promptText,
-    });
-
-    favoritePrompts.value = favoritePrompts.value.map((entry) => {
-      if (entry.promptId !== editingPrompt.value!.promptId) {
-        return entry;
-      }
-
-      return {
-        ...entry,
-        title: editForm.value.title,
-        category: editForm.value.category,
-        promptText: editForm.value.promptText,
-        customTitle: editForm.value.title,
-        customCategory: editForm.value.category,
-        customPromptText: editForm.value.promptText,
-        updatedAt: new Date().toISOString(),
-      };
-    });
-
-    closeEditModal();
-    appStore.showToast('Favorite prompt updated.', 'success');
+    const userId = appStore.state.user?.id;
+    if (userId) {
+      const response = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          sourcePromptId: editingPrompt.value.promptId,
+          customTitle: editForm.value.title,
+          customCategory: editForm.value.category,
+          customPromptText: editForm.value.promptText
+        })
+      });
+      if (!response.ok) throw new Error('Failed to update favorite');
+      // Refresh list
+      await loadFavorites();
+      closeEditModal();
+      appStore.showToast('Favorite updated successfully', 'success');
+    }
   } catch (error) {
-    appStore.showToast(error instanceof Error ? error.message : 'Failed to update prompt.', 'danger');
+    appStore.showToast('Failed to update favorite', 'danger');
   } finally {
     isSaving.value = false;
   }
@@ -349,3 +295,93 @@ onMounted(() => {
   loadFavorites();
 });
 </script>
+
+<style scoped>
+.favorites-page {
+  padding: var(--spacing-xl);
+}
+
+/* Prompt Card Styles - Consistent with PromptsPage */
+.prompt-card {
+  background: var(--color-bg-card);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  border: none;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.prompt-card-body {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  flex: 1; /* Allow body to grow */
+}
+
+.prompt-card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.prompt-title {
+  font-family: var(--font-family-title);
+  color: var(--color-text-title);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.prompt-content-preview {
+  color: var(--color-text-body);
+  font-family: var(--font-family-base);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  max-height: 140px; /* Constrain height to enable scrolling */
+  overflow-y: auto; /* Enable scrolling for long content */
+}
+
+.prompt-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  margin-top: auto;
+  border-top: 1px solid var(--color-bg-bar);
+}
+
+.prompt-action-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+  color: var(--color-text-body);
+  font-size: 1.1rem;
+}
+.prompt-action-btn:hover {
+  transform: scale(1.1);
+}
+
+.empty-state-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px; /* Ensure vertical centering */
+  text-align: center;
+  padding-bottom: 4rem; /* Visual balance */
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: #e2e8f0;
+  line-height: 1;
+}
+</style>
