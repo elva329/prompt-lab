@@ -2209,7 +2209,21 @@ h6 {
   color: #2d3f69;
 }
 
-.prompts-page, .prompt-content-preview {
+.prompts-page.page-surface {
+  font-family: "Manrope", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #4c5a78;
+  padding: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.favorites-page.page-surface {
+  padding: 1.5rem;
+}
+
+.prompt-content-preview {
   font-family: "Manrope", sans-serif;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -2218,8 +2232,6 @@ h6 {
   border-radius: 14px;
   padding: 0.75rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  overflow-y: auto;
-  overflow-x: hidden;
   white-space: pre-wrap;
 }
 
@@ -2498,8 +2510,7 @@ h6 {
   }
 
   .prompts-grid .prompt-card {
-    width: 100%;
-    min-height: 300px;
+    height: 100%;
   }
 
   .prompts-grid .prompt-card .card-body {

@@ -46,7 +46,7 @@
       <RouterLink to="/prompts" class="btn btn-primary px-4">Browse Prompts</RouterLink>
     </div>
 
-    <section v-else class="row g-2 prompts-grid prompts-scrollable-grid">
+    <section v-else class="row g-3 prompts-grid prompts-scrollable-grid">
       <div v-for="fav in favorites" :key="fav.promptId" class="col-md-6 col-lg-4">
         <article class="prompt-card h-100">
           <div class="card-body d-flex flex-column prompt-card-body">
