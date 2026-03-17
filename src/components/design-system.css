@@ -1,0 +1,103 @@
+:root {
+  /* Colors */
+  --color-primary: #38bdf8;
+  --color-text-title: #687083;
+  --color-text-subtitle: #a0aec0;
+  --color-text-body: #334155;
+  --color-text-muted: #94a3b8;
+  
+  --color-bg-card: #ffffff;
+  --color-bg-bar: #f1f5f9;
+  
+  --color-accent: #a78bfa;
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #fbbf24;
+  --color-danger: #ef4444;
+  --color-info: #2563eb;
+
+  /* Typography */
+  --font-family-base: 'Inter', sans-serif;
+  --font-family-title: 'Sora', sans-serif;
+  
+  --font-size-title: 0.8rem;
+  --font-size-subtitle: 0.75rem;
+  --font-size-body: 0.9rem;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+
+  /* Borders & Shadows */
+  --border-radius-card: 1.2rem;
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Standard Card Component Styles */
+.ui-card {
+  background: var(--color-bg-card);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  padding: var(--spacing-xl);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  font-family: var(--font-family-base);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: var(--font-size-title);
+  font-weight: 700;
+  color: var(--color-text-title);
+  font-family: var(--font-family-title);
+  margin: 0;
+}
+
+.card-subtitle {
+  color: var(--color-text-subtitle);
+  font-size: var(--font-size-subtitle);
+  font-weight: 500;
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-body);
+  flex: 1;
+}

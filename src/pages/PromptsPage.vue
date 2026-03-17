@@ -67,7 +67,7 @@
 
     <section v-if="filteredPrompts.length > 0" class="row g-2 prompts-grid prompts-scrollable-grid">
       <div v-for="prompt in visiblePrompts" :key="prompt.promptId" class="col-md-6 col-lg-4">
-        <article class="card border-0 shadow-sm h-100 prompt-card prompt-card-modern">
+        <article class="prompt-card h-100">
           <div class="card-body d-flex flex-column prompt-card-body">
             <div class="prompt-card-top-row">
               <label class="form-check mb-0 prompt-select-wrap" :aria-label="`Select ${prompt.title}`">
@@ -465,3 +465,146 @@ onMounted(async () => {
   loadPromptScores();
 });
 </script>
+
+<style scoped>
+.prompts-page {
+  padding: var(--spacing-xl);
+}
+
+/* Search & Header */
+.page-header-row {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-control {
+  border-radius: 99px;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  box-shadow: none;
+}
+
+.form-control:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+/* Category Tabs */
+.prompt-category-tabs .btn {
+  border-radius: 99px;
+  margin-right: var(--spacing-xs);
+  padding: 0.25rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.prompt-category-tabs .btn-outline-secondary {
+  color: var(--color-text-title); /* Darkened text for better contrast */
+  background: #f8fafc;
+  border-color: #e2e8f0; /* Darkened border for better visibility */
+}
+
+.prompt-category-tabs .btn-outline-secondary:hover,
+.prompt-category-tabs .btn-outline-secondary:focus {
+  background: #e2e8f0;
+  color: #7a61dc;
+  border-color: #7a61dc;
+}
+
+.prompt-category-tabs .btn-primary {
+  background: linear-gradient(130deg, #7a61dc, #5a85f1);
+  border: 1px solid transparent;
+  color: #f7f9ff;
+  box-shadow: 0 8px 18px rgba(95, 112, 189, 0.22);
+  font-weight: 700;
+}
+
+/* Prompt Card - Consistent with .ui-card */
+.prompt-card {
+  background: var(--color-bg-card);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  border: none;
+  transition: box-shadow 0.2s, transform 0.2s;
+  display: flex;
+  height: 320px; /* Fixed height to enable internal scrolling */
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.prompt-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.prompt-card-body {
+  padding: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.prompt-card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.prompt-title {
+  font-family: var(--font-family-title);
+  color: var(--color-text-title);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.prompt-content-preview {
+  color: var(--color-text-body);
+  font-family: var(--font-family-base);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  flex: 1; /* Take available space */
+  overflow-y: auto; /* Enable scrolling */
+  min-height: 0; /* Fix for flex scrolling */
+  opacity: 0.85;
+}
+
+.prompt-badge-category {
+  background: #f0f9ff;
+  color: #0369a1;
+  font-weight: 600;
+  font-size: 0.7rem;
+  padding: 0.35em 0.65em;
+  border-radius: 6px;
+}
+
+.prompt-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  margin-top: auto;
+  border-top: 1px solid var(--color-bg-bar);
+}
+
+.prompt-favorite-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.prompt-favorite-btn:hover {
+  transform: scale(1.1);
+}
+
+.prompt-badge-score {
+  background-color: #ecfdf5;
+  color: var(--color-success);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.prompt-badge-muted {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+}
+</style>
