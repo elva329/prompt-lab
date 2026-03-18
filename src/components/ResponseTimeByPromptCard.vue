@@ -8,7 +8,7 @@
     <div class="card-body">
       <div v-if="loading" class="loading-state">Loading...</div>
       <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
-      <div v-else id="responseTimeChart" style="width: 100%; height: 180px;"></div>
+      <div v-else id="responseTimeChart" style="width: 100%; height: 250px;"></div>
     </div>
   </div>
 </template>
