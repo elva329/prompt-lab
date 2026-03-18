@@ -81,9 +81,18 @@ async function callOpenAI(
   const data = await response.json();
   const endTime = performance.now();
 
+  const responseContent = data.choices[0]?.message?.content || '';
+  
+  // Get actual tokens or estimate if missing
+  let tokens = data.usage?.total_tokens;
+  if (!tokens) {
+    // Fallback estimation: ~4 chars per token for prompt + response
+    tokens = Math.ceil((promptText.length + responseContent.length) / 4);
+  }
+
   return {
-    response: data.choices[0]?.message?.content || '',
-    tokensUsed: data.usage?.total_tokens || 0,
+    response: responseContent,
+    tokensUsed: tokens,
     responseTimeMs: Math.round(endTime - startTime),
     model: data.model || config.model,
   };
@@ -121,9 +130,22 @@ async function callAnthropic(
   const data = await response.json();
   const endTime = performance.now();
 
+  const responseContent = data.content[0]?.text || '';
+  
+  // Get actual tokens or estimate if missing
+  let tokens = 0;
+  if (data.usage) {
+    tokens = (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0);
+  }
+  
+  if (!tokens) {
+    // Fallback estimation: ~4 chars per token for prompt + response
+    tokens = Math.ceil((promptText.length + responseContent.length) / 4);
+  }
+
   return {
-    response: data.content[0]?.text || '',
-    tokensUsed: data.usage?.input_tokens + data.usage?.output_tokens || 0,
+    response: responseContent,
+    tokensUsed: tokens,
     responseTimeMs: Math.round(endTime - startTime),
     model: data.model || config.model,
   };
@@ -219,9 +241,16 @@ async function callCustomAPI(
     throw new Error('Could not find response content in API response');
   }
 
+  // Get actual tokens or estimate if missing
+  let tokens = data.usage?.total_tokens || data.tokens || 0;
+  if (!tokens) {
+    // Fallback estimation: ~4 chars per token for prompt + response
+    tokens = Math.ceil((promptText.length + responseContent.length) / 4);
+  }
+
   return {
     response: responseContent,
-    tokensUsed: data.usage?.total_tokens || data.tokens || 0,
+    tokensUsed: tokens,
     responseTimeMs: Math.round(endTime - startTime),
     model: data.model || config.model,
   };
@@ -270,8 +299,6 @@ export function getDefaultConfig(): AIApiConfig {
   throw new Error('No API key configured. Please set VITE_CUSTOM_API_KEY and VITE_CUSTOM_BASE_URL in .env file');
 }
 
-/**
- * 
 /**
  * Batch process multiple prompts
  */
