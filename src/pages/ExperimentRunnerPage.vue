@@ -1,127 +1,185 @@
 <template>
-  <div class="experiment-runner d-flex flex-column gap-3 fade-in-up page-surface">
-    <section class="d-flex justify-content-between align-items-start gap-3 border-bottom pb-3">
-      <div>
-        <button class="btn btn-link text-decoration-none px-0 small" @click="goBack">
-          <i class="bi bi-chevron-left"></i>
-          Back
+  <div class="experiment-runner fade-in-up page-surface page-fullheight">
+    <div class="dashboard-menu-row">
+      <!-- Navigation Pills -->
+      <nav class="dashboard-menu-pills">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.name"
+          :to="item.path"
+          class="dashboard-menu-link"
+          :class="{ active: isNavItemActive(item.path) }"
+          :title="item.name"
+        >
+          <i :class="['bi', item.icon, 'me-md-2']"></i>
+          <span class="d-none d-md-inline">{{ item.name }}</span>
+        </RouterLink>
+      </nav>
+      <div class="dashboard-user-controls">
+        <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
+          <i class="bi bi-person-circle"></i>
         </button>
-        <h1 class="h3 fw-bold mb-1">{{ isNew ? 'New Experiment Setup' : experimentTitle }}</h1>
-        <p class="text-secondary mb-0 small">{{ experiment?.taskDescription }}</p>
       </div>
-      <div class="d-flex gap-2">
-        <button v-if="isNew" class="btn btn-primary" :disabled="isRunning || hasRun" @click="handleRun">
-          <i class="bi" :class="runButtonIcon"></i>
-          {{ runButtonText }}
-        </button>
-        <button v-else class="btn btn-primary" @click="rerunLoadedExperiment">
-          <i class="bi bi-play-fill"></i>
-          Re-run This Experiment
-        </button>
-      </div>
-    </section>
+    </div>
 
-    <section class="card border-0 shadow-sm grow">
-      <div class="card-body p-0 position-relative">
-        <div v-if="!hasRun && !isRunning" class="runner-overlay text-center p-4">
-          <div class="overlay-icon mx-auto mb-3"><i class="bi bi-flask"></i></div>
-          <h2 class="h5 fw-semibold mb-2">Ready to Test {{ selectedPrompts.length }} Prompts</h2>
-          <p class="text-secondary mb-0">
-            Click 'Run Experiment' to send these prompts to the AI model and compare the generated responses
-            side-by-side.
-          </p>
+    <div class="page-content-scrollable">
+      <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 page-header-row mb-4">
+        <div>
+          <button class="btn btn-link text-decoration-none px-0 small mb-2 d-inline-flex align-items-center gap-1 back-link" @click="goBack">
+            <i class="bi bi-arrow-left"></i>
+            Back to Experiments
+          </button>
+          <h1 class="h5 fw-bold mb-1">{{ isNew ? 'New Experiment Setup' : experimentTitle }}</h1>
+          <p class="text-secondary mb-0 small">{{ experiment?.taskDescription }}</p>
         </div>
+        <div class="d-flex gap-2 mt-2 mt-sm-0">
+          <button v-if="isNew" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2" :disabled="isRunning || hasRun" @click="handleRun">
+            <i class="bi" :class="isRunning ? 'bi-arrow-repeat spin' : 'bi-play-fill'"></i>
+            <span>{{ runButtonText }}</span>
+          </button>
+          <button v-else class="btn btn-primary px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2" @click="rerunLoadedExperiment">
+            <i class="bi bi-play-fill"></i>
+            <span>Re-run This Experiment</span>
+          </button>
+        </div>
+      </section>
 
-        <div class="row g-0 runner-columns">
-          <div v-for="(prompt, index) in selectedPrompts" :key="prompt.id" class="col-md border-end">
-            <div class="h-100 d-flex flex-column">
-              <div class="p-3 border-bottom bg-body-tertiary">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <span class="badge text-bg-dark">{{ alphabet[index] }}</span>
-                  <h3 class="h6 mb-0 text-truncate">{{ prompt.title }}</h3>
-                </div>
-                <pre class="small mb-0 prompt-pre">{{ prompt.content }}</pre>
-              </div>
+      <div class="experiment-main-container">
+        <div class="card border-0 shadow-sm overflow-hidden experiment-card-modern">
+          <div class="card-body p-0 position-relative">
+            <div v-if="!hasRun && !isRunning" class="runner-overlay text-center p-5">
+              <div class="overlay-icon mx-auto mb-4"><i class="bi bi-flask"></i></div>
+              <h2 class="h4 fw-bold mb-3">Ready to Test {{ selectedPrompts.length }} Prompts</h2>
+              <p class="text-secondary mb-4 mx-auto" style="max-width: 500px;">
+                Click 'Run Experiment' to send these prompts to the AI model and compare the generated responses
+                side-by-side with automated quality evaluation.
+              </p>
+              <button class="btn btn-primary btn-lg px-5 rounded-pill shadow" @click="handleRun">
+                Run Experiment
+              </button>
+            </div>
 
-              <div class="p-3 position-relative grow response-area">
-                <div v-if="isRunning && !resultByPrompt[prompt.id]" class="runner-loading text-center">
-                  <template v-if="index === currentProgress.current - 1">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="small text-secondary mt-2 mb-0">
-                      Generating response... ({{ index + 1 }}/{{ currentProgress.total }})
-                    </p>
-                  </template>
-                  <template v-else>
-                    <div class="queued-icon mb-2"><i class="bi bi-hourglass-split"></i></div>
-                    <p class="small text-secondary mb-0">
-                      Waiting... ({{ index + 1 }}/{{ currentProgress.total }})
-                    </p>
-                  </template>
-                </div>
-
-                <template v-if="hasRun && resultByPrompt[prompt.id]">
-                  <div class="response-text-scroll">
-                    <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
-                  </div>
-
-                  <div class="pt-3 border-top mt-3 vstack gap-3">
-                    <h4 class="h6 mb-0"><i class="bi bi-star-fill text-warning me-1"></i>Evaluation Metrics</h4>
-
-                    <div class="row g-2">
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Overall Quality</p>
-                          <p class="h4 fw-bold text-primary mb-0">{{ resultByPrompt[prompt.id].aiScore }}<span class="small text-secondary">/100</span></p>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Response Time</p>
-                          <p class="mb-0 fw-semibold">
-                            <i class="bi bi-clock me-1"></i>
-                            {{ resultByPrompt[prompt.id].responseTimeMs }}ms
-                          </p>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Clarity</p>
-                          <p class="mb-0 fw-semibold">{{ resultByPrompt[prompt.id].clarity || 0 }}/100</p>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Relevance</p>
-                          <p class="mb-0 fw-semibold">{{ resultByPrompt[prompt.id].relevance || 0 }}/100</p>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Coherence</p>
-                          <p class="mb-0 fw-semibold">{{ resultByPrompt[prompt.id].coherence || 0 }}/100</p>
-                        </div>
-                      </div>
-                      <div class="col-6">
-                        <div class="metric-card">
-                          <p class="small text-secondary mb-1">Completeness</p>
-                          <p class="mb-0 fw-semibold">{{ resultByPrompt[prompt.id].completeness || 0 }}/100</p>
-                        </div>
-                      </div>
+            <div class="row g-0 runner-columns">
+              <div v-for="(prompt, index) in selectedPrompts" :key="prompt.id" class="col-md border-end prompt-column">
+                <div class="h-100 d-flex flex-column">
+                  <div class="p-4 border-bottom bg-light prompt-header-area">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                      <span class="badge rounded-circle bg-dark d-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">{{ alphabet[index] }}</span>
+                      <h3 class="h6 mb-0 fw-bold text-truncate">{{ prompt.title }}</h3>
+                    </div>
+                    <div class="prompt-source-wrapper">
+                      <pre class="small mb-0 prompt-pre">{{ prompt.content }}</pre>
                     </div>
                   </div>
-                </template>
+
+                  <div class="p-4 position-relative grow response-area">
+                    <div v-if="isRunning && !resultByPrompt[prompt.id]" class="runner-loading text-center">
+                      <div class="loading-content-wrapper">
+                        <template v-if="index === currentProgress.current - 1">
+                          <div class="status-icon-box mb-4">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; border-width: 0.25rem;"></div>
+                          </div>
+                          <p class="h5 fw-bold text-primary mb-2">Generating</p>
+                          <p class="text-muted small fw-semibold">Prompt {{ index + 1 }} of {{ currentProgress.total }}</p>
+                        </template>
+                        <template v-else-if="index >= currentProgress.current">
+                          <div class="status-icon-box mb-4">
+                            <div class="queued-badge">
+                              <i class="bi bi-hourglass-split"></i>
+                            </div>
+                          </div>
+                          <p class="h5 fw-bold text-secondary mb-2">In Queue</p>
+                          <p class="text-muted small fw-semibold">Waiting to start...</p>
+                        </template>
+                      </div>
+                    </div>
+
+                    <template v-if="resultByPrompt[prompt.id]">
+                      <div class="response-header d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge prompt-badge-muted">AI RESPONSE</span>
+                        <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                      </div>
+                      
+                      <div class="response-text-scroll mb-4">
+                        <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
+                      </div>
+
+                      <div class="evaluation-section pt-4 border-top mt-auto">
+                        <h4 class="h6 mb-4 d-flex align-items-center gap-2">
+                          <i class="bi bi-shield-check text-success"></i>
+                          <span class="text-uppercase tracking-wider fw-bold small text-muted">Evaluation Metrics</span>
+                        </h4>
+
+                        <div class="metrics-grid">
+                          <div class="metric-item-modern highlight">
+                            <span class="metric-label">OVERALL QUALITY</span>
+                            <div class="metric-value-wrapper">
+                              <span class="metric-value">{{ resultByPrompt[prompt.id].aiScore }}</span>
+                              <span class="metric-unit">/100</span>
+                            </div>
+                            <div class="metric-progress">
+                              <div class="progress-bar" :style="{ width: resultByPrompt[prompt.id].aiScore + '%', backgroundColor: getScoreColor(resultByPrompt[prompt.id].aiScore) }"></div>
+                            </div>
+                          </div>
+
+                          <div class="metrics-subgrid mt-3">
+                            <div class="metric-item-mini">
+                              <span class="mini-label">RESPONSE TIME</span>
+                              <span class="mini-value"><i class="bi bi-clock me-1 small"></i>{{ resultByPrompt[prompt.id].responseTimeMs }}ms</span>
+                            </div>
+                            <div class="metric-item-mini">
+                              <span class="mini-label">TOKENS</span>
+                              <span class="mini-value">{{ resultByPrompt[prompt.id].tokensUsed }}</span>
+                            </div>
+                          </div>
+
+                      <div class="metrics-detailed-grid mt-3">
+                            <div class="metric-badge-card">
+                              <span class="badge-label">Clarity</span>
+                              <div class="badge-score-container">
+                                <span class="badge-score" :style="{ color: getScoreColor(resultByPrompt[prompt.id].clarity || 0) }">{{ resultByPrompt[prompt.id].clarity || 0 }}</span>
+                                <span class="badge-max">/100</span>
+                              </div>
+                            </div>
+                            <div class="metric-badge-card">
+                              <span class="badge-label">Relevance</span>
+                              <div class="badge-score-container">
+                                <span class="badge-score" :style="{ color: getScoreColor(resultByPrompt[prompt.id].relevance || 0) }">{{ resultByPrompt[prompt.id].relevance || 0 }}</span>
+                                <span class="badge-max">/100</span>
+                              </div>
+                            </div>
+                            <div class="metric-badge-card">
+                              <span class="badge-label">Coherence</span>
+                              <div class="badge-score-container">
+                                <span class="badge-score" :style="{ color: getScoreColor(resultByPrompt[prompt.id].coherence || 0) }">{{ resultByPrompt[prompt.id].coherence || 0 }}</span>
+                                <span class="badge-max">/100</span>
+                              </div>
+                            </div>
+                            <div class="metric-badge-card">
+                              <span class="badge-label">Completeness</span>
+                              <div class="badge-score-container">
+                                <span class="badge-score" :style="{ color: getScoreColor(resultByPrompt[prompt.id].completeness || 0) }">{{ resultByPrompt[prompt.id].completeness || 0 }}</span>
+                                <span class="badge-max">/100</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 
 import { getDefaultConfig, sendPromptToAI, type AIResponse } from '../lib/aiApi';
 import { evaluateResponse, type EvaluationCriteria } from '../lib/evaluationMetrics';
@@ -152,6 +210,21 @@ const currentProgress = ref({ current: 0, total: 0 });
 
 const id = computed(() => String(route.params.id || ''));
 const isNew = computed(() => id.value === 'new');
+
+const navItems = [
+  { name: 'Analytics', path: '/analytics', icon: 'bi-graph-up' },
+  { name: 'Prompt Library', path: '/prompts', icon: 'bi-journal-text' },
+  { name: 'Favorites', path: '/favorites', icon: 'bi-star-fill' },
+  { name: 'Experiments', path: '/experiments', icon: 'bi-flask' }
+];
+
+const isNavItemActive = (path: string) => route.path.startsWith(path);
+
+function handleLogout(): void {
+  appStore.logout();
+  router.push('/');
+}
+
 const selectedPromptIds = computed(() => {
   const value = String(route.query.prompts || '');
 
@@ -214,19 +287,14 @@ const runButtonText = computed(() => {
   return 'Run Experiment';
 });
 
-const runButtonIcon = computed(() => {
-  if (isRunning.value) {
-    return 'bi-arrow-repeat spin';
-  }
-
-  if (hasRun.value) {
-    return 'bi-check-circle';
-  }
-
-  return 'bi-play-fill';
-});
-
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+function getScoreColor(score: number): string {
+  if (score >= 80) return '#10b981'; // Success green
+  if (score >= 60) return '#3b82f6'; // Info blue
+  if (score >= 40) return '#f59e0b'; // Warning amber
+  return '#ef4444'; // Danger red
+}
 
 function getResolvedPromptIds(): number[] {
   if (isNew.value) {
@@ -373,17 +441,6 @@ async function handleRun(): Promise<void> {
       return;
     }
 
-    const generatedResults: Record<number, {
-      aiResponse: string;
-      aiScore: number;
-      responseTimeMs: number;
-      clarity: number;
-      relevance: number;
-      coherence: number;
-      completeness: number;
-      tokensUsed: number;
-    }> = {};
-
     // Process each prompt sequentially
     for (let i = 0; i < selectedPrompts.value.length; i++) {
       const prompt = selectedPrompts.value[i];
@@ -401,16 +458,19 @@ async function handleRun(): Promise<void> {
           aiResponse.tokensUsed
         );
 
-        // Store results
-        generatedResults[prompt.promptId] = {
-          aiResponse: aiResponse.response,
-          aiScore: evaluation.automatedScore,
-          responseTimeMs: aiResponse.responseTimeMs,
-          clarity: evaluation.clarity,
-          relevance: evaluation.relevance,
-          coherence: evaluation.coherence,
-          completeness: evaluation.completeness,
-          tokensUsed: aiResponse.tokensUsed,
+        // Store result immediately to update UI
+        runResults.value = {
+          ...runResults.value,
+          [prompt.promptId]: {
+            aiResponse: aiResponse.response,
+            aiScore: evaluation.automatedScore,
+            responseTimeMs: aiResponse.responseTimeMs,
+            clarity: evaluation.clarity,
+            relevance: evaluation.relevance,
+            coherence: evaluation.coherence,
+            completeness: evaluation.completeness,
+            tokensUsed: aiResponse.tokensUsed,
+          }
         };
 
         // Add small delay between requests to avoid rate limiting
@@ -420,20 +480,24 @@ async function handleRun(): Promise<void> {
       } catch (error) {
         console.error(`Error processing prompt ${prompt.promptId}:`, error);
         
-        // Store error result
-        generatedResults[prompt.promptId] = {
-          aiResponse: `Error: ${error instanceof Error ? error.message : 'Failed to generate response'}`,
-          aiScore: 0,
-          responseTimeMs: 0,
-          clarity: 0,
-          relevance: 0,
-          coherence: 0,
-          completeness: 0,
-          tokensUsed: 0,
+        // Store error result immediately to update UI
+        runResults.value = {
+          ...runResults.value,
+          [prompt.promptId]: {
+            aiResponse: `Error: ${error instanceof Error ? error.message : 'Failed to generate response'}`,
+            aiScore: 0,
+            responseTimeMs: 0,
+            clarity: 0,
+            relevance: 0,
+            coherence: 0,
+            completeness: 0,
+            tokensUsed: 0,
+          }
         };
       }
     }
 
+    const generatedResults = runResults.value;
     const resultsList = Object.values(generatedResults);
     const successfulResults = resultsList.filter((result) => result.aiScore > 0);
     const avgQualityScore = successfulResults.length
@@ -497,12 +561,344 @@ async function handleRun(): Promise<void> {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   if (isNew.value) {
-    loadSelectedPrompts();
+    await loadSelectedPrompts();
     return;
   }
 
-  loadExistingExperimentDetails();
+  await loadExistingExperimentDetails();
 });
 </script>
+
+<style scoped>
+.experiment-runner {
+  display: flex;
+  flex-direction: column;
+}
+
+.experiment-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem;
+}
+
+.experiment-card-modern {
+  border-radius: 1.25rem;
+  background: #fff;
+  height: auto;
+}
+
+.experiment-card-modern > .card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.back-link {
+  font-weight: 600;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #2563eb;
+}
+
+.runner-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+}
+
+.runner-columns {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .runner-columns {
+    min-height: 0;
+    height: auto;
+  }
+  
+  .response-area {
+    min-height: 300px;
+  }
+}
+
+.prompt-column {
+  transition: background-color 0.2s;
+  background: #fff;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.prompt-header-area {
+  height: 340px; /* Fixed height to accommodate 220px pre + title/padding */
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: #f8fafc; /* Match secondary surface color */
+}
+
+.prompt-pre {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #475569;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  flex: 1;
+  height: 220px; /* Fixed height for consistent sizing */
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.response-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2rem !important;
+  position: relative;
+}
+
+.evaluation-section {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.metrics-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.response-text-scroll {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  line-height: 1.6;
+  color: #1e293b;
+  height: 380px; 
+  max-height: 380px; /* Force fixed height */
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.response-copy {
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+}
+
+.metric-item-modern {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+.metric-item-modern.highlight {
+  border-color: #dbeafe;
+  background: #f0f9ff;
+}
+
+.metric-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.metric-unit {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.metric-progress {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.metric-progress .progress-bar {
+  height: 100%;
+  transition: width 1s ease-out;
+}
+
+.metrics-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.metric-item-mini {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  display: flex; /* keep original content's mini metric style */
+  flex-direction: column;
+}
+
+.mini-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 0.25rem;
+}
+
+.mini-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.metrics-detailed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.metric-badge-card {
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.metric-badge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.badge-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  margin-bottom: 0.25rem;
+}
+
+.badge-score-container {
+  display: flex;
+  align-items: baseline;
+  gap: 0.125rem;
+}
+
+.badge-score {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.badge-max {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.runner-loading {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 2rem;
+}
+
+.status-icon-box {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.queued-badge {
+  font-size: 3rem;
+  color: #94a3b8;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.loading-content-wrapper {
+  max-width: 280px;
+  width: 100%;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.smallest {
+  font-size: 0.7rem;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+</style>
