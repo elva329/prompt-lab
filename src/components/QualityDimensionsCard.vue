@@ -79,7 +79,7 @@ export default {
       wheelX: 'panX',
       wheelY: 'zoomX',
       paddingTop: 20,
-      paddingBottom: 20,
+      paddingBottom: 40, // Increased to move logo away
       paddingLeft: 20,
       paddingRight: 20,
       radius: am5.percent(85)
@@ -96,8 +96,9 @@ export default {
     xRenderer.labels.template.setAll({
       radius: 18,
       fontSize: 11,
-
-      fill: am5.color(0xa0aec0),
+      fontFamily: 'Manrope, sans-serif',
+      fontWeight: '700',
+      fill: am5.color(0x687083),
       paddingBottom: 6
     });
     let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {

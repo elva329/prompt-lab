@@ -107,7 +107,8 @@ export default {
         wheelX: 'panX',
         wheelY: 'zoomX',
         pinchZoomX: true,
-        paddingLeft: 0
+        paddingLeft: 0,
+        paddingBottom: 25 // Increased to move logo away
       })
     );
     // Update axis label font style and size to match sample

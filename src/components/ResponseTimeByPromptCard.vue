@@ -8,7 +8,7 @@
     <div class="card-body">
       <div v-if="loading" class="loading-state">Loading...</div>
       <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
-      <div v-else id="responseTimeChart" style="width: 100%; height: 250px;"></div>
+      <div v-else id="responseTimeChart" style="width: 100%; height: 180px;"></div>
     </div>
   </div>
 </template>
@@ -91,12 +91,15 @@ export default {
       root.setThemes([am5themes_Animated.new(root)]);
 
       let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        panX: true,
+        panX: false,
         panY: false,
-        wheelX: "panX",
-        wheelY: "zoomX",
-        pinchZoomX: true,
+        wheelX: "none",
+        wheelY: "none",
         paddingLeft: 0,
+        paddingRight: 10,
+        paddingTop: 10,
+        paddingBottom: 25, // Increased to move logo away
+        layout: root.verticalLayout
       }));
 
       let cursor = chart.set("cursor", am5xy.XYCursor.new(root, {}));
@@ -108,7 +111,10 @@ export default {
         centerY: am5.p50,
         centerX: am5.p100,
         paddingRight: 10,
-        fontSize: '0.8rem'
+        fontSize: 11,
+        fontFamily: 'Manrope, sans-serif',
+        fontWeight: '700',
+        fill: am5.color(0x687083)
       });
 
       let xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
@@ -119,7 +125,7 @@ export default {
       }));
 
       let yRenderer = am5xy.AxisRendererY.new(root, {
-        minGridDistance: 40
+        minGridDistance: 20 // Reduced from 40 to show more intervals
       });
 
       let yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
@@ -129,6 +135,13 @@ export default {
         renderer: yRenderer,
         numberFormat: "#.0's'"
       }));
+
+      yAxis.get("renderer").labels.template.setAll({
+        fontSize: 11,
+        fontFamily: 'Manrope, sans-serif',
+        fontWeight: '700',
+        fill: am5.color(0x687083)
+      });
       yAxis.children.moveValue(am5.Label.new(root, { text: "Avg. Time (s)", rotation: -90, y: am5.p50, centerX: am5.p50 }), 0);
 
       let series = chart.series.push(am5xy.LineSeries.new(root, {
@@ -162,12 +175,12 @@ export default {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1.5rem;
+  padding: 1rem 1.2rem; /* Reduced from 1.5rem */
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem; /* Reduced from 0.5rem */
   font-family: 'Inter', sans-serif;
   transition: box-shadow 0.2s, transform 0.2s;
 }

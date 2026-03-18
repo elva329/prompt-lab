@@ -841,8 +841,8 @@ h6 {
 }
 
 .dashboard-menu-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -870,6 +870,15 @@ h6 {
   font-weight: 700;
   white-space: nowrap;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767.98px) {
+  .dashboard-menu-link {
+    padding: 0.45rem 0.75rem;
+  }
 }
 
 .dashboard-menu-link:hover {
@@ -991,7 +1000,7 @@ h6 {
   }
 
   .dashboard-menu-row {
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 }
 

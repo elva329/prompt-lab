@@ -17,7 +17,7 @@
 
 <script>
 import * as am5 from '@amcharts/amcharts5';
-import * as am5percent from '@amcharts/amcharts5/percent';
+import * as am5xy from '@amcharts/amcharts5/xy';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { appStore } from '../stores/appStore';
 import { fetchResultsByUserRequest } from '../lib/resultsApi';
@@ -67,25 +67,65 @@ export default {
             root.setThemes([
               am5themes_Animated.new(root)
             ]);
-            let chart = root.container.children.push(am5percent.PieChart.new(root, {
+            
+            let chart = root.container.children.push(am5xy.XYChart.new(root, {
+              panX: false,
+              panY: false,
+              wheelX: "none",
+              wheelY: "none",
               layout: root.verticalLayout,
-              innerRadius: am5.percent(50)
+              paddingLeft: 0,
+              paddingRight: 30,
+              paddingTop: 10,
+              paddingBottom: 10
             }));
-            let series = chart.series.push(am5percent.PieSeries.new(root, {
-              valueField: 'value',
-              categoryField: 'category',
-              alignLabels: false
-            }));
-            series.labels.template.setAll({
-              textType: 'circular',
-              centerX: 0,
-              centerY: 0,
-              fontSize:6
+
+            let yRenderer = am5xy.AxisRendererY.new(root, {
+              minGridDistance: 30,
+              inversed: true,
+              cellStartLocation: 0.1,
+              cellEndLocation: 0.9
             });
-            series.data.setAll([
-              { value: 1, category: 'No Data' }
-            ]);
-            series.appear(1000, 100);
+
+            yRenderer.grid.template.set("visible", false);
+
+            let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+              categoryField: "category",
+              renderer: yRenderer
+            }));
+
+            let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+              min: 0,
+              max: 100,
+              strictMinMax: true,
+              renderer: am5xy.AxisRendererX.new(root, {
+                strokeOpacity: 0.1
+              })
+            }));
+
+            let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+              xAxis: xAxis,
+              yAxis: yAxis,
+              valueXField: "value",
+              categoryYField: "category",
+              sequencedInterpolation: true
+            }));
+
+            series.columns.template.setAll({
+              height: am5.percent(70),
+              cornerRadiusTR: 10,
+              cornerRadiusBR: 10,
+              strokeOpacity: 0,
+              fill: am5.color(0xCBD5E1)
+            });
+
+            const data = [
+              { category: "No Data", value: 0 }
+            ];
+
+            yAxis.data.setAll(data);
+            series.data.setAll(data);
+            
             this._am5Root = root;
           });
           return;
@@ -113,7 +153,7 @@ export default {
         console.log('Pass count:', passCount, 'Borderline count:', borderlineCount, 'Fail count:', failCount, 'Total:', total);
         console.log('Pass rate:', this.passRate, 'Borderline rate:', this.borderlineRate, 'Fail rate:', this.failRate);
         
-        // Render amCharts pie chart
+        // Render amCharts bar chart
         this.$nextTick(() => {
           const container = document.getElementById('qualitySummaryPieChart');
           if (!container) return;
@@ -127,96 +167,124 @@ export default {
             am5themes_Animated.new(root)
           ]);
           
-          // Create chart with balanced size
-          let chart = root.container.children.push(am5percent.PieChart.new(root, {
+          let chart = root.container.children.push(am5xy.XYChart.new(root, {
+            panX: false,
+            panY: false,
+            wheelX: "none",
+            wheelY: "none",
             layout: root.verticalLayout,
-            innerRadius: am5.percent(50),
-            width: container.offsetWidth,
-            height: container.offsetHeight,
+            paddingLeft: 0,
+            paddingRight: 30,
+            paddingTop: 10,
+            paddingBottom: 25 // Increased to move logo away
           }));
-          
-          let series = chart.series.push(am5percent.PieSeries.new(root, {
-            valueField: 'value',
-            categoryField: 'category',
-            alignLabels: false,
-            radius: am5.percent(80), // Balanced radius
-          }));
-          
-          // Hide labels on slices
-          series.labels.template.setAll({
-            visible: false
+
+          let yRenderer = am5xy.AxisRendererY.new(root, {
+            minGridDistance: 30,
+            inversed: true,
+            cellStartLocation: 0.1,
+            cellEndLocation: 0.9
           });
-          
-          // Hide ticks
-          series.ticks.template.setAll({
-            visible: false
-          });
-          
-          // Custom slice colors
-          series.get('colors').set('colors', [
-            am5.color(0x2563eb), // Pass
-            am5.color(0xfbbf24), // Borderline
-            am5.color(0xf87171), // Fail
-          ]);
-          
-          // Always show all three categories, even if value is 0
-          series.data.setAll([
-            { value: this.passRate, category: 'Pass ≥60' },
-            { value: this.borderlineRate, category: 'Borderline 50-59' },
-            { value: this.failRate, category: 'Fail <50' }
-          ]);
-          
-          // Create legend with vertical layout - positioned at the bottom with space for logo
-          let legend = chart.children.push(am5.Legend.new(root, {
-            centerX: am5.percent(50),
-            x: am5.percent(50),
-            marginTop: 5,
-            marginBottom: 20, // Space for amCharts logo
-            width: am5.percent(90),
-            layout: root.verticalLayout,
-            paddingLeft: 10,
-            paddingRight: 10,
+
+          yRenderer.grid.template.set("visible", false);
+
+          let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+            categoryField: "category",
+            renderer: yRenderer
           }));
-          
-          // Style the legend labels
-          legend.labels.template.setAll({
+
+          yAxis.get("renderer").labels.template.setAll({
             fontSize: 12,
-            fontWeight: '600',
-            fill: am5.color(0x334155),
-            textAlign: 'left',
-            width: 100,
-            oversizedBehavior: 'wrap'
-          });
-          
-          // Style the value labels (percentages)
-          legend.valueLabels.template.setAll({
-            fontSize: 12,
+            fontFamily: 'Manrope, sans-serif',
             fontWeight: '700',
-            fill: am5.color(0x334155),
-            textAlign: 'right',
-            width: 40
+            fill: am5.color(0x687083)
           });
+
+          let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+            min: 0,
+            max: 100,
+            strictMinMax: true,
+            renderer: am5xy.AxisRendererX.new(root, {
+              strokeOpacity: 0.1
+            })
+          }));
           
-          // Style the legend markers (colored dots)
-          legend.markers.template.setAll({
-            width: 10,
-            height: 10,
-            radius: 10,
-            marginRight: 8
+          xAxis.get("renderer").labels.template.setAll({
+            fontSize: 10,
+            fontFamily: 'Manrope, sans-serif',
+            fontWeight: '600',
+            fill: am5.color(0x687083)
           });
-          
-          // Add spacing between legend items
-          legend.itemContainers.template.setAll({
-            marginBottom: 5,
-            paddingTop: 2,
-            paddingBottom: 2,
-            width: am5.percent(100)
+
+          xAxis.get("renderer").grid.template.setAll({
+            strokeOpacity: 0.05
           });
+
+          let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueXField: "value",
+            categoryYField: "category",
+            sequencedInterpolation: true,
+            tooltip: am5.Tooltip.new(root, {
+              pointerOrientation: "horizontal",
+              labelText: "{categoryY}: {valueX}%"
+            })
+          }));
+
+          series.columns.template.setAll({
+            height: am5.percent(70),
+            cornerRadiusTR: 10,
+            cornerRadiusBR: 10,
+            strokeOpacity: 0
+          });
+
+          // Custom colors for each bar
+          series.columns.template.adapters.add("fill", (fill, target) => {
+            const category = target.dataItem.get("categoryY");
+            if (category === 'Pass') return am5.color(0x2563eb);
+            if (category === 'Borderline') return am5.color(0xfbbf24);
+            if (category === 'Fail') return am5.color(0xf87171);
+            return fill;
+          });
+
+          series.columns.template.adapters.add("stroke", (stroke, target) => {
+            const category = target.dataItem.get("categoryY");
+            if (category === 'Pass') return am5.color(0x2563eb);
+            if (category === 'Borderline') return am5.color(0xfbbf24);
+            if (category === 'Fail') return am5.color(0xf87171);
+            return stroke;
+          });
+
+          // Add labels to the end of bars
+          series.bullets.push(function() {
+            return am5.Bullet.new(root, {
+              locationX: 1,
+              native: false,
+              sprite: am5.Label.new(root, {
+                text: "{valueX}%",
+                fill: am5.color(0x334155),
+                centerY: am5.p50,
+                x: am5.p100,
+                populateText: true,
+                fontSize: 12,
+                fontFamily: 'Manrope, sans-serif',
+                fontWeight: "800"
+              })
+            });
+          });
+
+          const data = [
+            { category: "Pass", value: this.passRate },
+            { category: "Borderline", value: this.borderlineRate },
+            { category: "Fail", value: this.failRate }
+          ];
+
+          yAxis.data.setAll(data);
+          series.data.setAll(data);
           
-          // Connect legend to series
-          legend.data.setAll(series.dataItems);
-          
-          series.appear(1000, 100);
+          series.appear(1000);
+          chart.appear(1000, 100);
           this._am5Root = root;
         });
       } catch (e) {
@@ -245,81 +313,91 @@ export default {
             am5themes_Animated.new(root)
           ]);
           
-          // Create chart with balanced size
-          let chart = root.container.children.push(am5percent.PieChart.new(root, {
+          let chart = root.container.children.push(am5xy.XYChart.new(root, {
+            panX: false,
+            panY: false,
+            wheelX: "none",
+            wheelY: "none",
             layout: root.verticalLayout,
-            innerRadius: am5.percent(50),
-            width: container.offsetWidth,
-            height: container.offsetHeight,
+            paddingLeft: 0,
+            paddingRight: 30,
+            paddingTop: 10,
+            paddingBottom: 10
           }));
-          
-          let series = chart.series.push(am5percent.PieSeries.new(root, {
-            valueField: 'value',
-            categoryField: 'category',
-            alignLabels: false,
-            radius: am5.percent(80), // Balanced radius
+
+          let yRenderer = am5xy.AxisRendererY.new(root, {
+            minGridDistance: 30,
+            inversed: true,
+            cellStartLocation: 0.1,
+            cellEndLocation: 0.9
+          });
+
+          yRenderer.grid.template.set("visible", false);
+
+          let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
+            categoryField: "category",
+            renderer: yRenderer
           }));
-          
-          series.labels.template.setAll({ visible: false });
-          series.ticks.template.setAll({ visible: false });
-          
-          series.get('colors').set('colors', [
-            am5.color(0x2563eb), // Pass
-            am5.color(0xfbbf24), // Borderline
-            am5.color(0xf87171), // Fail
-          ]);
-          
-          series.data.setAll([
-            { value: this.passRate, category: 'Pass ≥60' },
-            { value: this.borderlineRate, category: 'Borderline 50-59' },
-            { value: this.failRate, category: 'Fail <50' }
-          ]);
-          
-          // Legend with vertical layout - positioned at the bottom with space for logo
-          let legend = chart.children.push(am5.Legend.new(root, {
-            centerX: am5.percent(50),
-            x: am5.percent(50),
-            marginTop: 5,
-            marginBottom: 20, // Space for amCharts logo
-            width: am5.percent(90),
-            layout: root.verticalLayout,
-            paddingLeft: 10,
-            paddingRight: 10,
+
+          let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
+            min: 0,
+            max: 100,
+            strictMinMax: true,
+            renderer: am5xy.AxisRendererX.new(root, {
+              strokeOpacity: 0.1
+            })
           }));
-          
-          legend.labels.template.setAll({
-            fontSize: 12,
-            fontWeight: '600',
-            fill: am5.color(0x334155),
-            textAlign: 'left',
-            width: 100,
-            oversizedBehavior: 'wrap'
+
+          let series = chart.series.push(am5xy.ColumnSeries.new(root, {
+            xAxis: xAxis,
+            yAxis: yAxis,
+            valueXField: "value",
+            categoryYField: "category",
+            sequencedInterpolation: true
+          }));
+
+          series.columns.template.setAll({
+            height: am5.percent(70),
+            cornerRadiusTR: 10,
+            cornerRadiusBR: 10,
+            strokeOpacity: 0
           });
-          
-          legend.valueLabels.template.setAll({
-            fontSize: 12,
-            fontWeight: '700',
-            fill: am5.color(0x334155),
-            textAlign: 'right',
-            width: 40
+
+          series.columns.template.adapters.add("fill", (fill, target) => {
+            const category = target.dataItem.get("categoryY");
+            if (category === 'Pass') return am5.color(0x2563eb);
+            if (category === 'Borderline') return am5.color(0xfbbf24);
+            if (category === 'Fail') return am5.color(0xf87171);
+            return fill;
           });
-          
-          legend.markers.template.setAll({
-            width: 10,
-            height: 10,
-            radius: 10,
-            marginRight: 8
+
+          series.bullets.push(function() {
+            return am5.Bullet.new(root, {
+              locationX: 1,
+              native: false,
+              sprite: am5.Label.new(root, {
+                text: "{valueX}%",
+                fill: am5.color(0x334155),
+                centerY: am5.p50,
+                x: am5.p100,
+                populateText: true,
+                fontSize: 12,
+                fontWeight: "700"
+              })
+            });
           });
+
+          const data = [
+            { category: "Pass", value: this.passRate },
+            { category: "Borderline", value: this.borderlineRate },
+            { category: "Fail", value: this.failRate }
+          ];
+
+          yAxis.data.setAll(data);
+          series.data.setAll(data);
           
-          legend.itemContainers.template.setAll({
-            marginBottom: 5,
-            paddingTop: 2,
-            paddingBottom: 2,
-            width: am5.percent(100)
-          });
-          
-          legend.data.setAll(series.dataItems);
-          series.appear(1000, 100);
+          series.appear(1000);
+          chart.appear(1000, 100);
           this._am5Root = root;
         });
       }
@@ -348,13 +426,18 @@ export default {
 }
 .pie-chart-center-fit {
   width: 100%;
-  height: 100%;
+  height: 200px; /* Reduced height as bar charts are more compact than donut charts */
   min-width: 240px;
-  max-width: 320px;
-  max-height: 340px;
+  max-width: 360px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
+}
+
+@media (max-width: 768px) {
+  .pie-chart-center-fit {
+    height: 220px; /* Slightly taller on mobile */
+  }
 }
 </style>

@@ -1,37 +1,18 @@
 <template>
   <div class="fade-in-up experiments-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
-      <!-- Mobile Navigation Dropdown -->
-      <div class="d-md-none flex-grow-1">
-        <div class="dropdown">
-          <button
-            class="btn form-select text-start d-flex justify-content-between align-items-center shadow-sm"
-            type="button"
-            @click="mobileMenuOpen = !mobileMenuOpen"
-          >
-            <span class="fw-semibold">{{ currentNavItem?.name || 'Menu' }}</span>
-            <i class="bi bi-chevron-down small"></i>
-          </button>
-          <ul class="dropdown-menu w-100 mt-1 border-0 shadow-lg" :class="{ 'show': mobileMenuOpen }">
-            <li v-for="item in navItems" :key="item.path">
-              <a class="dropdown-item py-2 px-3" :class="{ 'active': isNavItemActive(item.path) }" href="#" @click.prevent="handleMobileNavigate(item.path)">
-                {{ item.name }}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Desktop Navigation Pills -->
-      <nav class="dashboard-menu-pills d-none d-md-flex">
+      <!-- Navigation Pills -->
+      <nav class="dashboard-menu-pills">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
           :to="item.path"
           class="dashboard-menu-link"
           :class="{ active: isNavItemActive(item.path) }"
+          :title="item.name"
         >
-          {{ item.name }}
+          <i :class="['bi', item.icon, 'me-md-2']"></i>
+          <span class="d-none d-md-inline">{{ item.name }}</span>
         </RouterLink>
       </nav>
       <div class="dashboard-user-controls">
@@ -114,7 +95,6 @@ const route = useRoute();
 const isLoading = ref(false);
 const errorMessage = ref('');
 const experiments = ref<ExperimentRecord[]>([]);
-const mobileMenuOpen = ref(false);
 
 function shortId(value: string): string {
   return value.slice(-6).toUpperCase();
@@ -125,10 +105,10 @@ function formatDate(value: string): string {
 }
 
   const navItems = [
-      { name: 'Analytics', path: '/analytics' },
-      { name: 'Prompt Library', path: '/prompts' },
-      { name: 'Favorites', path: '/favorites' },
-      { name: 'Experiments', path: '/experiments' }
+      { name: 'Analytics', path: '/analytics', icon: 'bi-graph-up' },
+      { name: 'Prompt Library', path: '/prompts', icon: 'bi-journal-text' },
+      { name: 'Favorites', path: '/favorites', icon: 'bi-star-fill' },
+      { name: 'Experiments', path: '/experiments', icon: 'bi-flask' }
     ]
 
 function isNavItemActive(path: string): boolean {
@@ -139,11 +119,6 @@ function isNavItemActive(path: string): boolean {
 }
 
 const currentNavItem = computed(() => navItems.find((item) => isNavItemActive(item.path)));
-
-function handleMobileNavigate(path: string) {
-  router.push(path);
-  mobileMenuOpen.value = false;
-}
 
 function handleLogout(): void {
   appStore.logout();

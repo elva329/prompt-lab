@@ -11,29 +11,13 @@
       <div v-else class="card-content">
         
         <div class="ranking-section" v-if="topPerformers.length > 0">
-          <div class="section-title">TOP PERFORMERS</div>
-          <div v-for="item in topPerformers" :key="item.id" class="ranking-row">
-            <div class="row-header">
-              <span class="prompt-label">{{ item.label }}</span>
-              <span class="prompt-value">{{ item.score }}</span>
-            </div>
-            <div class="bar-container">
-              <div :id="'chart-' + item.id" class="chart-div"></div>
-            </div>
-          </div>
+          <div class="section-title">TOP 3 PERFORMERS</div>
+          <div id="topPerformersChart" class="ranking-chart-container" :style="{ height: (topPerformers.length * 40 + 40) + 'px' }"></div>
         </div>
 
         <div class="ranking-section" v-if="needsAttention.length > 0">
-          <div class="section-title attention">NEEDS ATTENTION</div>
-          <div v-for="item in needsAttention" :key="item.id" class="ranking-row">
-            <div class="row-header">
-              <span class="prompt-label">{{ item.label }}</span>
-              <span class="prompt-value">{{ item.score }}</span>
-            </div>
-            <div class="bar-container">
-              <div :id="'chart-' + item.id" class="chart-div"></div>
-            </div>
-          </div>
+          <div class="section-title attention">TOP 3 NEEDS ATTENTION</div>
+          <div id="needsAttentionChart" class="ranking-chart-container" :style="{ height: (needsAttention.length * 40 + 40) + 'px' }"></div>
         </div>
 
       </div>
@@ -81,21 +65,23 @@ export default {
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
         return {
           id: promptId,
-          promptLabel: `Prompt ${promptId}`,
-          label: `Prompt ${promptId}`,
           score: parseFloat(avg.toFixed(1)),
         };
       }).sort((a, b) => b.score - a.score); // Rank from high to low
 
-      // Needs Attention: Score < 60 (Sorted worst first)
+      // Needs Attention: Score < 60 (Sorted worst first), Limit to top 3
       this.needsAttention = processedData
         .filter(item => item.score < 60)
-        .sort((a, b) => a.score - b.score);
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 3)
+        .map((item, index) => ({ ...item, label: `#${index + 1} Prompt ${item.id}` }));
 
-      // Top Performers: Score >= 60 (Sorted best first)
+      // Top Performers: Score >= 60 (Sorted best first), Limit to top 3
       this.topPerformers = processedData
         .filter(item => item.score >= 60)
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map((item, index) => ({ ...item, label: `#${index + 1} Prompt ${item.id}` }));
 
       this.loading = false;
 
@@ -117,15 +103,15 @@ export default {
       this.roots.forEach(root => root.dispose());
       this.roots = [];
 
-      this.topPerformers.forEach(item => {
-        this.createBarChart(`chart-${item.id}`, item.score, 0x10b981); // Green
-      });
+      if (this.topPerformers.length > 0) {
+        this.createRankingChart('topPerformersChart', this.topPerformers, 0x10b981);
+      }
 
-      this.needsAttention.forEach(item => {
-        this.createBarChart(`chart-${item.id}`, item.score, 0xef4444); // Red
-      });
+      if (this.needsAttention.length > 0) {
+        this.createRankingChart('needsAttentionChart', this.needsAttention, 0xef4444);
+      }
     },
-    createBarChart(divId, value, colorHex) {
+    createRankingChart(divId, data, colorHex) {
       let root = am5.Root.new(divId);
       this.roots.push(root);
 
@@ -136,23 +122,26 @@ export default {
         panY: false,
         wheelX: "none",
         wheelY: "none",
-        paddingLeft: 0,
-        paddingRight: 0,
-        paddingTop: 0,
-        paddingBottom: 0,
+        paddingLeft: 5,
+        paddingRight: 5,
+        paddingTop: 15, // Increased to avoid clipping top labels
+        paddingBottom: 25, // Increased to move logo away
         layout: root.verticalLayout
       }));
 
+      let yRenderer = am5xy.AxisRendererY.new(root, {
+        minGridDistance: 20,
+        inversed: true,
+        cellStartLocation: 0.2, // Move first bar down for its label
+        cellEndLocation: 0.8
+      });
+      yRenderer.grid.template.set("visible", false);
+      yRenderer.labels.template.set("visible", false);
+
       let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
-        categoryField: "category",
-        renderer: am5xy.AxisRendererY.new(root, {
-          minGridDistance: 10,
-          inversed: true
-        })
+        categoryField: "label",
+        renderer: yRenderer
       }));
-      yAxis.get("renderer").grid.template.set("forceHidden", true);
-      yAxis.get("renderer").labels.template.set("forceHidden", true);
-      yAxis.data.setAll([{ category: "1" }]);
 
       let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
         min: 0,
@@ -160,28 +149,72 @@ export default {
         strictMinMax: true,
         renderer: am5xy.AxisRendererX.new(root, {})
       }));
-      xAxis.get("renderer").grid.template.set("forceHidden", true);
-      xAxis.get("renderer").labels.template.set("forceHidden", true);
+      xAxis.get("renderer").grid.template.set("visible", false);
+      xAxis.get("renderer").labels.template.set("visible", false);
 
       let series = chart.series.push(am5xy.ColumnSeries.new(root, {
         xAxis: xAxis,
         yAxis: yAxis,
-        valueXField: "value",
-        categoryYField: "category",
-        fill: am5.color(colorHex),
-        stroke: am5.color(colorHex)
+        valueXField: "score",
+        categoryYField: "label",
+        sequencedInterpolation: true
       }));
 
       series.columns.template.setAll({
-        height: am5.percent(100),
+        height: 6, // Restored to small height
         cornerRadiusBR: 3,
         cornerRadiusTR: 3,
         cornerRadiusBL: 3,
         cornerRadiusTL: 3,
-        strokeOpacity: 0
+        strokeOpacity: 0,
+        fill: am5.color(colorHex)
       });
 
-      series.data.setAll([{ category: "1", value: value }]);
+      // Label bullet (Above the bar, left aligned)
+      series.bullets.push(function() {
+        return am5.Bullet.new(root, {
+          locationY: 0, 
+          locationX: 0,
+          sprite: am5.Label.new(root, {
+            text: "{label}",
+            fill: am5.color(0x334155),
+            centerY: am5.p100,
+            x: 0,
+            dy: -2, // Slightly increased from -1
+            populateText: true,
+            fontSize: 11, 
+            fontFamily: 'Manrope, sans-serif',
+            fontWeight: "700"
+          })
+        });
+      });
+
+      // Score bullet (Above the bar, right aligned)
+      series.bullets.push(function() {
+        return am5.Bullet.new(root, {
+          locationY: 0,
+          locationX: 1,
+          sprite: am5.Label.new(root, {
+            text: "{score}",
+            fill: am5.color(colorHex), 
+            centerY: am5.p100,
+            centerX: am5.p100,
+            x: am5.p100,
+            dy: -2, // Slightly increased from -1
+            populateText: true,
+            fontSize: 11, 
+            fontFamily: 'Manrope, sans-serif',
+            fontWeight: "800"
+          })
+        });
+      });
+
+      const chartData = data.map(item => ({
+        ...item
+      }));
+
+      yAxis.data.setAll(chartData);
+      series.data.setAll(chartData);
       series.appear(1000);
       chart.appear(1000, 100);
     }
@@ -194,12 +227,12 @@ export default {
   background: #fff;
   border-radius: 1.2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1.5rem;
+  padding: 1rem 1.2rem; /* Reduced from 1.5rem */
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem; /* Reduced from 0.5rem */
   font-family: 'Inter', sans-serif;
   transition: box-shadow 0.2s, transform 0.2s;
 }
@@ -230,7 +263,8 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 200px;
-  overflow-y: auto; /* Allow scrolling if list is long */
+  overflow: visible; /* Prevent vertical scrollbar */
+  padding-bottom: 10px;
 }
 .loading-state, .empty-state {
   display: flex;
@@ -243,39 +277,26 @@ export default {
 .card-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  margin-top: 0.5rem;
+  gap: 1rem; /* Reduced from 1.5rem */
+  margin-top: 0.25rem; /* Reduced from 0.5rem */
+  padding-top: 2px;
 }
 .section-title {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #10b981; /* Green for Top Performers */
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
   letter-spacing: 0.05em;
 }
 .section-title.attention {
   color: #ef4444; /* Red for Needs Attention */
 }
-.ranking-row {
-  margin-bottom: 0.75rem;
+.ranking-section {
+
+  overflow: visible; /* Ensure bullets don't get clipped */
 }
-.row-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
-}
-.bar-container {
+.ranking-chart-container {
   width: 100%;
-  height: 6px;
-  background-color: #f1f5f9;
-  border-radius: 3px;
-  overflow: hidden;
-}
-.chart-div {
-  height: 100%;
-  width: 100%;
+  margin-bottom: 0.5rem;
 }
 </style>
