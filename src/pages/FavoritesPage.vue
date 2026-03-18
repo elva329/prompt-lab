@@ -1,7 +1,29 @@
 <template>
   <div class="fade-in-up favorites-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
-      <nav class="dashboard-menu-pills">
+      <!-- Mobile Navigation Dropdown -->
+      <div class="d-md-none flex-grow-1">
+        <div class="dropdown">
+          <button
+            class="btn form-select text-start d-flex justify-content-between align-items-center shadow-sm"
+            type="button"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+          >
+            <span class="fw-semibold">{{ currentNavItem?.name || 'Menu' }}</span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu w-100 mt-1 border-0 shadow-lg" :class="{ 'show': mobileMenuOpen }">
+            <li v-for="item in navItems" :key="item.path">
+              <a class="dropdown-item py-2 px-3" :class="{ 'active': isNavItemActive(item.path) }" href="#" @click.prevent="handleMobileNavigate(item.path)">
+                {{ item.name }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Pills -->
+      <nav class="dashboard-menu-pills d-none d-md-flex">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
@@ -127,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute, RouterLink } from 'vue-router';
 import { appStore } from '../stores/appStore';
 import { fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
@@ -149,6 +171,7 @@ const editForm = ref({ title: '', promptText: '', category: '' });
 const showDeleteModal = ref(false);
 const deletingPromptId = ref<number | null>(null);
 const isDeleting = ref(false);
+const mobileMenuOpen = ref(false);
 
 const isLoading = ref(true);
 const router = useRouter();
@@ -166,6 +189,13 @@ function isNavItemActive(path: string): boolean {
     return route.path === '/experiments' || route.path.startsWith('/experiments/');
   }
   return route.path === path;
+}
+
+const currentNavItem = computed(() => navItems.find((item) => isNavItemActive(item.path)));
+
+function handleMobileNavigate(path: string) {
+  router.push(path);
+  mobileMenuOpen.value = false;
 }
 
 function handleLogout(): void {

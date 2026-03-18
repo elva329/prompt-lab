@@ -1,7 +1,28 @@
 <template>
   <div class="analytics-page fade-in-up favorites-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
-      <nav class="dashboard-menu-pills">
+      <div class="d-md-none flex-grow-1">
+        <div class="dropdown">
+          <button
+            class="btn form-select text-start d-flex justify-content-between align-items-center shadow-sm"
+            type="button"
+            @click="mobileMenuOpen = !mobileMenuOpen"
+          >
+            <span class="fw-semibold">{{ currentNavItem?.name || 'Menu' }}</span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu w-100 mt-1 border-0 shadow-lg" :class="{ 'show': mobileMenuOpen }">
+            <li v-for="item in navItems" :key="item.path">
+              <a class="dropdown-item py-2 px-3" :class="{ 'active': isNavItemActive(item.path) }" href="#" @click.prevent="handleMobileNavigate(item.path)">
+                {{ item.name }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Pills -->
+      <nav class="dashboard-menu-pills d-none d-md-flex">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
@@ -65,7 +86,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { appStore } from '../stores/appStore'
 import AvgOverallQualityCard from '../components/AvgOverallQualityCard.vue'
@@ -94,6 +115,8 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const route = useRoute()
+    const mobileMenuOpen = ref(false)
+
     // appStore is imported directly
    const navItems = [
       { name: 'Analytics', path: '/analytics' },
@@ -108,6 +131,14 @@ export default defineComponent({
       }
       return route.path === path
     }
+
+    const currentNavItem = computed(() => navItems.find(item => isNavItemActive(item.path)))
+
+    function handleMobileNavigate(path: string) {
+      router.push(path)
+      mobileMenuOpen.value = false
+    }
+
     function handleLogout(): void {
       appStore.logout()
       router.push('/')
@@ -115,7 +146,10 @@ export default defineComponent({
     return {
       navItems,
       isNavItemActive,
-      handleLogout
+      handleLogout,
+      mobileMenuOpen,
+      currentNavItem,
+      handleMobileNavigate
     }
   }
 })
@@ -177,7 +211,7 @@ export default defineComponent({
 
 /* Card dimensions */
 .card-row1 {
-  height: 164px;
+  height: 200px;
 }
 
 .card-row2 {
@@ -193,9 +227,9 @@ export default defineComponent({
 .middle {
   flex-grow: 2; /* Takes 2 parts of space */
 }
-.card-row3 {
+/* .card-row3 {
   height: 547px;
-}
+} */
 
 /* Responsive adjustments */
 @media screen and (max-width: 1200px) {

@@ -818,6 +818,8 @@ h6 {
   align-items: center;
   margin-bottom: 1rem;
   gap: 1rem;
+  /* Ensure menu is above page content, fixing dropdown overlap issue on mobile. */
+  z-index: 10;
 }
 
 .dashboard-menu-pills {
@@ -986,6 +988,10 @@ h6 {
 @media (max-width: 767.98px) {
   .dashboard-kpi-row {
     grid-template-columns: 1fr;
+  }
+
+  .dashboard-menu-row {
+    justify-content: space-between;
   }
 }
 
