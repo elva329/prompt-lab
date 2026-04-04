@@ -48,15 +48,10 @@
         </div>
       </div>
 
-      <div class="analytics-main-grid">
-        <section class="analytics-panel analytics-panel--trend analytics-panel--span-rows">
+      <div class="analytics-secondary-grid">
+        <section class="analytics-panel analytics-panel--trend">
           <div class="analytics-card-shell analytics-card-shell--trend">
             <QualityScoreTrendCard />
-          </div>
-        </section>
-        <section class="analytics-panel analytics-panel--response">
-          <div class="analytics-card-shell analytics-card-shell--compact">
-            <ResponseTimeByPromptCard />
           </div>
         </section>
 
@@ -66,15 +61,21 @@
           </div>
         </section>
 
+        <section class="analytics-panel analytics-panel--latest">
+          <div class="analytics-card-shell analytics-card-shell--latest">
+            <LatestTestResultCard />
+          </div>
+        </section>
+
         <section class="analytics-panel analytics-panel--dimensions">
           <div class="analytics-card-shell analytics-card-shell--compact">
             <QualityDimensionsCard />
           </div>
         </section>
 
-        <section class="analytics-panel analytics-panel--latest">
-          <div class="analytics-card-shell analytics-card-shell--latest">
-            <LatestTestResultCard />
+        <section class="analytics-panel analytics-panel--response">
+          <div class="analytics-card-shell analytics-card-shell--compact">
+            <ResponseTimeByPromptCard />
           </div>
         </section>
 
@@ -82,7 +83,7 @@
           <div class="analytics-card-shell analytics-card-shell--signal">
             <PromptRankingsCard />
           </div>
-          </section>
+        </section>
       </div>
     </div>
   </div>
@@ -207,21 +208,22 @@ export default defineComponent({
   margin-bottom: 0.7rem;
 }
 
-.analytics-main-grid {
+.analytics-secondary-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.68fr) minmax(0, 0.65fr);
-  grid-template-rows: minmax(18rem, auto) minmax(17rem, auto);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1.2fr);
+  grid-template-rows: auto auto auto;
   grid-template-areas:
     'trend summary latest'
-    'trend dimensions rankings';
+    'trend dimensions latest'
+    'response response rankings';
   gap: 0.7rem;
   align-items: stretch;
   margin-bottom: 0.7rem;
 }
 
-/* .analytics-panel--trend {
+.analytics-panel--trend {
   grid-area: trend;
-} */
+}
 
 .analytics-panel--summary {
   grid-area: summary;
@@ -235,12 +237,12 @@ export default defineComponent({
   grid-area: latest;
 }
 
-.analytics-panel--rankings {
-  grid-area: rankings;
+.analytics-panel--response {
+  grid-area: response;
 }
 
-.analytics-panel--span-rows {
-  min-height: 0;
+.analytics-panel--rankings {
+  grid-area: rankings;
 }
 
 .analytics-panel--summary,
@@ -554,18 +556,18 @@ export default defineComponent({
 @media screen and (max-width: 1200px) {
   .analytics-top-strip,
   .analytics-main-grid,
-  .analytics-bottom-grid {
+  .analytics-secondary-grid {
     grid-template-columns: 1fr;
   }
 
-  .analytics-main-grid {
+  .analytics-secondary-grid {
+    grid-template-rows: none;
     grid-template-areas:
-      'trend'
       'summary'
       'latest'
       'dimensions'
       'rankings';
-    grid-template-rows: none;
+    gap: 0.7rem;
   }
 }
 
