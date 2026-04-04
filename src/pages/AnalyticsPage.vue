@@ -1,7 +1,6 @@
 <template>
   <div class="analytics-page fade-in-up favorites-page page-surface page-fullheight">
     <div class="dashboard-menu-row">
-      <!-- Navigation Pills -->
       <nav class="dashboard-menu-pills">
         <RouterLink
           v-for="item in navItems"
@@ -15,14 +14,16 @@
           <span class="d-none d-md-inline">{{ item.name }}</span>
         </RouterLink>
       </nav>
+
       <div class="dashboard-user-controls">
         <button class="dashboard-menu-icon" title="User Profile" @click="handleLogout">
           <i class="bi bi-person-circle"></i>
         </button>
       </div>
     </div>
+
     <div class="analytics-container">
-      <header class="analytics-header mb-4">
+      <header class="analytics-header">
         <div>
           <p class="analytics-eyebrow mb-1">Analytics-first</p>
           <h1 class="analytics-title mb-2">Prompt performance overview</h1>
@@ -31,53 +32,67 @@
           </p>
         </div>
       </header>
-      <!-- SECTION 1 -->
-      <div class="section-1">
-        <!-- ROW 1: 4 cards - 271*164 each -->
-        <div class="card-row-container">
-          <div class="bordered-card card-row1">
-            <AvgOverallQualityCard />
-          </div>
-          <div class="bordered-card card-row1">
-            <AvgResponseTimeCard />
-          </div>
-          <div class="bordered-card card-row1">
-            <PromptsEvaluatedCard />
-          </div>
-          <div class="bordered-card card-row1">
-            <PassRateCard />
-          </div>
-        </div>
 
-        <!-- ROW 2: 3 cards - height 379px each -->
-        <div class="card-row2-container">
-          <div class="bordered-card card-row2 left">
-            <QualityDimensionsCard />
-          </div>
-          <div class="bordered-card card-row2 middle">
+      <div class="analytics-top-strip">
+        <div class="analytics-card-shell analytics-top-metric">
+          <AvgOverallQualityCard />
+        </div>
+        <div class="analytics-card-shell analytics-top-metric">
+          <AvgResponseTimeCard />
+        </div>
+        <div class="analytics-card-shell analytics-top-metric">
+          <PromptsEvaluatedCard />
+        </div>
+        <div class="analytics-card-shell analytics-top-metric">
+          <PassRateCard />
+        </div>
+      </div>
+
+      <div class="analytics-main-grid">
+        <section class="analytics-panel analytics-panel--trend analytics-panel--span-rows">
+          <div class="analytics-card-shell analytics-card-shell--trend">
             <QualityScoreTrendCard />
           </div>
-          <div class="bordered-card card-row2 right">
+        </section>
+
+        <section class="analytics-panel analytics-panel--summary">
+          <div class="analytics-card-shell analytics-card-shell--summary">
             <QualitySummaryCard />
           </div>
-        </div>
+        </section>
 
-        <!-- ROW 3: 2 cards - height 547px each -->
-        <div class="card-row-container">
-          <div class="bordered-card card-row3">
+        <section class="analytics-panel analytics-panel--latest analytics-panel--span-rows">
+          <div class="analytics-card-shell analytics-card-shell--latest">
+            <LatestTestResultCard />
+          </div>
+        </section>
+
+        <section class="analytics-panel analytics-panel--dimensions">
+          <div class="analytics-card-shell analytics-card-shell--compact">
+            <QualityDimensionsCard />
+          </div>
+        </section>
+      </div>
+
+      <div class="analytics-bottom-grid">
+        <section class="analytics-panel analytics-panel--response">
+          <div class="analytics-card-shell analytics-card-shell--compact">
             <ResponseTimeByPromptCard />
           </div>
-          <div class="bordered-card card-row3">
+        </section>
+
+        <section class="analytics-panel analytics-panel--rankings">
+          <div class="analytics-card-shell analytics-card-shell--signal">
             <PromptRankingsCard />
           </div>
-        </div>
+        </section>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { appStore } from '../stores/appStore'
 import AvgOverallQualityCard from '../components/AvgOverallQualityCard.vue'
@@ -86,6 +101,7 @@ import PromptsEvaluatedCard from '../components/PromptsEvaluatedCard.vue'
 import PassRateCard from '../components/PassRateCard.vue'
 import QualityDimensionsCard from '../components/QualityDimensionsCard.vue'
 import QualityScoreTrendCard from '../components/QualityScoreTrendCard.vue'
+import LatestTestResultCard from '../components/LatestTestResultCard.vue'
 import QualitySummaryCard from '../components/QualitySummaryCard.vue'
 import ResponseTimeByPromptCard from '../components/ResponseTimeByPromptCard.vue'
 import PromptRankingsCard from '../components/PromptRankingsCard.vue'
@@ -99,6 +115,7 @@ export default defineComponent({
     PassRateCard,
     QualityDimensionsCard,
     QualityScoreTrendCard,
+    LatestTestResultCard,
     QualitySummaryCard,
     ResponseTimeByPromptCard,
     PromptRankingsCard
@@ -107,18 +124,18 @@ export default defineComponent({
     const router = useRouter()
     const route = useRoute()
 
-    // appStore is imported directly
-   const navItems = [
+    const navItems = [
       { name: 'Analytics', path: '/analytics', icon: 'bi-graph-up' },
       { name: 'Prompt Library', path: '/prompts', icon: 'bi-journal-text' },
       { name: 'Favorites', path: '/favorites', icon: 'bi-star-fill' },
       { name: 'Experiments', path: '/experiments', icon: 'bi-flask' }
     ]
-    
+
     function isNavItemActive(path: string): boolean {
       if (path === '/experiments') {
         return route.path === '/experiments' || route.path.startsWith('/experiments/')
       }
+
       return route.path === path
     }
 
@@ -128,6 +145,7 @@ export default defineComponent({
       appStore.logout()
       router.push('/')
     }
+
     return {
       navItems,
       isNavItemActive,
@@ -160,7 +178,8 @@ export default defineComponent({
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.25rem 0.2rem 0.15rem;
+  padding: 0.25rem 0.2rem 0.2rem;
+  margin-bottom: 0.45rem;
 }
 
 .analytics-eyebrow {
@@ -184,122 +203,388 @@ export default defineComponent({
   line-height: 1.55;
 }
 
-/* Border styles with radius - NO PADDING */
-.bordered-card {
+.analytics-top-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+}
+
+.analytics-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(0, 1.08fr);
+  grid-template-rows: minmax(18rem, auto) minmax(17rem, auto);
+  grid-template-areas:
+    'trend summary latest'
+    'trend dimensions latest';
+  gap: 0.7rem;
+  align-items: stretch;
+  margin-bottom: 0.7rem;
+}
+
+.analytics-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: stretch;
+}
+
+.analytics-stack {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.analytics-stack--right {
+  height: 100%;
+}
+
+.analytics-panel--trend {
+  grid-area: trend;
+}
+
+.analytics-panel--summary {
+  grid-area: summary;
+}
+
+.analytics-panel--dimensions {
+  grid-area: dimensions;
+}
+
+.analytics-panel--latest {
+  grid-area: latest;
+}
+
+.analytics-panel--span-rows {
+  min-height: 0;
+}
+
+.analytics-panel--summary,
+.analytics-panel--dimensions,
+.analytics-panel--latest,
+.analytics-panel--trend,
+.analytics-panel--response,
+.analytics-panel--rankings {
+  min-height: 0;
+}
+
+.analytics-panel--response,
+.analytics-panel--rankings {
+  height: 100%;
+}
+
+.analytics-panel {
+  min-width: 0;
+  display: flex;
+}
+
+.analytics-card-shell {
   border: none;
   border-radius: 18px;
-  box-sizing: border-box;
-  width: 100%;
+  overflow: hidden;
   display: flex;
-  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
   background: rgba(255, 255, 255, 0.62);
   box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
   transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
-.bordered-card:hover {
+.analytics-card-shell:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.78);
   box-shadow: 0 14px 28px rgba(16, 35, 63, 0.08);
 }
 
-.bordered-card > * {
+.analytics-card-shell > * {
   width: 100%;
+}
+
+.analytics-top-metric {
+  align-items: stretch;
+}
+
+.analytics-card-shell--latest {
   height: 100%;
 }
 
-.section-1 {
-  margin-bottom: 1.25rem;
+.analytics-card-shell--trend {
+  min-height: 0;
 }
 
-/* ALL ROWS use the same container with consistent gap */
-.card-row-container {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
+.analytics-card-shell--summary,
+.analytics-card-shell--compact,
+.analytics-card-shell--signal {
+  min-height: 0;
 }
 
-.card-row2-container {
-  display: flex;
+.analytics-card-shell--compact,
+.analytics-card-shell--signal {
+  height: 100%;
+}
+
+:deep(.avg-overall-quality-card),
+:deep(.avg-response-time-card),
+:deep(.prompts-evaluated-card),
+:deep(.pass-rate-card),
+:deep(.pc-card),
+:deep(.quality-card),
+:deep(.ui-card) {
   width: 100%;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
+  height: 100% !important;
+  min-height: 100% !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 245, 239, 0.98)) !important;
+  border: 1px solid rgba(223, 214, 204, 0.72) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05) !important;
+  color: #10233f !important;
+  overflow: hidden;
 }
 
-/* All cards flex equally */
-.card-row-container > * {
-  flex: 1;
-  min-width: 250px; /* Prevent cards from getting too small */
+:deep(.avg-overall-quality-card:hover),
+:deep(.avg-response-time-card:hover),
+:deep(.prompts-evaluated-card:hover),
+:deep(.pass-rate-card:hover),
+:deep(.pc-card:hover),
+:deep(.quality-card:hover),
+:deep(.ui-card:hover) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 245, 239, 1)) !important;
+  box-shadow: 0 16px 30px rgba(16, 35, 63, 0.08) !important;
 }
 
-/* Card dimensions */
-.card-row1 {
-  height: 200px;
+:deep(.avg-overall-quality-card),
+:deep(.avg-response-time-card),
+:deep(.prompts-evaluated-card),
+:deep(.pass-rate-card) {
+  padding: 0.78rem 0.85rem 0.72rem !important;
 }
 
-.card-row2 {
-  height: 379px;
-  flex-shrink: 1;
-  flex-basis: 0;
+:deep(.avg-overall-quality-card .card-title),
+:deep(.avg-response-time-card .card-title),
+:deep(.prompts-evaluated-card .card-title),
+:deep(.pass-rate-card .card-title),
+:deep(.pc-title),
+:deep(.quality-title),
+:deep(.card-title) {
+  color: #10233f !important;
 }
 
-.left, .right {
-  flex-grow: 1; /* Takes 1 part of space */
+:deep(.avg-overall-quality-card .card-subtitle),
+:deep(.avg-response-time-card .card-subtitle),
+:deep(.prompts-evaluated-card .card-subtitle),
+:deep(.pass-rate-card .card-subtitle),
+:deep(.pc-total),
+:deep(.quality-subtitle),
+:deep(.trend-stat-label),
+:deep(.prompt-name) {
+  color: #5f6d6b !important;
 }
 
-.middle {
-  flex-grow: 2; /* Takes 2 parts of space */
-}
-.card-row3 {
-  height: 400px;
+:deep(.avg-overall-quality-card .card-header),
+:deep(.avg-response-time-card .card-header),
+:deep(.prompts-evaluated-card .card-header),
+:deep(.pass-rate-card .card-header) {
+  margin-bottom: 0.35rem !important;
 }
 
-:deep(.dashboard-menu-row) {
-  margin-bottom: 0.9rem;
+:deep(.avg-overall-quality-card .card-value),
+:deep(.avg-response-time-card .card-value),
+:deep(.prompts-evaluated-card .card-value),
+:deep(.pass-rate-card .card-value) {
+  font-size: 1.25rem !important;
+}
+
+:deep(.avg-overall-quality-card .icon-bg),
+:deep(.avg-response-time-card .icon-bg),
+:deep(.prompts-evaluated-card .icon-bg),
+:deep(.pass-rate-card .icon-bg) {
+  width: 34px !important;
+  height: 34px !important;
+  background: rgba(246, 242, 235, 0.96) !important;
+  border-radius: 16px;
+}
+
+:deep(.avg-overall-quality-card .trend-badge),
+:deep(.avg-response-time-card .trend-badge),
+:deep(.prompts-evaluated-card .trend-badge),
+:deep(.pass-rate-card .trend-badge) {
+  padding: 0.12rem 0.45rem !important;
+  background: rgba(214, 239, 233, 0.9) !important;
+  color: #1b5e55 !important;
+}
+
+:deep(.avg-overall-quality-card .progress-bar),
+:deep(.avg-response-time-card .progress-bar),
+:deep(.prompts-evaluated-card .progress-bar),
+:deep(.pass-rate-card .progress-bar) {
+  background: rgba(225, 234, 230, 0.92) !important;
+}
+
+:deep(.avg-overall-quality-card .progress-bar-fill),
+:deep(.avg-response-time-card .progress-bar-fill),
+:deep(.prompts-evaluated-card .progress-bar-fill),
+:deep(.pass-rate-card .progress-bar-fill) {
+  background: linear-gradient(90deg, #1b5e55, #2a9d8f) !important;
+}
+
+:deep(.quality-card .quality-card-inner),
+:deep(.ui-card) {
+  font-family: 'Manrope', sans-serif !important;
+}
+
+:deep(.quality-card .quality-card-inner) {
+  padding: 0.9rem 1rem !important;
+}
+
+:deep(.quality-card .radar-chart) {
+  height: 118px !important;
+}
+
+:deep(.quality-card .bg-orange-400) {
+  background: #f97316 !important;
+}
+
+:deep(.quality-card .dimension-pill) {
+  background: rgba(240, 234, 224, 0.96) !important;
+}
+
+:deep(.quality-card .dimension-pill-label) {
+  color: #1b5e55 !important;
+}
+
+:deep(.quality-card .dimension-pill-value) {
+  color: #10233f !important;
+}
+
+:deep(.ui-card .card-body) {
+  min-height: 114px !important;
+}
+
+:deep(.ui-card .card-dot) {
+  background: #1b5e55 !important;
+}
+
+:deep(.pc-card) {
+  width: 100%;
+  max-width: 100% !important;
+  padding: 14px 16px !important;
+}
+
+:deep(.pc-card .pc-content) {
+  gap: 12px;
+}
+
+:deep(.pc-card svg) {
+  width: 88px;
+  height: 88px;
+}
+
+:deep(.pc-card .pc-donut-col) {
+  min-width: 88px;
+}
+
+:deep(.pc-card .pc-legend-col) {
+  min-width: 110px;
+  gap: 8px;
+}
+
+:deep(.section-header.top),
+:deep(.score-value.top),
+:deep(.rank-circle.top) {
+  color: #2a9d8f !important;
+}
+
+:deep(.section-header.attention),
+:deep(.score-value.attention),
+:deep(.rank-circle.attention) {
+  color: #b45309 !important;
+}
+
+:deep(.section-header .header-label) {
+  background: rgba(237, 244, 241, 0.96) !important;
+  color: #1b5e55 !important;
+}
+
+:deep(.section-header.attention .header-label) {
+  background: rgba(249, 237, 229, 0.96) !important;
+  color: #b45309 !important;
+}
+
+:deep(.rank-circle.top) {
+  background: rgba(214, 239, 233, 0.92) !important;
+}
+
+:deep(.rank-circle.attention) {
+  background: rgba(249, 237, 229, 0.96) !important;
+}
+
+:deep(.score-bar.top) {
+  background: linear-gradient(90deg, #2a9d8f 60%, rgba(42, 157, 143, 0.18) 100%) !important;
+}
+
+:deep(.score-bar.attention) {
+  background: linear-gradient(90deg, #d97706 60%, rgba(217, 119, 6, 0.18) 100%) !important;
 }
 
 :deep(.dashboard-menu-pills) {
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
-  border: 1px solid rgba(208, 218, 216, 0.5);
+  background: rgba(255, 255, 255, 0.68) !important;
+  border: 1px solid rgba(208, 218, 216, 0.56) !important;
+  box-shadow: 0 12px 26px rgba(16, 35, 63, 0.06) !important;
 }
 
 :deep(.dashboard-menu-link) {
-  color: #51605d;
+  color: #51605d !important;
 }
 
 :deep(.dashboard-menu-link:hover) {
-  color: #10233f;
-  background: rgba(236, 243, 242, 0.95);
+  color: #10233f !important;
+  background: rgba(236, 243, 242, 0.95) !important;
 }
 
 :deep(.dashboard-menu-link.active) {
-  color: #f8fbfc;
-  background: linear-gradient(130deg, #10233f, #1b5e55);
-  box-shadow: 0 8px 18px rgba(16, 35, 63, 0.14);
+  color: #f8fbfc !important;
+  background: linear-gradient(130deg, #10233f, #1b5e55) !important;
+  box-shadow: 0 8px 18px rgba(16, 35, 63, 0.14) !important;
 }
 
 :deep(.dashboard-menu-icon) {
-  background: rgba(255, 255, 255, 0.68);
-  color: #10233f;
-  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+  background: rgba(255, 255, 255, 0.74) !important;
+  color: #10233f !important;
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05) !important;
 }
 
 :deep(.dashboard-menu-icon:hover) {
-  background: rgba(255, 255, 255, 0.86);
-  color: #1b5e55;
+  background: rgba(255, 255, 255, 0.86) !important;
+  color: #1b5e55 !important;
 }
 
-/* Responsive adjustments */
+:deep(.avg-response-time-card svg circle:first-child) {
+  fill: rgba(237, 244, 241, 0.88) !important;
+}
+
+:deep(.prompts-evaluated-card svg text) {
+  fill: #1b5e55 !important;
+}
+
 @media screen and (max-width: 1200px) {
-  .card-row-container > .card-row1 {
-    flex-basis: calc(50% - 0.75rem); /* 2 cards per row, accounting for 1.5rem gap */
+  .analytics-top-strip,
+  .analytics-main-grid,
+  .analytics-bottom-grid {
+    grid-template-columns: 1fr;
   }
-  .card-row2-container > .card-row2,
-  .card-row-container > .card-row3 {
-    flex-basis: 100%; /* Stack cards in row 2 and 3 */
+
+  .analytics-main-grid {
+    grid-template-areas:
+      'trend'
+      'summary'
+      'latest'
+      'dimensions';
+    grid-template-rows: none;
+  }
+
+  .analytics-stack--right {
+    height: auto;
   }
 }
 
@@ -320,20 +605,9 @@ export default defineComponent({
     font-size: 0.92rem;
   }
 
-  .card-row-container > *,
-  .card-row2-container > * {
-    flex: 1 1 100%;
-    width: 100%;
-    max-width: 100%;
-    height: auto; /* Let height be determined by content */
-  }
-
-  /* Ensure specific card heights are also auto */
-  .card-row1,
-  .card-row2,
-  .card-row3 {
-    height: auto;
-    min-height: 200px;
+  .analytics-top-strip,
+  .analytics-body-grid {
+    gap: 0.6rem;
   }
 }
 </style>

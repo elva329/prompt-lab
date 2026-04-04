@@ -15,7 +15,7 @@
     </div>
     <div class="card-body">
       <div class="trend-chart-container">
-        <div id="qualityTrendLineChart" style="width:100%;height:210px;"></div>
+        <div id="qualityTrendLineChart" style="width:100%;height:155px;"></div>
       </div>
       <div class="trend-stat-row mt-1">
         <div class="trend-stat-item">
@@ -108,7 +108,7 @@ export default {
         wheelY: 'zoomX',
         pinchZoomX: true,
         paddingLeft: 0,
-        paddingBottom: 25 // Increased to move logo away
+        paddingBottom: 12
       })
     );
     // Update axis label font style and size to match sample
@@ -235,13 +235,14 @@ export default {
 .trend-chart-container {
   width: 100%;
   flex: 1;
+  min-height: 155px;
 }
 .trend-stat-row {
   display: flex;
   align-items: center;
   gap: var(--spacing-xl);
-  margin-top: auto; /* Push to bottom */
-  padding-top: 1rem;
+  margin-top: 0.4rem;
+  padding-top: 0.2rem;
 }
 .trend-stat-item {
   display: flex;
