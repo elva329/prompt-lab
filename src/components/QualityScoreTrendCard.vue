@@ -2,22 +2,14 @@
   <div class="ui-card">
     <div class="card-header">
       <div class="card-dot"></div>
-      <div class="card-title-section">
-        <h5 class="card-title">Quality Score Trend</h5>
-        <span class="card-subtitle">
-         7-day rolling · 
-          {{ trendData.length ?
-            (new Date(trendData[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' +
-             new Date(trendData[trendData.length-1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-             ' ' + new Date(trendData[trendData.length-1].date).getFullYear()) : '' }}
-        </span>
-      </div>
+      <h5 class="card-title">Quality Score Trend</h5>
     </div>
+    <div class="card-subtitle">7-day rolling · {{ trendData.length ? (new Date(trendData[0].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + '–' + new Date(trendData[trendData.length - 1].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + new Date(trendData[trendData.length - 1].date).getFullYear()) : '' }}</div>
     <div class="card-body">
       <div class="trend-chart-container">
-        <div id="qualityTrendLineChart" style="width:100%;height:155px;"></div>
+        <div id="qualityTrendLineChart" style="width:100%;height:250px;"></div>
       </div>
-      <div class="trend-stat-row mt-1">
+      <div class="trend-stat-row">
         <div class="trend-stat-item">
           <div class="trend-stat-dot" style="background-color:#f87171"></div>
           <span class="trend-stat-label">Low: <span style="color:#f87171;font-weight:600">{{ low }}</span></span>
@@ -26,12 +18,12 @@
           <div class="trend-stat-dot" style="background-color:#14b8a6"></div>
           <span class="trend-stat-label">High: <span style="color:#14b8a6;font-weight:600">{{ high }}</span></span>
         </div>
-        <div class="trend-stat-item">
-          <div class="trend-stat-dot" style="background-color:#94a3b8"></div>
-          <span class="trend-stat-label">Avg: <span style="color:#94a3b8;font-weight:600">{{ avg }}</span></span>
+          <div class="trend-stat-item">
+            <div class="trend-stat-dot" style="background-color:#94a3b8"></div>
+            <span class="trend-stat-label">Avg: <span style="color:#94a3b8;font-weight:600">{{ avg }}</span></span>
+          </div>
         </div>
       </div>
-  </div>
     </div>
 </template>
 
@@ -216,38 +208,70 @@ export default {
 </script>
 
 <style scoped>
-.card-header {
-  /* Override alignment for this specific card layout */
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
-}
-.card-dot {
-  margin-top: 4px;
-}
-.card-title-section {
+.ui-card {
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1rem 1.2rem;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
+  font-family: 'Inter', sans-serif;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.ui-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #38bdf8;
+  display: inline-block;
+}
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #687083;
+  font-family: 'Sora', sans-serif;
 }
 .card-subtitle {
-  color: var(--color-text-title); /* Uses darker color for subtitle here */
+  color: #a0aec0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
 }
 .trend-chart-container {
   width: 100%;
   flex: 1;
-  min-height: 155px;
+  min-height: 250px;
 }
 .trend-stat-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xl);
-  margin-top: 0.4rem;
-  padding-top: 0.2rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 0.25rem;
 }
 .trend-stat-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 0.4rem;
 }
 .trend-stat-dot {
   width: 6px;
@@ -255,8 +279,8 @@ export default {
   border-radius: 50%;
 }
 .trend-stat-label {
-  color: var(--color-text-title);
-  font-size: var(--font-size-subtitle);
+  color: #687083;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 </style>
