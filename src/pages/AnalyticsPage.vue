@@ -48,39 +48,49 @@
         </div>
       </div>
 
-      <div class="analytics-secondary-grid">
-        <section class="analytics-panel analytics-panel--trend">
-          <div class="analytics-card-shell analytics-card-shell--trend">
+      <div class="analytics-main-content">
+        <!-- Column 1: Trend -->
+        <section class="analytics-panel analytics-panel--trend-full">
+          <div class="analytics-card-shell">
             <QualityScoreTrendCard />
           </div>
         </section>
 
-        <section class="analytics-panel analytics-panel--summary">
-          <div class="analytics-card-shell analytics-card-shell--summary">
-            <QualitySummaryCard />
+        <!-- Column 2: Summary, Dimensions & Latest -->
+        <div class="analytics-right-column">
+          <div class="analytics-summary-row">
+            <section class="analytics-panel analytics-panel--summary-full">
+              <div class="analytics-card-shell">
+                <QualitySummaryCard />
+              </div>
+            </section>
           </div>
-        </section>
 
-        <section class="analytics-panel analytics-panel--latest">
-          <div class="analytics-card-shell analytics-card-shell--latest">
-            <LatestTestResultCard />
+          <div class="analytics-secondary-grid">
+            <section class="analytics-panel analytics-panel--dimensions">
+              <div class="analytics-card-shell">
+                <QualityDimensionsCard />
+              </div>
+            </section>
+
+            <section class="analytics-panel analytics-panel--latest">
+              <div class="analytics-card-shell">
+                <LatestTestResultCard />
+              </div>
+            </section>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <section class="analytics-panel analytics-panel--dimensions">
-          <div class="analytics-card-shell analytics-card-shell--compact">
-            <QualityDimensionsCard />
-          </div>
-        </section>
-
+      <div class="analytics-bottom-row">
         <section class="analytics-panel analytics-panel--response">
-          <div class="analytics-card-shell analytics-card-shell--compact">
+          <div class="analytics-card-shell">
             <ResponseTimeByPromptCard />
           </div>
         </section>
 
         <section class="analytics-panel analytics-panel--rankings">
-          <div class="analytics-card-shell analytics-card-shell--signal">
+          <div class="analytics-card-shell">
             <PromptRankingsCard />
           </div>
         </section>
@@ -208,55 +218,76 @@ export default defineComponent({
   margin-bottom: 0.7rem;
 }
 
+.analytics-main-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 0.7rem;
+  margin-bottom: 0.7rem;
+  align-items: stretch;
+}
+
+.analytics-panel--trend-full {
+  max-height: none;
+  height: 100%;
+  min-height: 0;
+}
+
+.analytics-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 0;
+  height: 100%;
+}
+
+.analytics-summary-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.analytics-panel--summary-full {
+  max-height: 160px;
+  min-height: 0;
+}
+
 .analytics-secondary-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 1.2fr);
-  grid-template-rows: auto auto auto;
-  grid-template-areas:
-    'trend summary latest'
-    'trend dimensions latest'
-    'response response rankings';
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 0.7rem;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.analytics-panel--dimensions {
+  max-height: none;
+  height: 100%;
+  min-height: 0;
+}
+
+.analytics-panel--latest {
+  max-height: none;
+  height: 100%;
+  min-height: 0;
+}
+
+.analytics-bottom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
   gap: 0.7rem;
   align-items: stretch;
   margin-bottom: 0.7rem;
 }
 
-.analytics-panel--trend {
-  grid-area: trend;
-}
-
-.analytics-panel--summary {
-  grid-area: summary;
-}
-
-.analytics-panel--dimensions {
-  grid-area: dimensions;
-}
-
-.analytics-panel--latest {
-  grid-area: latest;
-}
-
 .analytics-panel--response {
-  grid-area: response;
+  grid-column: 1;
 }
 
 .analytics-panel--rankings {
-  grid-area: rankings;
-}
-
-.analytics-panel--summary,
-.analytics-panel--dimensions,
-.analytics-panel--latest,
-.analytics-panel--trend,
-.analytics-panel--response,
-.analytics-panel--rankings {
-  min-height: 0;
-}
-
-.analytics-panel--response,
-.analytics-panel--rankings {
-  height: 100%;
+  grid-column: 2;
 }
 
 .analytics-panel {
@@ -298,7 +329,13 @@ export default defineComponent({
 .analytics-card-shell--trend {
   min-height: 0;
 }
+.analytics-card-shell--summary {
+  min-height: 0;
+}
 
+.analytics-card-shell--compact {
+  min-height: 0;
+}
 .analytics-card-shell--summary,
 .analytics-card-shell--compact,
 .analytics-card-shell--signal {
@@ -555,19 +592,21 @@ export default defineComponent({
 
 @media screen and (max-width: 1200px) {
   .analytics-top-strip,
-  .analytics-main-grid,
-  .analytics-secondary-grid {
+  .analytics-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-main-content {
     grid-template-columns: 1fr;
   }
 
   .analytics-secondary-grid {
-    grid-template-rows: none;
-    grid-template-areas:
-      'summary'
-      'latest'
-      'dimensions'
-      'rankings';
+    grid-template-columns: 1fr;
     gap: 0.7rem;
+  }
+
+  .analytics-bottom-row {
+    grid-template-columns: 1fr;
   }
 }
 
