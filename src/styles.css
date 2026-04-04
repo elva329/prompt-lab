@@ -81,9 +81,10 @@ h6 {
 .app-marketing-shell {
   position: relative;
   background:
-    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0) 35%),
-    radial-gradient(circle at 86% 20%, rgba(204, 191, 255, 0.34), rgba(204, 191, 255, 0) 42%),
-    linear-gradient(150deg, rgba(240, 236, 255, 0.7), rgba(231, 238, 255, 0.62));
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 28%),
+    radial-gradient(circle at 84% 18%, rgba(42, 157, 143, 0.16), rgba(42, 157, 143, 0) 34%),
+    radial-gradient(circle at 84% 84%, rgba(16, 35, 63, 0.08), rgba(16, 35, 63, 0) 30%),
+    linear-gradient(180deg, #f8f3eb 0%, #f4efe6 54%, #eef4f2 100%);
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -685,20 +686,27 @@ h6 {
 .marketing-footer {
   position: relative;
   z-index: 2;
-  background: rgba(246, 249, 255, 0.75);
-  border-top: 1px solid rgba(220, 228, 244, 0.72);
-  backdrop-filter: blur(6px);
+  margin-top: auto;
+  padding: 0.35rem 0 0.7rem;
+  background: transparent;
 }
 
 .marketing-footer-inner {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
+  padding: 0.5rem 1rem 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
 }
 
 .marketing-footer-copy {
-  font-size: 0.79rem;
-  color: #445069;
+  font-size: 0.8rem;
+  color: #72807d;
+  letter-spacing: 0.01em;
 }
 
 @media (max-width: 767.98px) {
