@@ -212,7 +212,7 @@ export default defineComponent({
 
 .analytics-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.68fr) minmax(0, 0.65fr);
   grid-template-rows: minmax(18rem, auto) minmax(17rem, auto);
   grid-template-areas:
     'trend summary latest'
@@ -437,9 +437,9 @@ export default defineComponent({
   padding: 0.9rem 1rem !important;
 }
 
-:deep(.quality-card .radar-chart) {
+/* :deep(.quality-card .radar-chart) {
   height: 118px !important;
-}
+} */
 
 :deep(.quality-card .bg-orange-400) {
   background: #f97316 !important;
