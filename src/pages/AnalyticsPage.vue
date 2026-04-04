@@ -54,6 +54,11 @@
             <QualityScoreTrendCard />
           </div>
         </section>
+        <section class="analytics-panel analytics-panel--response">
+          <div class="analytics-card-shell analytics-card-shell--compact">
+            <ResponseTimeByPromptCard />
+          </div>
+        </section>
 
         <section class="analytics-panel analytics-panel--summary">
           <div class="analytics-card-shell analytics-card-shell--summary">
@@ -75,11 +80,11 @@
       </div>
 
       <div class="analytics-bottom-grid">
-        <section class="analytics-panel analytics-panel--response">
+        <!-- <section class="analytics-panel analytics-panel--response">
           <div class="analytics-card-shell analytics-card-shell--compact">
             <ResponseTimeByPromptCard />
           </div>
-        </section>
+        </section> -->
 
         <section class="analytics-panel analytics-panel--rankings">
           <div class="analytics-card-shell analytics-card-shell--signal">
@@ -239,9 +244,9 @@ export default defineComponent({
   height: 100%;
 }
 
-.analytics-panel--trend {
+/* .analytics-panel--trend {
   grid-area: trend;
-}
+} */
 
 .analytics-panel--summary {
   grid-area: summary;
