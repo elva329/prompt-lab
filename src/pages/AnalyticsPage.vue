@@ -66,31 +66,23 @@
           </div>
         </section>
 
-        <section class="analytics-panel analytics-panel--latest analytics-panel--span-rows">
-          <div class="analytics-card-shell analytics-card-shell--latest">
-            <LatestTestResultCard />
-          </div>
-        </section>
-
         <section class="analytics-panel analytics-panel--dimensions">
           <div class="analytics-card-shell analytics-card-shell--compact">
             <QualityDimensionsCard />
           </div>
         </section>
-      </div>
 
-      <div class="analytics-bottom-grid">
-        <!-- <section class="analytics-panel analytics-panel--response">
-          <div class="analytics-card-shell analytics-card-shell--compact">
-            <ResponseTimeByPromptCard />
+        <section class="analytics-panel analytics-panel--latest">
+          <div class="analytics-card-shell analytics-card-shell--latest">
+            <LatestTestResultCard />
           </div>
-        </section> -->
+        </section>
 
         <section class="analytics-panel analytics-panel--rankings">
           <div class="analytics-card-shell analytics-card-shell--signal">
             <PromptRankingsCard />
           </div>
-        </section>
+          </section>
       </div>
     </div>
   </div>
@@ -221,27 +213,10 @@ export default defineComponent({
   grid-template-rows: minmax(18rem, auto) minmax(17rem, auto);
   grid-template-areas:
     'trend summary latest'
-    'trend dimensions latest';
+    'trend dimensions rankings';
   gap: 0.7rem;
   align-items: stretch;
   margin-bottom: 0.7rem;
-}
-
-.analytics-bottom-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0.7rem;
-  align-items: stretch;
-}
-
-.analytics-stack {
-  display: grid;
-  gap: 0.7rem;
-  min-width: 0;
-}
-
-.analytics-stack--right {
-  height: 100%;
 }
 
 /* .analytics-panel--trend {
@@ -258,6 +233,10 @@ export default defineComponent({
 
 .analytics-panel--latest {
   grid-area: latest;
+}
+
+.analytics-panel--rankings {
+  grid-area: rankings;
 }
 
 .analytics-panel--span-rows {
@@ -311,7 +290,7 @@ export default defineComponent({
 }
 
 .analytics-card-shell--latest {
-  height: 100%;
+  height: auto;
 }
 
 .analytics-card-shell--trend {
@@ -326,7 +305,7 @@ export default defineComponent({
 
 .analytics-card-shell--compact,
 .analytics-card-shell--signal {
-  height: 100%;
+  height: auto;
 }
 
 :deep(.avg-overall-quality-card),
@@ -584,12 +563,9 @@ export default defineComponent({
       'trend'
       'summary'
       'latest'
-      'dimensions';
+      'dimensions'
+      'rankings';
     grid-template-rows: none;
-  }
-
-  .analytics-stack--right {
-    height: auto;
   }
 }
 
