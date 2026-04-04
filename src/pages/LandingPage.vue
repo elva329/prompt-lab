@@ -5,8 +5,14 @@
         <div class="landing-shell w-100">
           <div class="landing-entrybar">
             <div class="landing-entry-actions d-flex align-items-center gap-2">
-              <button class="btn btn-link landing-login-link" @click="goLogin">Login</button>
-              <button class="btn landing-register-btn" @click="goLogin">Register</button>
+              <template v-if="isAuthenticated">
+                <button class="btn landing-secondary-btn" @click="goWorkspace">Workspace</button>
+                <button class="btn btn-link landing-login-link landing-logout-link" @click="handleLogout">Logout</button>
+              </template>
+              <template v-else>
+                <button class="btn btn-link landing-login-link" @click="goLogin">Login</button>
+                <button class="btn landing-register-btn" @click="goRegister">Register</button>
+              </template>
             </div>
           </div>
 
@@ -32,8 +38,8 @@
             </div>
 
             <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mb-4">
-              <button class="btn landing-primary-btn px-4 py-2" @click="goLogin">Get free demo</button>
-              <button class="btn landing-secondary-btn px-4 py-2" @click="goLogin">View experiments</button>
+              <button class="btn landing-primary-btn px-4 py-2" @click="goAnalyticsEntry">Get free demo</button>
+              <button class="btn landing-secondary-btn px-4 py-2" @click="goAnalyticsEntry">View experiments</button>
             </div>
 
             <div class="landing-showcase text-start">
@@ -90,9 +96,13 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+import { appStore } from '../stores/appStore';
+
 const router = useRouter();
+const isAuthenticated = computed(() => appStore.isAuthenticated.value);
 
 const features = [
   { icon: 'bi bi-lightning-charge', title: 'Rapid Prototyping', desc: 'Create and iterate on prompts in seconds.' },
@@ -107,6 +117,27 @@ const heroKpis = [
 ];
 
 function goLogin(): void {
-  router.push('/login');
+  router.push({ name: 'login', query: { redirect: 'analytics' } });
+}
+
+function goRegister(): void {
+  router.push({ name: 'login', query: { mode: 'register', redirect: 'analytics' } });
+}
+
+function goWorkspace(): void {
+  router.push('/prompts');
+}
+
+function goAnalyticsEntry(): void {
+  if (isAuthenticated.value) {
+    router.push('/analytics');
+    return;
+  }
+
+  router.push({ name: 'login', query: { redirect: 'analytics' } });
+}
+
+function handleLogout(): void {
+  appStore.logout();
 }
 </script>

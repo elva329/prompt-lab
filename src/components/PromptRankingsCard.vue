@@ -10,14 +10,35 @@
       <div v-else-if="!topPerformers.length && !needsAttention.length" class="empty-state">No data available.</div>
       <div v-else class="card-content">
         
-        <div class="ranking-section" v-if="topPerformers.length > 0">
-          <div class="section-title">TOP 3 PERFORMERS</div>
-          <div id="topPerformersChart" class="ranking-chart-container" :style="{ height: (topPerformers.length * 40 + 40) + 'px' }"></div>
-        </div>
-
-        <div class="ranking-section" v-if="needsAttention.length > 0">
-          <div class="section-title attention">TOP 3 NEEDS ATTENTION</div>
-          <div id="needsAttentionChart" class="ranking-chart-container" :style="{ height: (needsAttention.length * 40 + 40) + 'px' }"></div>
+        <div class="ranking-row">
+          <div class="ranking-section" v-if="topPerformers.length > 0">
+            <div class="section-header top">
+              <span class="icon">🏆</span>
+              <span class="header-label">TOP PERFORMERS</span>
+            </div>
+            <ul class="ranking-list">
+              <li v-for="(item, idx) in topPerformers" :key="item.id" class="ranking-item">
+                <span class="rank-circle top">{{ idx + 1 }}</span>
+                <span class="prompt-name">{{ item.label.replace(/Prompt /, '') }}</span>
+                <span class="score-bar top" :style="{ width: item.score + '%'}"></span>
+                <span class="score-value top">{{ item.score }}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="ranking-section" v-if="needsAttention.length > 0">
+            <div class="section-header attention">
+              <span class="icon">⚠️</span>
+              <span class="header-label">NEEDS ATTENTION</span>
+            </div>
+            <ul class="ranking-list">
+              <li v-for="(item, idx) in needsAttention" :key="item.id" class="ranking-item">
+                <span class="rank-circle attention">{{ idx + 1 }}</span>
+                <span class="prompt-name">{{ item.label.replace(/Prompt /, '') }}</span>
+                <span class="score-bar attention" :style="{ width: item.score + '%'}"></span>
+                <span class="score-value attention">{{ item.score }}</span>
+              </li>
+            </ul>
+          </div>
         </div>
 
       </div>
@@ -281,19 +302,114 @@ export default {
   margin-top: 0.25rem; /* Reduced from 0.5rem */
   padding-top: 2px;
 }
-.section-title {
-  font-size: 0.72rem;
+
+/* Section header styles */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #10b981; /* Green for Top Performers */
-  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
-  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
 }
-.section-title.attention {
-  color: #ef4444; /* Red for Needs Attention */
+.section-header.top {
+  color: #10b981;
+}
+.section-header.attention {
+  color: #ef4444;
+}
+.icon {
+  font-size: 1rem;
+}
+.header-label {
+  background: #e0f7f3;
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.section-header.attention .header-label {
+  background: #ffe4e4;
+}
+
+/* Ranking list styles */
+.ranking-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-family: 'Inter', sans-serif;
+}
+.rank-circle {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: #f0fdf4;
+  color: #10b981;
+}
+.rank-circle.attention {
+  background: #fff1f1;
+  color: #ef4444;
+}
+.prompt-name {
+  flex: 1;
+  font-weight: 600;
+  color: #334155;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.score-bar {
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  margin: 0 0.5rem;
+  min-width: 2rem;
+  max-width: 8rem;
+  background: #d1fae5;
+}
+.score-bar.top {
+  background: linear-gradient(90deg, #10b981 60%, #d1fae5 100%);
+}
+.score-bar.attention {
+  background: linear-gradient(90deg, #ef4444 60%, #ffe4e4 100%);
+}
+.score-value {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-left: 0.2rem;
+}
+.score-value.top {
+  color: #10b981;
+}
+.score-value.attention {
+  color: #ef4444;
+}
+
+/* Add ranking-row for two-column layout */
+.ranking-row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
 }
 .ranking-section {
 
   overflow: visible; /* Ensure bullets don't get clipped */
+  flex: 1;
 }
 .ranking-chart-container {
   width: 100%;

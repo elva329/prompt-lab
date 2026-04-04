@@ -126,17 +126,28 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, reactive, ref, watchEffect } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { appStore } from '../stores/appStore';
 
+const route = useRoute();
 const router = useRouter();
 const isRegisterMode = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const passwordRuleHint =
   'Use 8-16 characters, with at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special symbol (no spaces).';
+
+const redirectTarget = computed(() => {
+  const redirect = route.query.redirect;
+  return typeof redirect === 'string' ? redirect : '';
+});
+
+watchEffect(() => {
+  const mode = route.query.mode;
+  isRegisterMode.value = mode === 'register';
+});
 
 function isStrongPassword(password: string): boolean {
   if (password.length < 8 || password.length > 16) {
@@ -192,6 +203,12 @@ async function handleSubmit(): Promise<void> {
     } else {
       await appStore.login(form.email, form.password);
       // appStore.showToast('Login successful.', 'success');
+    }
+
+    const target = redirectTarget.value;
+    if (target === 'prompts' || target === 'experiments' || target === 'analytics' || target === 'favorites') {
+      router.push(`/${target}`);
+      return;
     }
 
     router.push('/analytics');

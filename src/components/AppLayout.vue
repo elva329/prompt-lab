@@ -31,7 +31,7 @@
       </span>
     </RouterLink>
 
-    <main class="app-main-fullscreen"">
+    <main class="app-main-fullscreen">
       <div class="container-xl" :class="{ 'h-100': !isPromptRoute }">
         <RouterView />
       </div>
