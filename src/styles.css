@@ -35,10 +35,10 @@ body {
   font-family: "Manrope", sans-serif;
   color: var(--app-text);
   background:
-    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 34%),
-    radial-gradient(circle at 82% 14%, rgba(205, 194, 255, 0.56), rgba(205, 194, 255, 0) 40%),
-    radial-gradient(circle at 88% 82%, rgba(196, 224, 255, 0.58), rgba(196, 224, 255, 0) 38%),
-    linear-gradient(155deg, #f3f0ff 0%, #ebe9ff 48%, #e7edff 100%);
+    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at 84% 14%, rgba(42, 157, 143, 0.12), rgba(42, 157, 143, 0) 40%),
+    radial-gradient(circle at 88% 82%, rgba(16, 35, 63, 0.08), rgba(16, 35, 63, 0) 38%),
+    linear-gradient(155deg, #f8f3eb 0%, #f4efe6 48%, #eef4f2 100%);
 }
 
 h1,
@@ -74,8 +74,8 @@ h6 {
   position: relative;
   background:
     radial-gradient(circle at 8% 8%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 34%),
-    radial-gradient(circle at 84% 18%, rgba(203, 191, 255, 0.3), rgba(203, 191, 255, 0) 42%),
-    linear-gradient(150deg, rgba(239, 235, 255, 0.7), rgba(231, 238, 255, 0.62));
+    radial-gradient(circle at 84% 18%, rgba(42, 157, 143, 0.16), rgba(42, 157, 143, 0) 34%),
+    linear-gradient(150deg, rgba(248, 243, 235, 0.72), rgba(239, 244, 241, 0.68));
 }
 
 .app-marketing-shell {
@@ -153,9 +153,9 @@ h6 {
 }
 
 .auth-topbar {
-  background: rgba(248, 249, 253, 0.84);
+  background: rgba(250, 246, 240, 0.88);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.72);
+  border-bottom: 1px solid rgba(232, 225, 214, 0.9);
 }
 
 .auth-nav-pills {
@@ -178,15 +178,15 @@ h6 {
 }
 
 .auth-nav-link:hover {
-  color: #24335f;
-  background: rgba(229, 238, 255, 0.6);
-  border-color: #d5e2ff;
+  color: #21414a;
+  background: rgba(214, 239, 233, 0.72);
+  border-color: rgba(122, 180, 170, 0.35);
 }
 
 .auth-nav-link.active {
-  color: #25356a;
-  border-color: #cfe0ff;
-  background: linear-gradient(120deg, #edf3ff, #e7f3ff);
+  color: #17333d;
+  border-color: rgba(122, 180, 170, 0.42);
+  background: linear-gradient(120deg, #eef6f3, #e7f0eb);
 }
 
 .sidebar-desktop {
@@ -198,8 +198,8 @@ h6 {
   top: 0;
   overflow-y: auto;
   flex-shrink: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 249, 253, 0.95));
-  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.92), rgba(246, 242, 235, 0.96));
+  border-right: 1px solid rgba(233, 225, 215, 0.92);
 }
 
 .sidebar-nav {
@@ -225,17 +225,17 @@ h6 {
 }
 
 .nav-item-link.active {
-  border-color: #cfe0ff;
-  background: linear-gradient(120deg, #edf3ff, #e7f3ff);
-  color: #25356a;
+  border-color: rgba(122, 180, 170, 0.42);
+  background: linear-gradient(120deg, #eef6f3, #e7f0eb);
+  color: #17333d;
 }
 
 .avatar-pill {
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  background: linear-gradient(140deg, #dbe8ff, #d6f4ff);
-  color: #2c3f7b;
+  background: linear-gradient(140deg, #dcebe6, #f0e8db);
+  color: #24454d;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -243,11 +243,11 @@ h6 {
 }
 
 .sidebar-desktop .border-top {
-  border-color: rgba(208, 214, 225, 0.8) !important;
+  border-color: rgba(222, 214, 205, 0.9) !important;
 }
 
 .sidebar-desktop .border-bottom {
-  border-color: rgba(208, 214, 225, 0.8) !important;
+  border-color: rgba(222, 214, 205, 0.9) !important;
 }
 
 .gradient-text {
@@ -329,7 +329,6 @@ h6 {
 .landing-shell::before {
   content: none;
 }
-
 .landing-topbar {
   position: relative;
   z-index: 2;
@@ -419,13 +418,6 @@ h6 {
   font-size: 1.35rem;
   letter-spacing: -0.02em;
   color: #10233f;
-}
-
-.landing-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
 }
 
 .landing-content {
@@ -2238,11 +2230,11 @@ h6 {
 }
 
 .experiment-row:hover {
-  background: linear-gradient(150deg, rgba(247, 250, 255, 0.95), rgba(238, 245, 255, 0.9));
+  background: linear-gradient(150deg, rgba(247, 242, 235, 0.96), rgba(238, 244, 241, 0.92));
 }
 
 .ai-assistant-card {
-  background: linear-gradient(135deg, #f8fbff, #edf3ff);
+  background: linear-gradient(135deg, #f8f3eb, #eef4f1);
 }
 
 .prompt-card:not(.prompt-card-modern) {

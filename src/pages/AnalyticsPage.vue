@@ -22,6 +22,15 @@
       </div>
     </div>
     <div class="analytics-container">
+      <header class="analytics-header mb-4">
+        <div>
+          <p class="analytics-eyebrow mb-1">Analytics-first</p>
+          <h1 class="analytics-title mb-2">Prompt performance overview</h1>
+          <p class="analytics-subtitle mb-0">
+            Review prompt quality, response time, and experiment rankings in one clear workspace.
+          </p>
+        </div>
+      </header>
       <!-- SECTION 1 -->
       <div class="section-1">
         <!-- ROW 1: 4 cards - 271*164 each -->
@@ -131,9 +140,13 @@ export default defineComponent({
 
 <style scoped>
 .analytics-page {
-  /* height: 100vh; */
-  padding: 1rem;
+  position: relative;
+  padding: 0.75rem;
   box-sizing: border-box;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 30%),
+    radial-gradient(circle at 84% 18%, rgba(42, 157, 143, 0.12), rgba(42, 157, 143, 0) 34%),
+    linear-gradient(180deg, #f8f3eb 0%, #f4efe6 54%, #eef4f2 100%);
 }
 
 .analytics-container {
@@ -142,14 +155,52 @@ export default defineComponent({
   margin: 0 auto;
 }
 
+.analytics-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0.2rem 0.15rem;
+}
+
+.analytics-eyebrow {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #6b7c79;
+}
+
+.analytics-title {
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  line-height: 1.05;
+  color: #10233f;
+}
+
+.analytics-subtitle {
+  max-width: 48rem;
+  color: #5f6d6b;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 /* Border styles with radius - NO PADDING */
 .bordered-card {
-  /* border: 2px solid #000; */
-  border-radius: 8px;
+  border: none;
+  border-radius: 18px;
   box-sizing: border-box;
   width: 100%;
   display: flex;
   align-items: stretch;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.bordered-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 14px 28px rgba(16, 35, 63, 0.08);
 }
 
 .bordered-card > * {
@@ -158,22 +209,22 @@ export default defineComponent({
 }
 
 .section-1 {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 /* ALL ROWS use the same container with consistent gap */
 .card-row-container {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
 .card-row2-container {
   display: flex;
   width: 100%;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
@@ -205,6 +256,42 @@ export default defineComponent({
   height: 400px;
 }
 
+:deep(.dashboard-menu-row) {
+  margin-bottom: 0.9rem;
+}
+
+:deep(.dashboard-menu-pills) {
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+  border: 1px solid rgba(208, 218, 216, 0.5);
+}
+
+:deep(.dashboard-menu-link) {
+  color: #51605d;
+}
+
+:deep(.dashboard-menu-link:hover) {
+  color: #10233f;
+  background: rgba(236, 243, 242, 0.95);
+}
+
+:deep(.dashboard-menu-link.active) {
+  color: #f8fbfc;
+  background: linear-gradient(130deg, #10233f, #1b5e55);
+  box-shadow: 0 8px 18px rgba(16, 35, 63, 0.14);
+}
+
+:deep(.dashboard-menu-icon) {
+  background: rgba(255, 255, 255, 0.68);
+  color: #10233f;
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+}
+
+:deep(.dashboard-menu-icon:hover) {
+  background: rgba(255, 255, 255, 0.86);
+  color: #1b5e55;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 1200px) {
   .card-row-container > .card-row1 {
@@ -217,6 +304,22 @@ export default defineComponent({
 }
 
 @media screen and (max-width: 768px) {
+  .analytics-page {
+    padding: 0.55rem;
+  }
+
+  .analytics-header {
+    align-items: flex-start;
+  }
+
+  .analytics-title {
+    font-size: 1.45rem;
+  }
+
+  .analytics-subtitle {
+    font-size: 0.92rem;
+  }
+
   .card-row-container > *,
   .card-row2-container > * {
     flex: 1 1 100%;
@@ -230,7 +333,7 @@ export default defineComponent({
   .card-row2,
   .card-row3 {
     height: auto;
-    min-height: 200px; /* Give cards a minimum height on mobile */
+    min-height: 200px;
   }
 }
 </style>
