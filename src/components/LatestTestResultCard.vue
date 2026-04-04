@@ -1,63 +1,65 @@
 <template>
-  <div class="latest-result-card">
+  <div class="ui-card latest-result-card">
     <div class="latest-result-header">
       <div>
-        <div class="latest-result-kicker">Latest Test Result</div>
-        <div class="latest-result-title">/100 · Overall Quality</div>
+        <div class="card-title">Latest Test Result</div>
+        <div class="card-subtitle">/100 · Overall Quality</div>
       </div>
       <span class="latest-result-status" :class="statusToneClass">{{ statusLabel }}</span>
     </div>
 
-    <div v-if="loading" class="latest-result-loading">Loading latest result...</div>
-    <div v-else-if="!latestResult" class="latest-result-empty">No results available yet.</div>
-    <div v-else class="latest-result-content">
-      <div class="latest-result-summary">
-        <div class="latest-result-ring" :style="ringStyle">
-          <div class="latest-result-ring-inner">
-            <span class="latest-result-score">{{ latestResult.overallQuality }}</span>
+    <div class="card-body latest-result-body">
+      <div v-if="loading" class="latest-result-loading">Loading latest result...</div>
+      <div v-else-if="!latestResult" class="latest-result-empty">No results available yet.</div>
+      <div v-else class="latest-result-content">
+        <div class="latest-result-summary">
+          <div class="latest-result-ring" :style="ringStyle">
+            <div class="latest-result-ring-inner">
+              <span class="latest-result-score">{{ latestResult.overallQuality }}</span>
+            </div>
+          </div>
+
+          <div class="latest-result-meta">
+            <div class="latest-result-meta-eyebrow">Overall Quality</div>
+            <div class="latest-result-prompt">{{ promptTitle }}</div>
+            <div class="latest-result-id">promptId {{ latestResult.promptId }}</div>
+            <div class="latest-result-date">{{ formattedDate }}</div>
           </div>
         </div>
 
-        <div class="latest-result-meta">
-          <div class="latest-result-meta-eyebrow">Overall Quality</div>
-          <div class="latest-result-prompt">{{ promptTitle }}</div>
-          <div class="latest-result-id">promptId {{ latestResult.promptId }}</div>
-          <div class="latest-result-date">{{ formattedDate }}</div>
-        </div>
-      </div>
-
-      <div class="latest-result-metrics">
-        <div
-          v-for="metric in metrics"
-          :key="metric.label"
-          class="latest-result-metric-row"
-        >
-          <div class="latest-result-metric-label">{{ metric.label }}</div>
-          <div class="latest-result-metric-track" :aria-label="metric.label">
-            <div class="latest-result-metric-fill" :style="{ width: `${metric.value}%`, background: metric.color }"></div>
+        <div class="latest-result-metrics">
+          <div
+            v-for="metric in metrics"
+            :key="metric.label"
+            class="latest-result-metric-row"
+          >
+            <div class="latest-result-metric-label">{{ metric.label }}</div>
+            <div class="latest-result-metric-track" :aria-label="metric.label">
+              <div class="latest-result-metric-fill" :style="{ width: `${metric.value}%`, background: metric.color }"></div>
+            </div>
+            <div class="latest-result-metric-value">{{ metric.value }}</div>
           </div>
-          <div class="latest-result-metric-value">{{ metric.value }}</div>
         </div>
-      </div>
 
-      <div class="latest-result-response">
-        <div class="latest-result-response-label">
-          <i class="bi bi-clock"></i>
-          <span>Response Time</span>
+        <div class="latest-result-response">
+          <div class="latest-result-response-label">
+            <i class="bi bi-clock"></i>
+            <span>Response Time</span>
+          </div>
+          <div class="latest-result-response-value">{{ formattedResponseTime }}</div>
         </div>
-        <div class="latest-result-response-value">{{ formattedResponseTime }}</div>
-      </div>
 
-      <div class="latest-result-experiment">
-        <div class="latest-result-experiment-label">Experiment</div>
-        <div class="latest-result-experiment-id">{{ latestResult.experimentId }}</div>
-        <div class="latest-result-experiment-meta">{{ formattedExperimentDate }} · {{ experimentRuns }} runs</div>
-      </div>
+        <div class="latest-result-experiment">
+          <div class="latest-result-experiment-label">Experiment</div>
+          <div class="latest-result-experiment-id">{{ latestResult.experimentId }}</div>
+          <div class="latest-result-experiment-meta">{{ formattedExperimentDate }} · {{ experimentRuns }} runs</div>
+        </div>
 
-      <RouterLink class="latest-result-link" to="/experiments">
-        <span>View All Results</span>
-        <i class="bi bi-arrow-right"></i>
-      </RouterLink>
+        <RouterLink class="latest-result-link" to="/experiments">
+          <span>View All Results</span>
+          <i class="bi bi-arrow-right"></i>
+        </RouterLink>
+      </div>
     </div>
   </div>
 </template>
@@ -203,47 +205,41 @@ export default defineComponent({
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   width: 100%;
   min-height: 100%;
-  padding: 1rem 1rem 1.05rem;
-  border-radius: 26px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 246, 241, 0.98)),
-    linear-gradient(135deg, rgba(255, 186, 73, 0.06), rgba(59, 130, 246, 0.03));
-  border: 1px solid rgba(228, 221, 211, 0.92);
-  box-shadow: 0 16px 34px rgba(16, 35, 63, 0.06);
+  padding: 1.2rem 1.1rem 1rem 1.1rem;
+  border-radius: 1rem;
+  gap: 0;
+  background: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 6px 18px rgba(24, 33, 58, 0.08);
   overflow: hidden;
-}
-
-.latest-result-card::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: linear-gradient(90deg, #f59e0b, #fb7185);
 }
 
 .latest-result-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-}
-
-.latest-result-kicker {
-  color: #9aa7bf;
-  font-size: 0.82rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.latest-result-title {
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
   margin-top: 0.2rem;
-  color: #7a8aa8;
-  font-size: 0.95rem;
+}
+
+.latest-result-card .card-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
   font-weight: 700;
+  color: #687083;
+  margin-bottom: 0.2rem;
+  letter-spacing: 0.01em;
+  margin-top: 0.2rem;
+}
+
+.latest-result-card .card-subtitle {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  color: #687083;
+  margin-bottom: 0;
 }
 
 .latest-result-status {
@@ -251,10 +247,10 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   align-self: flex-start;
-  min-height: 2.45rem;
-  padding: 0.35rem 0.8rem;
+  min-height: 1.55rem;
+  padding: 0.18rem 0.6rem;
   border-radius: 999px;
-  font-size: 0.88rem;
+  font-size: 0.68rem;
   font-weight: 800;
   line-height: 1.15;
   border: 1px solid transparent;
@@ -280,7 +276,7 @@ export default defineComponent({
 
 .latest-result-loading,
 .latest-result-empty {
-  min-height: 18rem;
+  min-height: 12rem;
   display: grid;
   place-items: center;
   color: #8b97aa;
@@ -290,24 +286,24 @@ export default defineComponent({
 .latest-result-content {
   display: flex;
   flex-direction: column;
-  gap: 0.95rem;
+  gap: 0.6rem;
 }
 
 .latest-result-summary {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
 }
 
 .latest-result-ring {
   --latest-score: 0%;
   --latest-accent: #f97316;
-  width: 5rem;
-  height: 5rem;
+  width: 4.4rem;
+  height: 4.4rem;
   border-radius: 50%;
   background: conic-gradient(var(--latest-accent) var(--latest-score), rgba(234, 240, 247, 0.95) 0);
-  padding: 0.36rem;
+  padding: 0.3rem;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
 }
 
@@ -321,7 +317,7 @@ export default defineComponent({
 }
 
 .latest-result-score {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 800;
   line-height: 1;
   color: #1f2937;
@@ -333,7 +329,7 @@ export default defineComponent({
 
 .latest-result-meta-eyebrow {
   color: #91a0b8;
-  font-size: 0.85rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -341,7 +337,7 @@ export default defineComponent({
 
 .latest-result-prompt {
   color: #24324a;
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   font-weight: 800;
   margin-top: 0.25rem;
 }
@@ -349,31 +345,31 @@ export default defineComponent({
 .latest-result-id,
 .latest-result-date {
   color: #8c99af;
-  font-size: 0.92rem;
+  font-size: 0.68rem;
   font-weight: 600;
 }
 
 .latest-result-metrics {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.45rem;
 }
 
 .latest-result-metric-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) auto;
-  gap: 0.8rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.65fr) auto;
+  gap: 0.55rem;
   align-items: center;
 }
 
 .latest-result-metric-label {
   color: #8b97aa;
-  font-size: 0.92rem;
+  font-size: 0.68rem;
   font-weight: 700;
 }
 
 .latest-result-metric-track {
   position: relative;
-  height: 0.7rem;
+  height: 0.5rem;
   border-radius: 999px;
   background: rgba(232, 237, 244, 0.95);
   overflow: hidden;
@@ -388,7 +384,7 @@ export default defineComponent({
   min-width: 2.2rem;
   text-align: right;
   color: #435066;
-  font-size: 0.98rem;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -397,8 +393,8 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.85rem 0.95rem;
-  border-radius: 18px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
   background: rgba(247, 249, 252, 0.98);
 }
 
@@ -407,7 +403,7 @@ export default defineComponent({
   align-items: center;
   gap: 0.55rem;
   color: #8b97aa;
-  font-size: 0.95rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
@@ -417,18 +413,18 @@ export default defineComponent({
 
 .latest-result-response-value {
   color: #ff6f7a;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 900;
   letter-spacing: -0.01em;
 }
 
 .latest-result-experiment {
-  padding: 0.85rem 0.1rem 0.15rem;
+  padding: 0.35rem 0.1rem 0.05rem;
 }
 
 .latest-result-experiment-label {
   color: #9aa7bf;
-  font-size: 0.8rem;
+  font-size: 0.62rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -437,14 +433,14 @@ export default defineComponent({
 .latest-result-experiment-id {
   margin-top: 0.25rem;
   color: #5b6981;
-  font-size: 0.98rem;
+  font-size: 0.72rem;
   font-weight: 800;
 }
 
 .latest-result-experiment-meta {
   margin-top: 0.2rem;
   color: #91a0b8;
-  font-size: 0.92rem;
+  font-size: 0.68rem;
   font-weight: 600;
 }
 
@@ -454,11 +450,11 @@ export default defineComponent({
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding-top: 0.85rem;
+  padding-top: 0.5rem;
   border-top: 1px solid rgba(226, 231, 239, 0.9);
   color: #3b82f6;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 800;
 }
 
