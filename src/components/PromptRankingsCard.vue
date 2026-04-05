@@ -1,8 +1,11 @@
 <template>
   <div class="ui-card">
-    <div class="card-header">
-      <span class="card-dot"></span>
-      <span class="card-title">Prompt Rankings</span>
+    <div class="card-header-row">
+      <div class="card-header">
+        <span class="card-dot"></span>
+        <span class="card-title">Prompt Rankings</span>
+      </div>
+      <div class="run-counter">{{ totalRuns }} runs</div>
     </div>
     
     <div class="card-body">
@@ -19,7 +22,7 @@
             <ul class="ranking-list">
               <li v-for="(item, idx) in topPerformers" :key="item.id" class="ranking-item">
                 <span class="rank-circle top">{{ idx + 1 }}</span>
-                <span class="prompt-name">{{ item.label.replace(/Prompt /, '') }}</span>
+                <span class="prompt-name">{{ item.label }}</span>
                 <span class="score-bar top" :style="{ width: item.score + '%'}"></span>
                 <span class="score-value top">{{ item.score }}</span>
               </li>
@@ -33,12 +36,16 @@
             <ul class="ranking-list">
               <li v-for="(item, idx) in needsAttention" :key="item.id" class="ranking-item">
                 <span class="rank-circle attention">{{ idx + 1 }}</span>
-                <span class="prompt-name">{{ item.label.replace(/Prompt /, '') }}</span>
+                <span class="prompt-name">{{ item.label }}</span>
                 <span class="score-bar attention" :style="{ width: item.score + '%'}"></span>
                 <span class="score-value attention">{{ item.score }}</span>
               </li>
             </ul>
           </div>
+        </div>
+        
+        <div class="ranking-footer">
+          Ranked by overall quality score · 5 best & 4 worst shown
         </div>
 
       </div>
@@ -47,9 +54,6 @@
 </template>
 
 <script>
-import * as am5 from '@amcharts/amcharts5';
-import * as am5xy from '@amcharts/amcharts5/xy';
-import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import { fetchResultsByUserRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
 
@@ -59,8 +63,8 @@ export default {
     return {
       topPerformers: [],
       needsAttention: [],
+      totalRuns: 0,
       loading: true,
-      roots: [],
     };
   },
   async mounted() {
@@ -70,6 +74,7 @@ export default {
       if (!userId) throw new Error('User not logged in');
 
       const results = await fetchResultsByUserRequest(userId);
+      this.totalRuns = results.length;
 
       if (results.length === 0) {
         this.loading = false;
@@ -86,158 +91,30 @@ export default {
         const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
         return {
           id: promptId,
-          score: parseFloat(avg.toFixed(1)),
+          score: Math.round(avg),
         };
-      }).sort((a, b) => b.score - a.score); // Rank from high to low
+      }).sort((a, b) => b.score - a.score);
 
-      // Needs Attention: Score < 60 (Sorted worst first), Limit to top 3
+      // Top Performers: Score >= 60 (Sorted best first), Limit to top 5
+      this.topPerformers = processedData
+        .filter(item => item.score >= 60)
+        .slice(0, 5)
+        .map((item, index) => ({ ...item, label: `Prompt ${item.id}` }));
+
+      // Needs Attention: Score < 60 (Sorted worst first), Limit to top 4
       this.needsAttention = processedData
         .filter(item => item.score < 60)
         .sort((a, b) => a.score - b.score)
-        .slice(0, 3)
-        .map((item, index) => ({ ...item, label: `#${index + 1} Prompt ${item.id}` }));
-
-      // Top Performers: Score >= 60 (Sorted best first), Limit to top 3
-      this.topPerformers = processedData
-        .filter(item => item.score >= 60)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3)
-        .map((item, index) => ({ ...item, label: `#${index + 1} Prompt ${item.id}` }));
+        .slice(0, 4)
+        .map((item, index) => ({ ...item, label: `Prompt ${item.id}` }));
 
       this.loading = false;
-
-      this.$nextTick(() => {
-        this.initCharts();
-      });
     } catch (e) {
       console.error("Failed to fetch prompt rankings:", e);
       this.topPerformers = [];
       this.needsAttention = [];
+      this.totalRuns = 0;
       this.loading = false;
-    }
-  },
-  beforeUnmount() {
-    this.roots.forEach(root => root.dispose());
-  },
-  methods: {
-    initCharts() {
-      this.roots.forEach(root => root.dispose());
-      this.roots = [];
-
-      if (this.topPerformers.length > 0) {
-        this.createRankingChart('topPerformersChart', this.topPerformers, 0x10b981);
-      }
-
-      if (this.needsAttention.length > 0) {
-        this.createRankingChart('needsAttentionChart', this.needsAttention, 0xef4444);
-      }
-    },
-    createRankingChart(divId, data, colorHex) {
-      let root = am5.Root.new(divId);
-      this.roots.push(root);
-
-      root.setThemes([am5themes_Animated.new(root)]);
-
-      let chart = root.container.children.push(am5xy.XYChart.new(root, {
-        panX: false,
-        panY: false,
-        wheelX: "none",
-        wheelY: "none",
-        paddingLeft: 5,
-        paddingRight: 5,
-        paddingTop: 15, // Increased to avoid clipping top labels
-        paddingBottom: 25, // Increased to move logo away
-        layout: root.verticalLayout
-      }));
-
-      let yRenderer = am5xy.AxisRendererY.new(root, {
-        minGridDistance: 20,
-        inversed: true,
-        cellStartLocation: 0.2, // Move first bar down for its label
-        cellEndLocation: 0.8
-      });
-      yRenderer.grid.template.set("visible", false);
-      yRenderer.labels.template.set("visible", false);
-
-      let yAxis = chart.yAxes.push(am5xy.CategoryAxis.new(root, {
-        categoryField: "label",
-        renderer: yRenderer
-      }));
-
-      let xAxis = chart.xAxes.push(am5xy.ValueAxis.new(root, {
-        min: 0,
-        max: 100,
-        strictMinMax: true,
-        renderer: am5xy.AxisRendererX.new(root, {})
-      }));
-      xAxis.get("renderer").grid.template.set("visible", false);
-      xAxis.get("renderer").labels.template.set("visible", false);
-
-      let series = chart.series.push(am5xy.ColumnSeries.new(root, {
-        xAxis: xAxis,
-        yAxis: yAxis,
-        valueXField: "score",
-        categoryYField: "label",
-        sequencedInterpolation: true
-      }));
-
-      series.columns.template.setAll({
-        height: 6, // Restored to small height
-        cornerRadiusBR: 3,
-        cornerRadiusTR: 3,
-        cornerRadiusBL: 3,
-        cornerRadiusTL: 3,
-        strokeOpacity: 0,
-        fill: am5.color(colorHex)
-      });
-
-      // Label bullet (Above the bar, left aligned)
-      series.bullets.push(function() {
-        return am5.Bullet.new(root, {
-          locationY: 0, 
-          locationX: 0,
-          sprite: am5.Label.new(root, {
-            text: "{label}",
-            fill: am5.color(0x334155),
-            centerY: am5.p100,
-            x: 0,
-            dy: -2, // Slightly increased from -1
-            populateText: true,
-            fontSize: 11, 
-            fontFamily: 'Manrope, sans-serif',
-            fontWeight: "700"
-          })
-        });
-      });
-
-      // Score bullet (Above the bar, right aligned)
-      series.bullets.push(function() {
-        return am5.Bullet.new(root, {
-          locationY: 0,
-          locationX: 1,
-          sprite: am5.Label.new(root, {
-            text: "{score}",
-            fill: am5.color(colorHex), 
-            centerY: am5.p100,
-            centerX: am5.p100,
-            x: am5.p100,
-            dy: -2, // Slightly increased from -1
-            populateText: true,
-            fontSize: 11, 
-            fontFamily: 'Manrope, sans-serif',
-            fontWeight: "800"
-          })
-        });
-      });
-
-      const chartData = data.map(item => ({
-        ...item
-      }));
-
-      yAxis.data.setAll(chartData);
-      series.data.setAll(chartData);
-      series.appear(1000);
-      chart.appear(1000, 100);
     }
   }
 };
@@ -245,48 +122,70 @@ export default {
 
 <style scoped>
 .ui-card {
-  background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1rem 1.2rem; /* Reduced from 1.5rem */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 245, 239, 0.98));
+  border: 1px solid rgba(223, 214, 204, 0.72);
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+  padding: 1.2rem;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem; /* Reduced from 0.5rem */
-  font-family: 'Inter', sans-serif;
+  gap: 0.75rem;
+  font-family: 'Manrope', sans-serif;
   transition: box-shadow 0.2s, transform 0.2s;
 }
+
 .ui-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 16px 30px rgba(16, 35, 63, 0.08);
 }
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .card-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
+
 .card-dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #38bdf8; /* Standardized primary dot color */
+  background: #1b5e55;
   display: inline-block;
 }
+
 .card-title {
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #687083;
-  font-family: 'Sora', sans-serif;
+  color: #10233f;
+  letter-spacing: -0.01em;
 }
+
+.run-counter {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #a0aec0;
+  background: rgba(226, 232, 240, 0.5);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+}
+
 .card-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 200px;
-  overflow: visible; /* Prevent vertical scrollbar */
-  padding-bottom: 10px;
+  min-height: 0;
+  overflow: visible;
 }
+
 .loading-state, .empty-state {
   display: flex;
   align-items: center;
@@ -295,12 +194,12 @@ export default {
   font-size: 0.9rem;
   flex: 1;
 }
+
 .card-content {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Reduced from 1.5rem */
-  margin-top: 0.25rem; /* Reduced from 0.5rem */
-  padding-top: 2px;
+  gap: 1rem;
+  flex: 1;
 }
 
 /* Section header styles */
@@ -308,29 +207,37 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-.section-header.top {
-  color: #10b981;
-}
-.section-header.attention {
-  color: #ef4444;
-}
-.icon {
-  font-size: 1rem;
-}
-.header-label {
-  background: #e0f7f3;
-  border-radius: 0.3rem;
-  padding: 0.1rem 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.05em;
 }
+
+.section-header.top {
+  color: #1b5e55;
+}
+
+.section-header.attention {
+  color: #dc2626;
+}
+
+.icon {
+  font-size: 1.1rem;
+}
+
+.header-label {
+  background: #ecf9f7;
+  border-radius: 4px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #1b5e55;
+}
+
 .section-header.attention .header-label {
-  background: #ffe4e4;
+  background: #fce4e6;
+  color: #dc2626;
 }
 
 /* Ranking list styles */
@@ -340,79 +247,114 @@ export default {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
 }
+
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  font-family: 'Inter', sans-serif;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-family: 'Manrope', sans-serif;
 }
+
 .rank-circle {
-  width: 2rem;
-  height: 2rem;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 0.85rem;
-  background: #f0fdf4;
-  color: #10b981;
-}
-.rank-circle.attention {
-  background: #fff1f1;
-  color: #ef4444;
-}
-.prompt-name {
-  flex: 1;
-  font-weight: 600;
-  color: #334155;
   font-size: 0.8rem;
+  flex-shrink: 0;
+  background: #ecf9f7;
+  color: #1b5e55;
+}
+
+.rank-circle.attention {
+  background: #fce4e6;
+  color: #dc2626;
+}
+
+.prompt-name {
+  flex: 0 0 90px;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.85rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .score-bar {
-  height: 0.6rem;
-  border-radius: 0.3rem;
-  margin: 0 0.5rem;
-  min-width: 2rem;
-  max-width: 8rem;
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
   background: #d1fae5;
+  min-width: 30px;
 }
+
 .score-bar.top {
-  background: linear-gradient(90deg, #10b981 60%, #d1fae5 100%);
+  background: linear-gradient(90deg, #1b5e55 50%, #d1fae5 100%);
 }
+
 .score-bar.attention {
-  background: linear-gradient(90deg, #ef4444 60%, #ffe4e4 100%);
+  background: linear-gradient(90deg, #dc2626 50%, #fce4e6 100%);
 }
+
 .score-value {
   font-weight: 700;
   font-size: 0.85rem;
-  margin-left: 0.2rem;
-}
-.score-value.top {
-  color: #10b981;
-}
-.score-value.attention {
-  color: #ef4444;
+  min-width: 28px;
+  text-align: right;
+  flex-shrink: 0;
 }
 
-/* Add ranking-row for two-column layout */
+.score-value.top {
+  color: #1b5e55;
+}
+
+.score-value.attention {
+  color: #dc2626;
+}
+
+/* Layout styles */
 .ranking-row {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
-}
-.ranking-section {
-
-  overflow: visible; /* Ensure bullets don't get clipped */
+  gap: 2rem;
   flex: 1;
+  min-height: 0;
 }
-.ranking-chart-container {
-  width: 100%;
-  margin-bottom: 0.5rem;
+
+.ranking-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: visible;
+}
+
+.ranking-footer {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+@media (max-width: 768px) {
+  .ranking-row {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .run-counter {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
 }
 </style>
