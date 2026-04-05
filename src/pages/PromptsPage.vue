@@ -61,9 +61,9 @@
       </div>
     </section>
 
-    <section v-if="isLoading && prompts.length === 0" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="text-secondary mt-2">Loading prompts...</p>
+    <section v-if="isLoading && prompts.length === 0" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading prompts</p>
     </section>
 
     <section v-else-if="errorMessage && prompts.length === 0" class="alert alert-danger">{{ errorMessage }}</section>

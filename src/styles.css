@@ -2886,3 +2886,147 @@ h6 {
     transform: rotate(360deg);
   }
 }
+
+/* Enhanced Loading Animations */
+@keyframes spinSmooth {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinGlow {
+  0% {
+    transform: rotate(0deg);
+    filter: drop-shadow(0 0 4px rgba(27, 94, 85, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(27, 94, 85, 0.5));
+  }
+  100% {
+    transform: rotate(360deg);
+    filter: drop-shadow(0 0 4px rgba(27, 94, 85, 0.3));
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Loading State Container */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 3rem 1rem;
+  min-height: 200px;
+}
+
+/* Enhanced Spinner */
+.loading-spinner {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  border-top-color: #1b5e55;
+  border-radius: 50%;
+  animation: spinSmooth 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 2px solid transparent;
+  border-right-color: rgba(27, 94, 85, 0.3);
+  border-radius: 50%;
+  animation: spinSmooth 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite reverse;
+}
+
+/* Animated Dots */
+.loading-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1b5e55;
+  animation: dotPulse 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Loading Text */
+.loading-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  letter-spacing: 0.3px;
+}
+
+.loading-text::after {
+  content: '';
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: loadingDots 1.5s steps(3, end) infinite;
+}
+
+@keyframes loadingDots {
+  0%, 20% {
+    content: '';
+    width: 0;
+  }
+  40% {
+    content: '.';
+    width: 0.2em;
+  }
+  60% {
+    content: '..';
+    width: 0.4em;
+  }
+  80%, 100% {
+    content: '...';
+    width: 0.6em;
+  }
+}

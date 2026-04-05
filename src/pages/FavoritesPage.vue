@@ -35,9 +35,9 @@
       </div>
     </section>
 
-    <div v-if="isLoading" class="loading-state py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="text-secondary mt-2">Loading favorites...</p>
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading favorites</p>
     </div>
 
     <div v-else-if="favorites.length === 0" class="empty-state-wrapper">

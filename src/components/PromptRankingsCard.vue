@@ -9,7 +9,10 @@
     </div>
     
     <div class="card-body">
-      <div v-if="loading" class="loading-state">Loading...</div>
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+        <p class="loading-text" style="font-size: 0.85rem; margin: 0;">Loading</p>
+      </div>
       <div v-else-if="!topPerformers.length && !needsAttention.length" class="empty-state">No data available.</div>
       <div v-else class="card-content">
         

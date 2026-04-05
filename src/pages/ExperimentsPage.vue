@@ -34,9 +34,9 @@
       </button>
     </section>
 
-    <section v-if="isLoading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="text-secondary mt-2 mb-0">Loading experiments...</p>
+    <section v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading experiments</p>
     </section>
 
     <section v-else-if="errorMessage" class="alert alert-danger mb-0">{{ errorMessage }}</section>

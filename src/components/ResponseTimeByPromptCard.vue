@@ -6,7 +6,10 @@
     </div>
     <div class="card-subtitle">Prompt speed & distribution</div>
     <div class="card-body">
-      <div v-if="loading" class="loading-state">Loading...</div>
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner" style="width: 40px; height: 40px;"></div>
+        <p class="loading-text" style="font-size: 0.85rem; margin: 0;">Loading</p>
+      </div>
       <div v-else-if="!avgTimes.length" class="empty-state">No data available.</div>
       <div v-else id="responseTimeChart" style="width: 100%; height: 250px;"></div>
     </div>
