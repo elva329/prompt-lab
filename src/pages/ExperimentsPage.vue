@@ -190,3 +190,13 @@ onMounted(() => {
   loadExperiments();
 });
 </script>
+
+<style scoped>
+.experiment-card-modern {
+  cursor: default;
+}
+
+.experiment-card-modern .btn {
+  cursor: pointer;
+}
+</style>
