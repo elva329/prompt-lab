@@ -100,7 +100,7 @@ export default {
         wheelY: 'zoomX',
         pinchZoomX: true,
         paddingLeft: 0,
-        paddingBottom: 12
+        paddingBottom: 50
       })
     );
     // Update axis label font style and size to match sample
@@ -193,7 +193,7 @@ export default {
     chart.set('scrollbarX', am5.Scrollbar.new(root, {
       orientation: 'horizontal',
       marginTop:-5, // Add space above scrollbar
-      marginBottom: 40 // Add space above scrollbar
+      marginBottom: 60 // Increased spacing for logo
     }));
     series.appear(1000, 100);
     chart.appear(1000, 100);
