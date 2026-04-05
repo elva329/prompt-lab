@@ -29,11 +29,16 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary" v-if="selectedPromptIds.length">Selected: {{ selectedPromptIds.length }}/3</span>
-        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0" @click="goToTestPrompt">
+        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0 || selectedPromptIds.length > 3" @click="goToTestPrompt">
           Test Prompts
         </button>
       </div>
     </section>
+
+    <div v-if="selectedPromptIds.length > 3" class="alert alert-warning px-4 py-3 mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      You can select up to 3 prompts only. Please deselect some prompts before testing.
+    </div>
 
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -234,10 +239,6 @@ function toggleSelection(id: number) {
   if (isSelected(id)) {
     selectedPromptIds.value = selectedPromptIds.value.filter(i => i !== id);
   } else {
-    if (selectedPromptIds.value.length >= 3) {
-      appStore.showToast('You can select up to 3 prompts.', 'warning');
-      return;
-    }
     selectedPromptIds.value.push(id);
   }
 }

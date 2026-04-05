@@ -37,7 +37,7 @@
         <button class="btn btn-outline-secondary btn-sm" :disabled="selectedPromptIds.length === 0" @click="clearSelection">
           Clear
         </button>
-        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0" @click="goToTestPrompt">
+        <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0 || selectedPromptIds.length > 3" @click="goToTestPrompt">
           Test Prompt
         </button>
       </div>
@@ -59,6 +59,11 @@
           </button>
         </div>
       </div>
+    </section>
+
+    <section v-if="selectedPromptIds.length > 3" class="alert alert-warning px-4 py-3 mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      You can select up to 3 prompts only. Please deselect some prompts before testing.
     </section>
 
     <section v-if="isLoading && prompts.length === 0" class="loading-container">
@@ -352,15 +357,9 @@ function isSelected(promptId: number): boolean {
 function togglePromptSelection(promptId: number): void {
   if (isSelected(promptId)) {
     selectedPromptIds.value = selectedPromptIds.value.filter((entry) => entry !== promptId);
-    return;
+  } else {
+    selectedPromptIds.value = [...selectedPromptIds.value, promptId];
   }
-
-  if (selectedPromptIds.value.length >= 3) {
-    appStore.showToast('You can select up to 3 prompts only.', 'warning');
-    return;
-  }
-
-  selectedPromptIds.value = [...selectedPromptIds.value, promptId];
 }
 
 function isFavorite(promptId: number): boolean {
