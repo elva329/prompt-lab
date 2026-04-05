@@ -58,13 +58,13 @@
 
         <!-- Column 2: Summary, Dimensions & Latest -->
         <div class="analytics-right-column">
-          <div class="analytics-summary-row">
+          <!-- <div class="analytics-summary-row">
             <section class="analytics-panel analytics-panel--summary-full">
               <div class="analytics-card-shell">
                 <QualitySummaryCard />
               </div>
             </section>
-          </div>
+          </div> -->
 
           <div class="analytics-secondary-grid">
             <section class="analytics-panel analytics-panel--dimensions">
@@ -220,7 +220,7 @@ export default defineComponent({
 
 .analytics-main-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr);
   gap: 0.7rem;
   margin-bottom: 0.7rem;
   align-items: stretch;
@@ -276,7 +276,7 @@ export default defineComponent({
 
 .analytics-bottom-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.6fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.2fr);
   gap: 0.7rem;
   align-items: stretch;
   margin-bottom: 0.7rem;
@@ -296,6 +296,7 @@ export default defineComponent({
 }
 
 .analytics-card-shell {
+  max-height: 420px;
   border: none;
   border-radius: 18px;
   overflow: hidden;
