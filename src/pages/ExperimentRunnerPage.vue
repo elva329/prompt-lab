@@ -50,13 +50,10 @@
             <div v-if="!hasRun && !isRunning" class="runner-overlay text-center p-5">
               <div class="overlay-icon mx-auto mb-4"><i class="bi bi-flask"></i></div>
               <h2 class="h4 fw-bold mb-3">Ready to Test {{ selectedPrompts.length }} Prompts</h2>
-              <p class="text-secondary mb-4 mx-auto" style="max-width: 500px;">
+              <p class="text-secondary mb-0 mx-auto" style="max-width: 500px;">
                 Click 'Run Experiment' to send these prompts to the AI model and compare the generated responses
                 side-by-side with automated quality evaluation.
               </p>
-              <button class="btn btn-primary btn-lg px-5 rounded-pill shadow" @click="handleRun">
-                Run Experiment
-              </button>
             </div>
 
             <div class="row g-0 runner-columns">
@@ -77,9 +74,9 @@
                       <div class="loading-content-wrapper">
                         <template v-if="index === currentProgress.current - 1">
                           <div class="status-icon-box mb-4">
-                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; border-width: 0.25rem;"></div>
+                            <div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 0.25rem; color: #1b5e55;"></div>
                           </div>
-                          <p class="h5 fw-bold text-primary mb-2">Generating</p>
+                          <p class="h5 fw-bold mb-2" style="color: #1b5e55;">Generating</p>
                           <p class="text-muted small fw-semibold">Prompt {{ index + 1 }} of {{ currentProgress.total }}</p>
                         </template>
                         <template v-else-if="index >= currentProgress.current">
@@ -597,12 +594,12 @@ onMounted(async () => {
 
 .back-link {
   font-weight: 600;
-  color: #64748b;
+  color: #1b5e55;
   transition: color 0.2s;
 }
 
 .back-link:hover {
-  color: #2563eb;
+  color: #0f3d38;
 }
 
 .runner-overlay {
@@ -621,13 +618,14 @@ onMounted(async () => {
   width: 80px;
   height: 80px;
   border-radius: 24px;
-  background: #eff6ff;
-  color: #2563eb;
+  background: linear-gradient(135deg, rgba(27, 94, 85, 0.1) 0%, rgba(27, 94, 85, 0.05) 100%);
+  color: #1b5e55;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(27, 94, 85, 0.15);
+  border: 2px solid rgba(27, 94, 85, 0.1);
 }
 
 .runner-columns {
@@ -647,18 +645,19 @@ onMounted(async () => {
 
 .prompt-column {
   transition: background-color 0.2s;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.75);
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .prompt-header-area {
-  height: 340px; /* Fixed height to accommodate 220px pre + title/padding */
+  height: 340px;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  background: #f8fafc; /* Match secondary surface color */
+  background: linear-gradient(135deg, rgba(27, 94, 85, 0.05) 0%, rgba(27, 94, 85, 0.02) 100%);
+  border-bottom: 1px solid rgba(27, 94, 85, 0.06);
 }
 
 .prompt-pre {
@@ -666,12 +665,12 @@ onMounted(async () => {
   font-size: 0.8rem;
   line-height: 1.5;
   color: #475569;
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(27, 94, 85, 0.08);
   border-radius: 0.75rem;
   padding: 1rem;
   flex: 1;
-  height: 220px; /* Fixed height for consistent sizing */
+  height: 220px;
   max-height: 220px;
   overflow-y: auto;
 }
@@ -700,8 +699,8 @@ onMounted(async () => {
 }
 
 .response-text-scroll {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(27, 94, 85, 0.08);
   border-radius: 1rem;
   padding: 1.25rem;
   line-height: 1.6;
@@ -718,15 +717,16 @@ onMounted(async () => {
 }
 
 .metric-item-modern {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(27, 94, 85, 0.08);
   border-radius: 1rem;
   padding: 1.25rem;
 }
 
 .metric-item-modern.highlight {
-  border-color: #dbeafe;
-  background: #f0f9ff;
+  border-color: rgba(27, 94, 85, 0.10);
+  background: linear-gradient(135deg, rgba(27, 94, 85, 0.03) 0%, rgba(27, 94, 85, 0.01) 100%);
+  box-shadow: 0 4px 12px rgba(27, 94, 85, 0.12);
 }
 
 .metric-label {
@@ -748,7 +748,7 @@ onMounted(async () => {
 .metric-value {
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #1b5e55;
   line-height: 1;
 }
 
@@ -760,7 +760,7 @@ onMounted(async () => {
 
 .metric-progress {
   height: 6px;
-  background: #e2e8f0;
+  background: rgba(27, 94, 85, 0.1);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -777,11 +777,11 @@ onMounted(async () => {
 }
 
 .metric-item-mini {
-  background: #fff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(27, 94, 85, 0.06);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  display: flex; /* keep original content's mini metric style */
+  display: flex;
   flex-direction: column;
 }
 
@@ -805,8 +805,8 @@ onMounted(async () => {
 }
 
 .metric-badge-card {
-  background: #fff;
-  border: 1px solid #f1f5f9;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(27, 94, 85, 0.10);
   border-radius: 0.75rem;
   padding: 0.75rem;
   display: flex;
@@ -814,12 +814,12 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .metric-badge-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 24px rgba(27, 94, 85, 0.12);
 }
 
 .badge-label {
@@ -883,6 +883,11 @@ onMounted(async () => {
 .loading-content-wrapper {
   max-width: 280px;
   width: 100%;
+}
+
+.spinner-border {
+  border-color: currentColor;
+  border-right-color: transparent;
 }
 
 .spin {
