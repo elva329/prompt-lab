@@ -306,25 +306,26 @@ onMounted(() => {
   padding: var(--spacing-xl);
 }
 
-/* Prompt Card Styles - Consistent with PromptsPage */
+/* Prompt Card Styles - Modern Design System */
 .prompt-card {
-  background: var(--color-bg-card);
-  border-radius: var(--border-radius-card);
-  box-shadow: var(--shadow-card);
+  background: rgba(255, 255, 255, 0.75);
   border: none;
-  transition: box-shadow 0.2s, transform 0.2s;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
 
 .prompt-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: 0 12px 24px rgba(16, 35, 63, 0.12);
 }
 
 .prompt-card-body {
-  padding: var(--spacing-lg);
-  gap: var(--spacing-sm);
+  padding: 1.5rem;
+  gap: 0.75rem;
   flex: 1; /* Allow body to grow */
 }
 
@@ -335,15 +336,13 @@ onMounted(() => {
 }
 
 .prompt-title {
-  font-family: var(--font-family-title);
-  color: var(--color-text-title);
+  color: #10233f;
   font-size: 1rem;
   font-weight: 700;
 }
 
 .prompt-content-preview {
-  color: var(--color-text-body);
-  font-family: var(--font-family-base);
+  color: #475569;
   font-size: 0.9rem;
   line-height: 1.6;
   opacity: 0.85;
@@ -355,9 +354,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: var(--spacing-sm);
+  padding-top: 0.75rem;
   margin-top: auto;
-  border-top: 1px solid var(--color-bg-bar);
+  border-top: 1px solid rgba(203, 213, 225, 0.2);
 }
 
 .prompt-action-btn {
@@ -366,7 +365,7 @@ onMounted(() => {
   padding: 0;
   cursor: pointer;
   transition: transform 0.2s;
-  color: var(--color-text-body);
+  color: #475569;
   font-size: 1.1rem;
 }
 .prompt-action-btn:hover {

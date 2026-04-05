@@ -130,7 +130,7 @@
   display: inline-block;
 }
 .pcm-dot-done {
-  background: #a78bfa; /* purple */
+  background: #1b5e55; /* teal */
 }
 .pcm-dot-progress {
   background: #ff8a65; /* orange */
@@ -170,7 +170,7 @@
 }
 
 .pcm-ring-done {
-  stroke: #a78bfa;
+  stroke: #1b5e55;
   stroke-width: 22;
   stroke-dashoffset: 50; /* 50% done */
 }
