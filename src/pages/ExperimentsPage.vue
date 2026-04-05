@@ -43,7 +43,7 @@
 
     <section v-else-if="experiments.length" class="row g-4">
       <div v-for="experiment in experiments" :key="experiment._id" class="col-md-6 col-xl-4">
-        <article class="card border-0 shadow-sm h-100 experiment-row experiment-card-modern" @click="viewExperimentDetails(experiment._id)">
+        <article class="card border-0 shadow-sm h-100 experiment-row experiment-card-modern">
           <div class="card-body d-flex flex-column gap-2">
             <div class="d-flex justify-content-between align-items-center">
               <h2 class="h6 fw-semibold mb-0">Experiment {{ shortId(experiment._id) }}</h2>
@@ -59,11 +59,11 @@
             </div>
 
             <div class="mt-auto pt-2 border-top d-flex justify-content-end gap-2">
-              <button class="btn btn-outline-secondary btn-sm" @click.stop="viewExperimentDetails(experiment._id)">
+              <button class="btn btn-outline-secondary btn-sm" @click="viewExperimentDetails(experiment._id)">
                 <i class="bi bi-eye me-1"></i>
                 View Details
               </button>
-              <button class="btn btn-outline-primary btn-sm" @click.stop="rerunExperiment(experiment.prompts)">
+              <button class="btn btn-primary btn-sm" @click="rerunExperiment(experiment.prompts)">
                 <i class="bi bi-play-fill me-1"></i>
                 Re-run
               </button>
