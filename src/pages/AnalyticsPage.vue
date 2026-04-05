@@ -298,21 +298,22 @@ export default defineComponent({
 .analytics-card-shell {
   max-height: 420px;
   border: none;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   width: 100%;
   min-width: 0;
   margin: 0;
-  background: rgba(255, 255, 255, 0.62);
-  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .analytics-card-shell:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 14px 28px rgba(16, 35, 63, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 24px rgba(16, 35, 63, 0.12);
 }
 
 .analytics-card-shell > * {
@@ -358,12 +359,14 @@ export default defineComponent({
   width: 100%;
   height: 100% !important;
   min-height: 100% !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 245, 239, 0.98)) !important;
-  border: 1px solid rgba(223, 214, 204, 0.72) !important;
-  border-radius: 18px !important;
-  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05) !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08) !important;
   color: #10233f !important;
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 :deep(.avg-overall-quality-card:hover),
@@ -373,8 +376,9 @@ export default defineComponent({
 :deep(.pc-card:hover),
 :deep(.quality-card:hover),
 :deep(.ui-card:hover) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 245, 239, 1)) !important;
-  box-shadow: 0 16px 30px rgba(16, 35, 63, 0.08) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 12px 24px rgba(16, 35, 63, 0.12) !important;
+  transform: translateY(-2px) !important;
 }
 
 :deep(.avg-overall-quality-card),

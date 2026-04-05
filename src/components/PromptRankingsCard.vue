@@ -45,7 +45,7 @@
         </div>
         
         <div class="ranking-footer">
-          Ranked by overall quality score · 5 best & 4 worst shown
+          Ranked by overall quality score · 5 best & 5 worst shown
         </div>
 
       </div>
@@ -101,11 +101,11 @@ export default {
         .slice(0, 5)
         .map((item, index) => ({ ...item, label: `Prompt ${item.id}` }));
 
-      // Needs Attention: Score < 60 (Sorted worst first), Limit to top 4
+      // Needs Attention: Score < 60 (Sorted worst first), Limit to top 5
       this.needsAttention = processedData
         .filter(item => item.score < 60)
         .sort((a, b) => a.score - b.score)
-        .slice(0, 4)
+        .slice(0, 5)
         .map((item, index) => ({ ...item, label: `Prompt ${item.id}` }));
 
       this.loading = false;
@@ -122,10 +122,10 @@ export default {
 
 <style scoped>
 .ui-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 245, 239, 0.98));
-  border: 1px solid rgba(223, 214, 204, 0.72);
-  border-radius: 18px;
-  box-shadow: 0 10px 22px rgba(16, 35, 63, 0.05);
+  background: rgba(255, 255, 255, 0.75);
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08);
   padding: 1.2rem;
   width: 100%;
   height: 100%;
@@ -133,12 +133,14 @@ export default {
   flex-direction: column;
   gap: 0.75rem;
   font-family: 'Manrope', sans-serif;
-  transition: box-shadow 0.2s, transform 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .ui-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(16, 35, 63, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 12px 24px rgba(16, 35, 63, 0.12);
 }
 
 .card-header-row {
