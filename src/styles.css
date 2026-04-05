@@ -90,10 +90,33 @@ h6 {
 }
 
 .global-home-brand-block {
+  display: inline-block;
   position: absolute;
   top: 0.9rem;
   left: 1.1rem;
   z-index: 12;
+}
+
+.global-home-brand-block::after {
+  content: 'Home';
+  position: absolute;
+  bottom: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1b5e55;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.global-home-brand-block:hover::after {
+  opacity: 1;
 }
 
 .app-fullscreen {
@@ -895,6 +918,8 @@ h6 {
   gap: 1rem;
   /* Ensure menu is above page content, fixing dropdown overlap issue on mobile. */
   z-index: 10;
+  overflow: visible;
+  padding-bottom: 0.5rem;
 }
 
 .dashboard-menu-pills {
@@ -913,6 +938,8 @@ h6 {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  overflow: visible;
+  z-index: 100;
 }
 
 .dashboard-menu-icon {
@@ -928,12 +955,35 @@ h6 {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
 .dashboard-menu-icon:hover {
   background: rgba(236, 243, 255, 0.96);
   color: #334773;
   border-color: rgba(177, 197, 238, 0.95);
+}
+
+.dashboard-menu-icon::after {
+  content: 'Logout';
+  position: absolute;
+  bottom: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1b5e55;
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.dashboard-menu-icon:hover::after {
+  opacity: 1;
 }
 
 .dashboard-menu-link {
