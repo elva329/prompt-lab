@@ -207,32 +207,42 @@ export default defineComponent({
   flex-direction: column;
   width: 100%;
   min-height: 100%;
-  padding: 1.2rem 1.1rem 1rem 1.1rem;
+  padding: 1.1rem 1rem 1rem 1rem;
   border-radius: 1rem;
   gap: 0;
   background: #fff;
   border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow: 0 6px 18px rgba(24, 33, 58, 0.08);
-  overflow: hidden;
 }
 
 .latest-result-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.7rem;
-  margin-top: 0.2rem;
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+  margin-top: 0;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.latest-result-header > div:first-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .latest-result-card .card-title {
   font-family: 'Sora', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #687083;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
   letter-spacing: 0.01em;
-  margin-top: 0.2rem;
+  margin-top: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .latest-result-card .card-subtitle {
@@ -247,13 +257,14 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
   align-self: flex-start;
-  min-height: 1.55rem;
-  padding: 0.18rem 0.6rem;
+  min-height: 1.4rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.1;
   border: 1px solid transparent;
+  flex-shrink: 0;
 }
 
 .latest-result-status.tone-weak {
@@ -446,16 +457,29 @@ export default defineComponent({
 
 .latest-result-link {
   margin-top: auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 0.5rem;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
   border-top: 1px solid rgba(226, 231, 239, 0.9);
   color: #3b82f6;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 800;
+  width: 100%;
+  min-width: 0;
+}
+
+.latest-result-link span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.latest-result-link i {
+  flex-shrink: 0;
 }
 
 .latest-result-link:hover {
@@ -464,7 +488,7 @@ export default defineComponent({
 
 @media screen and (max-width: 768px) {
   .latest-result-card {
-    padding: 0.95rem;
+    padding: 1rem;
   }
 
   .latest-result-summary {

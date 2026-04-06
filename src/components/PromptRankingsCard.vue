@@ -168,7 +168,7 @@ export default {
 }
 
 .card-title {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #10233f;
   letter-spacing: -0.01em;

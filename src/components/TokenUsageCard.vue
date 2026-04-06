@@ -225,7 +225,7 @@ export default defineComponent({
 
 .tu-title {
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #334155;
 }
