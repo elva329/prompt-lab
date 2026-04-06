@@ -746,26 +746,49 @@ h6 {
   position: relative;
   z-index: 2;
   margin-top: auto;
-  padding: 0.35rem 0 0.7rem;
-  background: transparent;
+  padding: 0.7rem 0 1rem;
+  background:
+    linear-gradient(180deg, rgba(236, 243, 242, 0.2), rgba(236, 243, 242, 0.88));
+  border-top: 1px solid rgba(184, 203, 198, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .marketing-footer-inner {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1040px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
-  padding: 0.5rem 1rem 0;
-  background: transparent;
-  backdrop-filter: none;
-  border-radius: 0;
 }
 
 .marketing-footer-copy {
-  font-size: 0.8rem;
-  color: #72807d;
-  letter-spacing: 0.01em;
+  position: relative;
+  padding: 0 1.5rem;
+  font-size: 0.83rem;
+  color: #3f5250;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+.marketing-footer-copy::before,
+.marketing-footer-copy::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: radial-gradient(circle, #2a9d8f 0%, #2a9d8f 35%, rgba(42, 157, 143, 0.3) 100%);
+}
+
+.marketing-footer-copy::before {
+  left: 0;
+}
+
+.marketing-footer-copy::after {
+  right: 0;
 }
 
 @media (max-width: 767.98px) {
