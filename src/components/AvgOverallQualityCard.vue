@@ -1,34 +1,39 @@
 <template>
   <div class="avg-overall-quality-card">
-    <div class="card-header">
-      <div class="icon-bg">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <path d="M12 4h8v2.5c0 .6-.2 1.2-.5 1.7l-3.5 6.3v2.5" stroke="#2C6FE7" stroke-width="2" stroke-linecap="round"/>
-          <path d="M16 17v-2.5l-3.5-6.3c-.3-.5-.5-1.1-.5-1.7V4h8" stroke="#2C6FE7" stroke-width="2" stroke-linecap="round"/>
-          <ellipse cx="16" cy="24" rx="7" ry="4" stroke="#2C6FE7" stroke-width="2"/>
-        </svg>
+    <div class="quality-glow" aria-hidden="true"></div>
+
+    <header class="quality-header">
+      <div class="quality-heading">
+        <h3 class="quality-title">AVG. OVERALL QUALITY</h3>
       </div>
-      <div class="trend-badge">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path d="M2 10l4-4 3 3 5-5" stroke="#13b8d2" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <span>{{ trend }}</span>
+      <div class="quality-trend-chip" :class="trendClass">
+        <span class="trend-arrow" aria-hidden="true">{{ trendArrow }}</span>
+        <span>{{ trendLabel }}</span>
       </div>
-    </div>
-    <div class="card-title">AVG. OVERALL QUALITY</div>
-    <div class="card-value-row">
-      <span class="card-value">{{ avgQualityScore !== null ? avgQualityScore : 'N/A' }}</span>
-      <span class="card-value-max">/ 100</span>
-    </div>
-    <div class="card-subtitle">vs. last experiment batch</div>
-    <div class="progress-bar">
-      <div class="progress-bar-fill"></div>
+    </header>
+
+    <div class="quality-body">
+      <div class="quality-score-orb">
+        <div class="quality-score-value">{{ displayScore }}</div>
+        <div class="quality-score-max">/ 100</div>
+      </div>
+
+      <div class="quality-meta">
+        <div class="quality-tier-pill">
+          <span class="quality-tier-label">Tier</span>
+          <span class="quality-tier-value">{{ qualityTier }}</span>
+        </div>
+        <p class="quality-subtitle">vs. last experiment batch</p>
+        <div class="quality-meter" role="img" aria-label="Overall quality score">
+          <div class="quality-meter-fill" :style="{ width: scorePercent + '%' }"></div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import { fetchResultsSummaryRequest } from '../lib/resultsApi'
 import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
 import { appStore } from '../stores/appStore'
@@ -39,6 +44,42 @@ export default defineComponent({
     const avgQualityScore = ref<number | null>(null)
     const trend = ref<string>("N/A")
     const userId = appStore.state.user?.id || ''
+
+    const scorePercent = computed(() => {
+      if (typeof avgQualityScore.value !== 'number') return 0
+      return Math.max(0, Math.min(100, avgQualityScore.value))
+    })
+
+    const displayScore = computed(() => {
+      if (typeof avgQualityScore.value !== 'number') return 'N/A'
+      return avgQualityScore.value
+    })
+
+    const trendClass = computed(() => {
+      if (trend.value === 'N/A') return 'trend-neutral'
+      if (trend.value.startsWith('+')) return 'trend-positive'
+      if (trend.value.startsWith('-')) return 'trend-negative'
+      return 'trend-neutral'
+    })
+
+    const trendArrow = computed(() => {
+      if (trend.value.startsWith('+')) return '↗'
+      if (trend.value.startsWith('-')) return '↘'
+      return '•'
+    })
+
+    const trendLabel = computed(() => {
+      if (trend.value === 'N/A') return 'No baseline'
+      return trend.value
+    })
+
+    const qualityTier = computed(() => {
+      if (typeof avgQualityScore.value !== 'number') return 'No Data'
+      if (avgQualityScore.value >= 85) return 'Excellent'
+      if (avgQualityScore.value >= 70) return 'Strong'
+      if (avgQualityScore.value >= 55) return 'Developing'
+      return 'Needs Work'
+    })
 
     const fetchAvgQuality = async () => {
       if (!userId) return
@@ -74,100 +115,199 @@ export default defineComponent({
 
     onMounted(fetchAvgQuality)
 
-    return { avgQualityScore, trend }
+    return { avgQualityScore, trend, scorePercent, displayScore, trendClass, trendArrow, trendLabel, qualityTier }
   }
 })
 </script>
 
 <style scoped>
 .avg-overall-quality-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 6px 18px rgba(24,33,58,0.08);
-  padding: 1.2rem 1.1rem 1rem 1.1rem;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(145deg, #0f3a35 0%, #175e56 58%, #1f7e75 100%);
+  border-radius: 1.05rem;
+  box-shadow: 0 12px 24px rgba(10, 47, 43, 0.28);
+  padding: 0.85rem;
   display: flex;
   flex-direction: column;
+  gap: 0.7rem;
   height: 100%;
   width: 100%;
   min-height: 0;
   min-width: 0;
   flex: 1 1 100%;
   box-sizing: border-box;
-  justify-content: center;
+  overflow: hidden;
 }
-.card-header {
+
+.quality-glow {
+  position: absolute;
+  top: -48px;
+  right: -22px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(110, 245, 214, 0.32), rgba(110, 245, 214, 0));
+  z-index: -1;
+}
+
+.quality-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 0.7rem;
-  margin-top: 0.2rem;
+  gap: 0.5rem;
 }
-.icon-bg {
-  background: #fff;
-  width: 44px;
-  height: 44px;
+
+.quality-heading {
+  min-width: 0;
+}
+
+.quality-title {
+  margin: 0.1rem 0 0;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #163455;
+  line-height: 1.2;
+}
+
+.quality-trend-chip {
   display: flex;
+  align-items: center;
+  gap: 0.24rem;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.trend-arrow {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.trend-positive {
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: #0f766e;
+}
+
+.trend-negative {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #b91c1c;
+}
+
+.trend-neutral {
+  background: rgba(100, 116, 139, 0.16);
+  border-color: rgba(100, 116, 139, 0.28);
+  color: #475569;
+}
+
+.quality-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.quality-score-orb {
+  width: 98px;
+  height: 98px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 25%, #ffffff 0%, #d9fff7 72%);
+  border: 3px solid rgba(13, 67, 60, 0.46);
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.32), 0 6px 14px rgba(8, 42, 38, 0.22);
 }
-.trend-badge {
+
+.quality-score-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #0e4f47;
+  line-height: 1;
+}
+
+.quality-score-max {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #4f7f79;
+  margin-top: 0.12rem;
+}
+
+.quality-meta {
   display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
+.quality-tier-pill {
+  width: fit-content;
+  display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  background: #e6fcf7;
-  color: #13b8d2;
-  font-size: 0.68rem; /* Trend label/percentage */
-  font-weight: 700;
+  gap: 0.36rem;
+  padding: 0.16rem 0.54rem;
   border-radius: 999px;
-  padding: 0.18rem 0.7rem;
-  margin-top: 0.1rem;
+  background: rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.22);
 }
-.card-title {
+
+.quality-tier-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #0f766e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.quality-tier-value {
   font-family: 'Sora', sans-serif;
-  font-size: 0.8rem; /* Card label */
+  font-size: 0.64rem;
   font-weight: 700;
-  color: #687083;
-  margin-bottom: 0.2rem;
-  letter-spacing: 0.01em;
-  margin-top: 0.2rem;
+  color: #134e4a;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
-.card-value-row {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 0.2rem;
-}
-.card-value {
+
+.quality-subtitle {
+  margin: 0;
   font-family: 'Manrope', sans-serif;
-  font-size: 1.7rem; /* Metric primary value */
-  font-weight: 800;
-  color: #151922;
+  font-size: 0.7rem;
+  color: #3f5960;
 }
-.card-value-max {
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.68rem; /* Value label */
-  font-weight: 700;
-  color: #687083;
-  margin-left: 0.3rem;
-}
-.card-subtitle {
-  font-family: 'Manrope', sans-serif;
-  font-size: 0.68rem; /* Card subtitle */
-  color: #687083;
-  margin-bottom: 0.7rem;
-}
-.progress-bar {
+
+.quality-meter {
   width: 100%;
   height: 7px;
-  background: #e7edff;
-  border-radius: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.24);
   overflow: hidden;
-  margin-top: auto;
 }
-.progress-bar-fill {
-  width: 67%;
+
+.quality-meter-fill {
   height: 100%;
-  background: #2c6fe7;
-  border-radius: 6px;
-  transition: width 0.3s;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #90ffe0 0%, #6ef5d6 55%, #42ccbe 100%);
+  transition: width 0.4s ease;
+}
+
+@media (max-width: 1200px) {
+  .quality-score-orb {
+    width: 86px;
+    height: 86px;
+  }
+
+  .quality-score-value {
+    font-size: 1.6rem;
+  }
 }
 </style>

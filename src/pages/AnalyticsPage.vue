@@ -349,7 +349,6 @@ export default defineComponent({
   height: auto;
 }
 
-:deep(.avg-overall-quality-card),
 :deep(.avg-response-time-card),
 :deep(.prompts-evaluated-card),
 :deep(.pass-rate-card),
@@ -369,7 +368,6 @@ export default defineComponent({
   backdrop-filter: blur(10px) !important;
 }
 
-:deep(.avg-overall-quality-card:hover),
 :deep(.avg-response-time-card:hover),
 :deep(.prompts-evaluated-card:hover),
 :deep(.pass-rate-card:hover),
@@ -381,14 +379,12 @@ export default defineComponent({
   transform: translateY(-2px) !important;
 }
 
-:deep(.avg-overall-quality-card),
 :deep(.avg-response-time-card),
 :deep(.prompts-evaluated-card),
 :deep(.pass-rate-card) {
   padding: 0.78rem 0.85rem 0.72rem !important;
 }
 
-:deep(.avg-overall-quality-card .card-title),
 :deep(.avg-response-time-card .card-title),
 :deep(.prompts-evaluated-card .card-title),
 :deep(.pass-rate-card .card-title),
@@ -398,7 +394,6 @@ export default defineComponent({
   color: #10233f !important;
 }
 
-:deep(.avg-overall-quality-card .card-subtitle),
 :deep(.avg-response-time-card .card-subtitle),
 :deep(.prompts-evaluated-card .card-subtitle),
 :deep(.pass-rate-card .card-subtitle),
@@ -409,21 +404,18 @@ export default defineComponent({
   color: #5f6d6b !important;
 }
 
-:deep(.avg-overall-quality-card .card-header),
 :deep(.avg-response-time-card .card-header),
 :deep(.prompts-evaluated-card .card-header),
 :deep(.pass-rate-card .card-header) {
   margin-bottom: 0.35rem !important;
 }
 
-:deep(.avg-overall-quality-card .card-value),
 :deep(.avg-response-time-card .card-value),
 :deep(.prompts-evaluated-card .card-value),
 :deep(.pass-rate-card .card-value) {
   font-size: 1.25rem !important;
 }
 
-:deep(.avg-overall-quality-card .icon-bg),
 :deep(.avg-response-time-card .icon-bg),
 :deep(.prompts-evaluated-card .icon-bg),
 :deep(.pass-rate-card .icon-bg) {
@@ -433,7 +425,6 @@ export default defineComponent({
   border-radius: 16px;
 }
 
-:deep(.avg-overall-quality-card .trend-badge),
 :deep(.avg-response-time-card .trend-badge),
 :deep(.prompts-evaluated-card .trend-badge),
 :deep(.pass-rate-card .trend-badge) {
@@ -442,18 +433,76 @@ export default defineComponent({
   color: #1b5e55 !important;
 }
 
-:deep(.avg-overall-quality-card .progress-bar),
 :deep(.avg-response-time-card .progress-bar),
 :deep(.prompts-evaluated-card .progress-bar),
 :deep(.pass-rate-card .progress-bar) {
   background: rgba(225, 234, 230, 0.92) !important;
 }
 
-:deep(.avg-overall-quality-card .progress-bar-fill),
 :deep(.avg-response-time-card .progress-bar-fill),
 :deep(.prompts-evaluated-card .progress-bar-fill),
 :deep(.pass-rate-card .progress-bar-fill) {
   background: linear-gradient(90deg, #1b5e55, #2a9d8f) !important;
+}
+
+:deep(.avg-overall-quality-card) {
+  width: 100%;
+  height: 100% !important;
+  min-height: 100% !important;
+  background: linear-gradient(150deg, rgba(232, 247, 245, 0.96), rgba(224, 240, 252, 0.94)) !important;
+  /* border: 1px solid rgba(27, 94, 85, 0.22) !important; */
+  border-radius: 16px !important;
+  box-shadow: 0 8px 20px rgba(27, 94, 85, 0.14) !important;
+  color: #10233f !important;
+  padding: 0.9rem 0.95rem 0.82rem !important;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+:deep(.avg-overall-quality-card:hover) {
+  background: linear-gradient(150deg, rgba(236, 250, 247, 0.98), rgba(229, 244, 255, 0.96)) !important;
+  box-shadow: 0 12px 24px rgba(27, 94, 85, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+:deep(.avg-overall-quality-card .card-title) {
+  color: #0f4d45 !important;
+  letter-spacing: 0.02em !important;
+}
+
+:deep(.avg-overall-quality-card .card-subtitle) {
+  color: #4f6f6a !important;
+}
+
+:deep(.avg-overall-quality-card .card-header) {
+  margin-bottom: 0.45rem !important;
+}
+
+:deep(.avg-overall-quality-card .card-value) {
+  font-size: 1.4rem !important;
+  color: #0f4d45 !important;
+}
+
+:deep(.avg-overall-quality-card .icon-bg) {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(27, 94, 85, 0.16) !important;
+}
+
+:deep(.avg-overall-quality-card .trend-badge) {
+  padding: 0.13rem 0.5rem !important;
+  background: rgba(27, 94, 85, 0.14) !important;
+  color: #0f4d45 !important;
+}
+
+:deep(.avg-overall-quality-card .progress-bar) {
+  background: rgba(184, 214, 208, 0.5) !important;
+}
+
+:deep(.avg-overall-quality-card .progress-bar-fill) {
+  background: linear-gradient(90deg, #1b5e55, #3aa39a) !important;
 }
 
 :deep(.quality-card .quality-card-inner),
