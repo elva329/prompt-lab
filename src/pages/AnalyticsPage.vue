@@ -34,16 +34,16 @@
       </header>
 
       <div class="analytics-top-strip">
-        <div class="analytics-card-shell analytics-top-metric">
+        <div class="analytics-card-shell analytics-top-metric analytics-top-card--overall">
           <AvgOverallQualityCard />
         </div>
-        <div class="analytics-card-shell analytics-top-metric">
+        <div class="analytics-card-shell analytics-top-metric analytics-top-metric--compact analytics-top-card--response">
           <AvgResponseTimeCard />
         </div>
-        <div class="analytics-card-shell analytics-top-metric">
-          <PromptsEvaluatedCard />
+        <div class="analytics-card-shell analytics-top-metric analytics-top-metric--token analytics-top-card--token">
+          <TokenUsageCard />
         </div>
-        <div class="analytics-card-shell analytics-top-metric">
+        <div class="analytics-card-shell analytics-top-metric analytics-top-metric--compact analytics-top-card--pass">
           <PassRateCard />
         </div>
       </div>
@@ -92,7 +92,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { appStore } from '../stores/appStore'
 import AvgOverallQualityCard from '../components/AvgOverallQualityCard.vue'
 import AvgResponseTimeCard from '../components/AvgResponseTimeCard.vue'
-import PromptsEvaluatedCard from '../components/PromptsEvaluatedCard.vue'
+import TokenUsageCard from '../components/TokenUsageCard.vue'
 import PassRateCard from '../components/PassRateCard.vue'
 import QualityDimensionsCard from '../components/QualityDimensionsCard.vue'
 import QualityScoreTrendCard from '../components/QualityScoreTrendCard.vue'
@@ -106,7 +106,7 @@ export default defineComponent({
   components: {
     AvgOverallQualityCard,
     AvgResponseTimeCard,
-    PromptsEvaluatedCard,
+    TokenUsageCard,
     PassRateCard,
     QualityDimensionsCard,
     QualityScoreTrendCard,
@@ -200,9 +200,28 @@ export default defineComponent({
 
 .analytics-top-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(0, 1.45fr);
+  grid-template-areas:
+    "overall response token"
+    "overall pass token";
   gap: 0.7rem;
   margin-bottom: 0.7rem;
+}
+
+.analytics-top-card--overall {
+  grid-area: overall;
+}
+
+.analytics-top-card--response {
+  grid-area: response;
+}
+
+.analytics-top-card--token {
+  grid-area: token;
+}
+
+.analytics-top-card--pass {
+  grid-area: pass;
 }
 
 .analytics-main-content {
@@ -309,6 +328,46 @@ export default defineComponent({
 
 .analytics-top-metric {
   align-items: stretch;
+}
+
+.analytics-top-metric--compact {
+  align-self: start;
+}
+
+.analytics-top-metric--token :deep(.token-usage-card) {
+  padding: 0.74rem 0.82rem !important;
+  gap: 0.62rem !important;
+}
+
+.analytics-top-metric--token :deep(.tu-kpi-grid) {
+  gap: 0.52rem !important;
+}
+
+.analytics-top-metric--token :deep(.tu-kpi-box) {
+  padding: 0.52rem 0.6rem !important;
+}
+
+.analytics-top-metric--compact :deep(.avg-response-time-card),
+.analytics-top-metric--compact :deep(.pass-rate-card) {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0.54rem 0.6rem 0.5rem !important;
+}
+
+.analytics-top-metric--compact :deep(.avg-response-time-card .card-header),
+.analytics-top-metric--compact :deep(.pass-rate-card .card-header) {
+  margin-bottom: 0.2rem !important;
+  margin-top: 0 !important;
+}
+
+.analytics-top-metric--compact :deep(.avg-response-time-card .card-value),
+.analytics-top-metric--compact :deep(.pass-rate-card .card-value) {
+  font-size: 1.15rem !important;
+}
+
+.analytics-top-metric--compact :deep(.avg-response-time-card .card-subtitle),
+.analytics-top-metric--compact :deep(.pass-rate-card .card-subtitle) {
+  margin-bottom: 0.2rem !important;
 }
 
 .analytics-card-shell--latest {
@@ -635,6 +694,11 @@ export default defineComponent({
   .analytics-top-strip,
   .analytics-main-grid {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "overall"
+      "response"
+      "pass"
+      "token";
   }
 
   .analytics-main-content {
