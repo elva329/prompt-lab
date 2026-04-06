@@ -992,14 +992,14 @@ h6 {
 @keyframes landing-workflow-animate {
   0% {
     opacity: 0;
-    transform: rotate(-45deg) translateX(-15px);
+    transform: rotate(-45deg);
   }
   50% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: rotate(-45deg) translateX(15px);
+    transform: rotate(-45deg);
   }
 }
 
