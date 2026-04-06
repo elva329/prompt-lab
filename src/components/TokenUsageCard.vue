@@ -251,7 +251,7 @@ export default defineComponent({
 
 .tu-kpi-box {
   border-radius: 14px;
-  background: rgba(232, 235, 245, 0.92);
+  background: rgba(232, 235, 245, 0.52);
   padding: 0.56rem 0.65rem;
 }
 

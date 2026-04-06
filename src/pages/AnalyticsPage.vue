@@ -200,7 +200,7 @@ export default defineComponent({
 
 .analytics-top-strip {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(0, 1.45fr);
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 0.95fr) minmax(0, 1.15fr);
   grid-template-areas:
     "overall response token"
     "overall pass token";
@@ -337,6 +337,8 @@ export default defineComponent({
 .analytics-top-metric--token :deep(.token-usage-card) {
   padding: 0.74rem 0.82rem !important;
   gap: 0.62rem !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08) !important;
 }
 
 .analytics-top-metric--token :deep(.tu-kpi-grid) {
@@ -495,10 +497,9 @@ export default defineComponent({
   width: 100%;
   height: 100% !important;
   min-height: 100% !important;
-  background: linear-gradient(150deg, rgba(232, 247, 245, 0.96), rgba(224, 240, 252, 0.94)) !important;
-  /* border: 1px solid rgba(27, 94, 85, 0.22) !important; */
+  background: rgba(255, 255, 255, 0.92) !important;
   border-radius: 16px !important;
-  box-shadow: 0 8px 20px rgba(27, 94, 85, 0.14) !important;
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08) !important;
   color: #10233f !important;
   padding: 0.9rem 0.95rem 0.82rem !important;
   overflow: hidden;
@@ -506,49 +507,48 @@ export default defineComponent({
 }
 
 :deep(.avg-overall-quality-card:hover) {
-  background: linear-gradient(150deg, rgba(236, 250, 247, 0.98), rgba(229, 244, 255, 0.96)) !important;
-  box-shadow: 0 12px 24px rgba(27, 94, 85, 0.2) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 12px 24px rgba(16, 35, 63, 0.12) !important;
   transform: translateY(-2px) !important;
 }
 
 :deep(.avg-overall-quality-card .card-title) {
-  color: #0f4d45 !important;
+  color: #10233f !important;
   letter-spacing: 0.02em !important;
 }
 
 :deep(.avg-overall-quality-card .card-subtitle) {
-  color: #4f6f6a !important;
+  color: #5f6d6b !important;
 }
 
 :deep(.avg-overall-quality-card .card-header) {
-  margin-bottom: 0.45rem !important;
+  margin-bottom: 0.35rem !important;
 }
 
 :deep(.avg-overall-quality-card .card-value) {
-  font-size: 1.4rem !important;
-  color: #0f4d45 !important;
+  font-size: 1.25rem !important;
+  color: #10233f !important;
 }
 
 :deep(.avg-overall-quality-card .icon-bg) {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 10px !important;
-  background: rgba(255, 255, 255, 0.86) !important;
-  border: 1px solid rgba(27, 94, 85, 0.16) !important;
+  width: 34px !important;
+  height: 34px !important;
+  background: rgba(246, 242, 235, 0.96) !important;
+  border-radius: 16px;
 }
 
 :deep(.avg-overall-quality-card .trend-badge) {
-  padding: 0.13rem 0.5rem !important;
-  background: rgba(27, 94, 85, 0.14) !important;
-  color: #0f4d45 !important;
+  padding: 0.12rem 0.45rem !important;
+  background: rgba(214, 239, 233, 0.9) !important;
+  color: #1b5e55 !important;
 }
 
 :deep(.avg-overall-quality-card .progress-bar) {
-  background: rgba(184, 214, 208, 0.5) !important;
+  background: rgba(225, 234, 230, 0.92) !important;
 }
 
 :deep(.avg-overall-quality-card .progress-bar-fill) {
-  background: linear-gradient(90deg, #1b5e55, #3aa39a) !important;
+  background: linear-gradient(90deg, #1b5e55, #2a9d8f) !important;
 }
 
 :deep(.quality-card .quality-card-inner),

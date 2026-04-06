@@ -29,6 +29,21 @@
         </div>
       </div>
     </div>
+
+    <div class="quality-stats-grid">
+      <div class="stat-item">
+        <span class="stat-label">Experiments</span>
+        <span class="stat-value">{{ experimentsRun }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Prompts Tested</span>
+        <span class="stat-value">{{ promptsEvaluated }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Top Dimension</span>
+        <span class="stat-value">{{ topDimension }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,6 +58,8 @@ export default defineComponent({
   setup() {
     const avgQualityScore = ref<number | null>(null)
     const trend = ref<string>("N/A")
+    const experimentsRun = ref<number>(0)
+    const promptsEvaluated = ref<number>(0)
     const userId = appStore.state.user?.id || ''
 
     const scorePercent = computed(() => {
@@ -81,18 +98,33 @@ export default defineComponent({
       return 'Needs Work'
     })
 
+    const topDimension = computed(() => {
+      const dims = { clarity: 0, relevance: 0, coherence: 0, completeness: 0 }
+      const dimsList = [
+        { name: 'Clarity', score: dims.clarity },
+        { name: 'Relevance', score: dims.relevance },
+        { name: 'Coherence', score: dims.coherence },
+        { name: 'Completeness', score: dims.completeness }
+      ]
+      const best = dimsList.reduce((max, d) => d.score > max.score ? d : max)
+      return best.score > 0 ? best.name : 'N/A'
+    })
+
     const fetchAvgQuality = async () => {
       if (!userId) return
       try {
         const summary = await fetchResultsSummaryRequest(userId)
         avgQualityScore.value = summary.avgQualityScore
+        experimentsRun.value = summary.experimentsRun || 0
+        promptsEvaluated.value = summary.promptsEvaluated || 0
 
-        // Fetch previous experiment's avgQualityScore for trend calculation
+        // Fetch experiments for trend calculation
         const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
         const experimentsPayload = await experimentsRes.json()
         const experiments = experimentsPayload.experiments || []
+        
         if (experiments.length > 1) {
-          // Get previous experiment id
+          // Get previous experiment results for trend
           const prevExperimentId = experiments[1]._id
           const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
           const prevScores = prevResults.map(r => r.overallQuality).filter(v => typeof v === 'number')
@@ -115,7 +147,19 @@ export default defineComponent({
 
     onMounted(fetchAvgQuality)
 
-    return { avgQualityScore, trend, scorePercent, displayScore, trendClass, trendArrow, trendLabel, qualityTier }
+    return { 
+      avgQualityScore, 
+      trend, 
+      scorePercent, 
+      displayScore, 
+      trendClass, 
+      trendArrow, 
+      trendLabel, 
+      qualityTier,
+      experimentsRun,
+      promptsEvaluated,
+      topDimension
+    }
   }
 })
 </script>
@@ -124,9 +168,9 @@ export default defineComponent({
 .avg-overall-quality-card {
   position: relative;
   isolation: isolate;
-  background: linear-gradient(145deg, #0f3a35 0%, #175e56 58%, #1f7e75 100%);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 1.05rem;
-  box-shadow: 0 12px 24px rgba(10, 47, 43, 0.28);
+  box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08);
   padding: 0.85rem;
   display: flex;
   flex-direction: column;
@@ -138,6 +182,7 @@ export default defineComponent({
   flex: 1 1 100%;
   box-sizing: border-box;
   overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .quality-glow {
@@ -167,7 +212,7 @@ export default defineComponent({
   font-family: 'Sora', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: #163455;
+  color: #10233f;
   line-height: 1.2;
 }
 
@@ -190,21 +235,21 @@ export default defineComponent({
 }
 
 .trend-positive {
-  background: rgba(16, 185, 129, 0.16);
-  border-color: rgba(16, 185, 129, 0.28);
-  color: #0f766e;
+  background: rgba(16, 185, 129, 0.13);
+  border-color: rgba(16, 185, 129, 0.32);
+  color: #0b7e6e;
 }
 
 .trend-negative {
-  background: rgba(239, 68, 68, 0.14);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.32);
+  color: #c12525;
 }
 
 .trend-neutral {
-  background: rgba(100, 116, 139, 0.16);
-  border-color: rgba(100, 116, 139, 0.28);
-  color: #475569;
+  background: rgba(100, 116, 139, 0.12);
+  border-color: rgba(100, 116, 139, 0.32);
+  color: #52616f;
 }
 
 .quality-body {
@@ -218,20 +263,20 @@ export default defineComponent({
   width: 98px;
   height: 98px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 25%, #ffffff 0%, #d9fff7 72%);
-  border: 3px solid rgba(13, 67, 60, 0.46);
+  background: linear-gradient(135deg, #f5fbf9 0%, #ebf5f2 60%, #dff1ed 100%);
+  border: 2px solid rgba(42, 157, 143, 0.26);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.32), 0 6px 14px rgba(8, 42, 38, 0.22);
+  box-shadow: 0 4px 12px rgba(42, 157, 143, 0.12), inset 0 0 0 2px rgba(255, 255, 255, 0.54);
 }
 
 .quality-score-value {
   font-family: 'Manrope', sans-serif;
   font-size: 1.85rem;
   font-weight: 900;
-  color: #0e4f47;
+  color: #0e7366;
   line-height: 1;
 }
 
@@ -239,7 +284,7 @@ export default defineComponent({
   font-family: 'Manrope', sans-serif;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #4f7f79;
+  color: #5f8f89;
   margin-top: 0.12rem;
 }
 
@@ -256,15 +301,15 @@ export default defineComponent({
   gap: 0.36rem;
   padding: 0.16rem 0.54rem;
   border-radius: 999px;
-  background: rgba(15, 118, 110, 0.12);
-  border: 1px solid rgba(15, 118, 110, 0.22);
+  background: rgba(42, 157, 143, 0.12);
+  border: 1px solid rgba(42, 157, 143, 0.24);
 }
 
 .quality-tier-label {
   font-family: 'Manrope', sans-serif;
   font-size: 0.6rem;
   font-weight: 700;
-  color: #0f766e;
+  color: #0f7366;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -273,7 +318,7 @@ export default defineComponent({
   font-family: 'Sora', sans-serif;
   font-size: 0.64rem;
   font-weight: 700;
-  color: #134e4a;
+  color: #0b5948;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -282,22 +327,73 @@ export default defineComponent({
   margin: 0;
   font-family: 'Manrope', sans-serif;
   font-size: 0.7rem;
-  color: #3f5960;
+  color: #5f6d6b;
 }
 
 .quality-meter {
   width: 100%;
   height: 7px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.24);
+  background: rgba(42, 157, 143, 0.16);
   overflow: hidden;
 }
 
 .quality-meter-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #90ffe0 0%, #6ef5d6 55%, #42ccbe 100%);
+  background: linear-gradient(90deg, #2a9d8f 0%, #1b7f75 55%, #0e7366 100%);
   transition: width 0.4s ease;
+}
+
+.quality-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: linear-gradient(135deg, rgba(42, 157, 143, 0.08), rgba(27, 94, 85, 0.06));
+  border-radius: 0.9rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(42, 157, 143, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+  text-align: center;
+  padding: 0 0.45rem;
+  position: relative;
+}
+
+.stat-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(42, 157, 143, 0.26), transparent);
+}
+
+.stat-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.63rem;
+  font-weight: 750;
+  color: #5f6d6b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+}
+
+.stat-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: #10233f;
+  letter-spacing: 0.01em;
 }
 
 @media (max-width: 1200px) {
@@ -308,6 +404,53 @@ export default defineComponent({
 
   .quality-score-value {
     font-size: 1.6rem;
+  }
+
+  .quality-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0.58rem 0.65rem;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .quality-body {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .quality-score-orb {
+    width: 72px;
+    height: 72px;
+  }
+
+  .quality-score-value {
+    font-size: 1.42rem;
+  }
+
+  .quality-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding: 0.52rem 0.55rem;
+  }
+
+  .stat-label {
+    font-size: 0.58rem;
+  }
+
+  .stat-value {
+    font-size: 0.95rem;
+  }
+
+  .stat-item:not(:last-child)::after {
+    height: 20px;
   }
 }
 </style>
