@@ -49,37 +49,24 @@
       </div>
 
       <div class="analytics-main-content">
-        <!-- Column 1: Trend -->
+        <section class="analytics-panel analytics-panel--dimensions">
+          <div class="analytics-card-shell">
+            <QualityDimensionsCard />
+          </div>
+        </section>
+
+        <!-- Center: Trend -->
         <section class="analytics-panel analytics-panel--trend-full">
           <div class="analytics-card-shell">
             <QualityScoreTrendCard />
           </div>
         </section>
 
-        <!-- Column 2: Summary, Dimensions & Latest -->
-        <div class="analytics-right-column">
-          <!-- <div class="analytics-summary-row">
-            <section class="analytics-panel analytics-panel--summary-full">
-              <div class="analytics-card-shell">
-                <QualitySummaryCard />
-              </div>
-            </section>
-          </div> -->
-
-          <div class="analytics-secondary-grid">
-            <section class="analytics-panel analytics-panel--dimensions">
-              <div class="analytics-card-shell">
-                <QualityDimensionsCard />
-              </div>
-            </section>
-
-            <section class="analytics-panel analytics-panel--latest">
-              <div class="analytics-card-shell">
-                <LatestTestResultCard />
-              </div>
-            </section>
+        <section class="analytics-panel analytics-panel--latest">
+          <div class="analytics-card-shell">
+            <LatestTestResultCard />
           </div>
-        </div>
+        </section>
       </div>
 
       <div class="analytics-bottom-row">
@@ -220,7 +207,7 @@ export default defineComponent({
 
 .analytics-main-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.4fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.8fr) minmax(0, 0.9fr);
   gap: 0.7rem;
   margin-bottom: 0.7rem;
   align-items: stretch;
