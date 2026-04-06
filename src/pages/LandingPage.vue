@@ -46,31 +46,56 @@
               <div class="landing-preview-header">
                 <div>
                   <p class="landing-preview-kicker mb-1">Workspace snapshot</p>
-                  <p class="landing-preview-title mb-0">One view for experiments and outcomes</p>
+                  <!-- <p class="landing-preview-title mb-0">One view for experiments and outcomes</p> -->
                 </div>
-                <span class="landing-preview-badge">Live data</span>
+                <!-- <span class="landing-preview-badge">Live data</span> -->
               </div>
 
               <figure class="landing-preview-image-wrap mb-3">
-                <img
-                  src="/experiment-result-preview.svg"
-                  alt="Preview of an experiment result dashboard showing Prompt B as winner"
-                  class="landing-preview-image"
-                />
+                <div class="landing-metrics-preview">
+                  <!-- <div class="landing-metrics-header">
+                    <i class="bi bi-shield-check"></i>
+                    <h3>EVALUATION METRICS</h3>
+                  </div> -->
+
+                  <!-- Overall Quality -->
+                  <div class="landing-metrics-item landing-metrics-item--full">
+                    <span class="landing-metrics-label">OVERALL QUALITY</span>
+                    <div class="landing-metrics-value">59<span>/100</span></div>
+                    <div class="landing-metrics-progress" style="width: 59%"></div>
+                  </div>
+
+                  <!-- Row: Response Time & Tokens -->
+                  <div class="landing-metrics-item">
+                    <span class="landing-metrics-label">RESPONSE TIME</span>
+                    <div class="landing-metrics-value"><i class="bi bi-hourglass-split"></i> 10835ms</div>
+                  </div>
+                  <div class="landing-metrics-item">
+                    <span class="landing-metrics-label">TOKENS</span>
+                    <div class="landing-metrics-value">129</div>
+                  </div>
+
+                  <!-- Row: Four Dimensions -->
+                  <div class="landing-metrics-item landing-metrics-item--clarity">
+                    <span class="landing-metrics-label">CLARITY</span>
+                    <div class="landing-metrics-value">75<span>/100</span></div>
+                  </div>
+                  <div class="landing-metrics-item landing-metrics-item--relevance">
+                    <span class="landing-metrics-label">RELEVANCE</span>
+                    <div class="landing-metrics-value">36<span>/100</span></div>
+                  </div>
+                  <div class="landing-metrics-item landing-metrics-item--coherence">
+                    <span class="landing-metrics-label">COHERENCE</span>
+                    <div class="landing-metrics-value">65<span>/100</span></div>
+                  </div>
+                  <div class="landing-metrics-item landing-metrics-item--completeness">
+                    <span class="landing-metrics-label">COMPLETENESS</span>
+                    <div class="landing-metrics-value">60<span>/100</span></div>
+                  </div>
+                </div>
               </figure>
 
               <div class="landing-preview-metrics">
-                <div class="landing-preview-summary">
-                  <div class="landing-preview-summary-icon">
-                    <i class="bi bi-lightning-charge"></i>
-                  </div>
-                  <div>
-                    <h3 class="landing-preview-summary-title mb-1">Three things it helps you do</h3>
-                    <p class="landing-preview-summary-copy mb-0">
-                      Prototype prompts, compare outputs, and keep the strongest result visible.
-                    </p>
-                  </div>
-                </div>
               </div>
             </aside>
           </div>
@@ -95,33 +120,7 @@
             </div>
           </section>
 
-          <section class="landing-workflow-section">
-            <div class="landing-section-heading landing-section-heading--compact">
-              <p class="landing-section-kicker mb-1">Workflow</p>
-              <!-- <h2 class="landing-section-title mb-0">How testing works in Prompt Lab</h2>
-              <p class="landing-section-copy mb-0">From selecting prompts to running experiments and reviewing stored results.</p> -->
-            </div>
-
-            <!-- <div class="landing-workflow-lane" aria-hidden="true">
-              <span class="landing-workflow-lane-start">Start</span>
-              <span class="landing-workflow-lane-end">Results saved</span>
-            </div> -->
-
-            <div class="landing-workflow-flow">
-              <article v-for="step in workflowSteps" :key="step.title" class="landing-workflow-node">
-                <div class="landing-workflow-node-marker" :style="{ background: step.color }">
-                  <i :class="step.icon"></i>
-                </div>
-                <div class="landing-workflow-node-copy">
-                  <div class="landing-workflow-step">{{ step.step }}</div>
-                  <h3 class="landing-workflow-title mb-1">{{ step.title }}</h3>
-                  <p class="landing-workflow-copy mb-0">{{ step.desc }}</p>
-                </div>
-              </article>
-            </div>
-          </section>
-
-          <section class="landing-signals-section">
+            <section class="landing-signals-section">
             <div class="landing-section-heading landing-section-heading--compact">
               <p class="landing-section-kicker mb-1">Evaluation Matrix</p>
               <!-- <h2 class="landing-section-title mb-0">Prompt test matrix</h2>
@@ -173,6 +172,36 @@
               </div>
             </div>
           </section>
+
+          <section class="landing-workflow-section">
+            <div class="landing-section-heading landing-section-heading--compact">
+              <p class="landing-section-kicker mb-1">Workflow</p>
+              <!-- <h2 class="landing-section-title mb-0">How testing works in Prompt Lab</h2>
+              <p class="landing-section-copy mb-0">From selecting prompts to running experiments and reviewing stored results.</p> -->
+            </div>
+
+            <!-- <div class="landing-workflow-lane" aria-hidden="true">
+              <span class="landing-workflow-lane-start">Start</span>
+              <span class="landing-workflow-lane-end">Results saved</span>
+            </div> -->
+
+            <div class="landing-workflow-flow">
+              <article v-for="(step, index) in workflowSteps" :key="step.title" class="landing-workflow-node">
+                <div class="landing-workflow-node-marker" :style="{ background: step.color }">
+                  <i :class="step.icon"></i>
+                </div>
+                <div class="landing-workflow-node-copy">
+                  <div class="landing-workflow-step">{{ step.step }}</div>
+                  <h3 class="landing-workflow-title mb-1">{{ step.title }}</h3>
+                  <p class="landing-workflow-copy mb-0">{{ step.desc }}</p>
+                </div>
+                <div v-if="index < workflowSteps.length - 1" class="landing-workflow-arrow">
+                  <i class="bi bi-arrow-right"></i>
+                </div>
+              </article>
+            </div>
+          </section>
+
         </div>
       </div>
     </section>
