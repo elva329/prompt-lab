@@ -1202,7 +1202,7 @@ h6 {
 }
 
 .landing-matrix-label-title {
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #10233f;
   margin: 0 0 0.2rem 0;
@@ -1213,7 +1213,7 @@ h6 {
 }
 
 .landing-matrix-label-copy {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   line-height: 1.35;
   color: #5f6d6b;
   margin: 0;
