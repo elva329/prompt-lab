@@ -40,8 +40,23 @@
         <span class="stat-value">{{ promptsEvaluated }}</span>
       </div>
       <div class="stat-item">
-        <span class="stat-label">Top Dimension</span>
-        <span class="stat-value">{{ topDimension }}</span>
+        <span class="stat-label">Prompts / Run</span>
+        <span class="stat-value">{{ promptsPerRun }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Score Spread</span>
+        <span class="stat-value">{{ scoreSpreadLabel }}</span>
+      </div>
+    </div>
+
+    <div class="quality-insight-row">
+      <div class="insight-item">
+        <span class="insight-label">Points To Excellent</span>
+        <span class="insight-value">{{ pointsToExcellent }}</span>
+      </div>
+      <div class="insight-item">
+        <span class="insight-label">Data Confidence</span>
+        <span class="insight-value">{{ confidenceLevel }}</span>
       </div>
     </div>
   </div>
@@ -60,6 +75,7 @@ export default defineComponent({
     const trend = ref<string>("N/A")
     const experimentsRun = ref<number>(0)
     const promptsEvaluated = ref<number>(0)
+    const scoreSpread = ref<number | null>(null)
     const userId = appStore.state.user?.id || ''
 
     const scorePercent = computed(() => {
@@ -98,16 +114,26 @@ export default defineComponent({
       return 'Needs Work'
     })
 
-    const topDimension = computed(() => {
-      const dims = { clarity: 0, relevance: 0, coherence: 0, completeness: 0 }
-      const dimsList = [
-        { name: 'Clarity', score: dims.clarity },
-        { name: 'Relevance', score: dims.relevance },
-        { name: 'Coherence', score: dims.coherence },
-        { name: 'Completeness', score: dims.completeness }
-      ]
-      const best = dimsList.reduce((max, d) => d.score > max.score ? d : max)
-      return best.score > 0 ? best.name : 'N/A'
+    const promptsPerRun = computed(() => {
+      if (experimentsRun.value <= 0 || promptsEvaluated.value <= 0) return '0.0'
+      return (promptsEvaluated.value / experimentsRun.value).toFixed(1)
+    })
+
+    const scoreSpreadLabel = computed(() => {
+      if (typeof scoreSpread.value !== 'number') return '--'
+      return `${scoreSpread.value} pts`
+    })
+
+    const pointsToExcellent = computed(() => {
+      if (typeof avgQualityScore.value !== 'number') return '--'
+      return `${Math.max(0, 85 - avgQualityScore.value)} pts`
+    })
+
+    const confidenceLevel = computed(() => {
+      if (promptsEvaluated.value >= 30) return 'High'
+      if (promptsEvaluated.value >= 12) return 'Medium'
+      if (promptsEvaluated.value > 0) return 'Emerging'
+      return 'No Data'
     })
 
     const fetchAvgQuality = async () => {
@@ -123,6 +149,22 @@ export default defineComponent({
         const experimentsPayload = await experimentsRes.json()
         const experiments = experimentsPayload.experiments || []
         
+        if (experiments.length > 0) {
+          const currentExperimentId = experiments[0]._id
+          const currentResults = await fetchResultsByExperimentRequest(userId, currentExperimentId)
+          const currentScores = currentResults
+            .map(r => r.overallQuality)
+            .filter(v => typeof v === 'number')
+
+          if (currentScores.length > 0) {
+            const maxScore = Math.max(...currentScores)
+            const minScore = Math.min(...currentScores)
+            scoreSpread.value = maxScore - minScore
+          } else {
+            scoreSpread.value = null
+          }
+        }
+
         if (experiments.length > 1) {
           // Get previous experiment results for trend
           const prevExperimentId = experiments[1]._id
@@ -142,6 +184,7 @@ export default defineComponent({
       } catch (e) {
         avgQualityScore.value = null
         trend.value = 'N/A'
+        scoreSpread.value = null
       }
     }
 
@@ -158,7 +201,10 @@ export default defineComponent({
       qualityTier,
       experimentsRun,
       promptsEvaluated,
-      topDimension
+      promptsPerRun,
+      scoreSpreadLabel,
+      pointsToExcellent,
+      confidenceLevel
     }
   }
 })
@@ -347,7 +393,7 @@ export default defineComponent({
 
 .quality-stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 0;
   background: linear-gradient(135deg, rgba(42, 157, 143, 0.08), rgba(27, 94, 85, 0.06));
   border-radius: 0.9rem;
@@ -396,6 +442,39 @@ export default defineComponent({
   letter-spacing: 0.01em;
 }
 
+.quality-insight-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  border-radius: 0.68rem;
+  border: 1px solid rgba(42, 157, 143, 0.12);
+  background: rgba(42, 157, 143, 0.05);
+  padding: 0.42rem 0.5rem;
+}
+
+.insight-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #5f6d6b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.insight-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0e7366;
+}
+
 @media (max-width: 1200px) {
   .quality-score-orb {
     width: 86px;
@@ -407,7 +486,7 @@ export default defineComponent({
   }
 
   .quality-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     padding: 0.58rem 0.65rem;
   }
 
@@ -436,8 +515,8 @@ export default defineComponent({
   }
 
   .quality-stats-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.2rem;
     padding: 0.52rem 0.55rem;
   }
 
@@ -450,7 +529,11 @@ export default defineComponent({
   }
 
   .stat-item:not(:last-child)::after {
-    height: 20px;
+    display: none;
+  }
+
+  .quality-insight-row {
+    grid-template-columns: 1fr;
   }
 }
 </style>
