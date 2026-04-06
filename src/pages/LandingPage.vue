@@ -196,12 +196,15 @@
                   <p class="landing-workflow-copy mb-0">{{ step.desc }}</p>
                 </div>
                 <div v-if="index < workflowSteps.length - 1" class="landing-workflow-arrow">
-                  <i class="bi bi-arrow-right"></i>
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
               </article>
             </div>
           </section>
 
+        
         </div>
       </div>
     </section>
