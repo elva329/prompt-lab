@@ -3613,8 +3613,8 @@ h6 {
 }
 
 .prompts-load-more-icon {
-  color: #4166ad;
-  font-size: 0.74rem;
+  color: #1b5e55;
+  font-size: 1rem;
   line-height: 1;
   animation: prompts-chevron-bounce 1.6s infinite;
 }
