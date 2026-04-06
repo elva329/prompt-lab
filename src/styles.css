@@ -992,14 +992,14 @@ h6 {
 @keyframes landing-workflow-animate {
   0% {
     opacity: 0;
-    transform: rotate(-45deg);
+    transform: rotate(-45deg) translateX(-15px);
   }
   50% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: rotate(-45deg);
+    transform: rotate(-45deg) translateX(15px);
   }
 }
 
@@ -3616,6 +3616,21 @@ h6 {
   color: #4166ad;
   font-size: 0.74rem;
   line-height: 1;
+  animation: prompts-chevron-bounce 1.6s infinite;
+}
+
+@keyframes prompts-chevron-bounce {
+  0% {
+    opacity: 0.6;
+    transform: translateY(-6px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+    transform: translateY(6px);
+  }
 }
 
 .prompts-load-more-label {
