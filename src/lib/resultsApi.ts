@@ -1,3 +1,5 @@
+import { getAuthHeaders } from './authApi';
+
 export type PromptResultPayload = {
   promptId: number;
   category?: string;
@@ -62,15 +64,12 @@ type ResultsByUserResponse = {
 };
 
 export async function saveResultsBatchRequest(data: {
-  userId: string;
   experimentId: string;
   promptResults: PromptResultPayload[];
 }): Promise<{ insertedCount: number; message?: string }> {
   const response = await fetch('/api/results/batch', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -83,8 +82,10 @@ export async function saveResultsBatchRequest(data: {
   return payload;
 }
 
-export async function fetchResultsSummaryRequest(userId: string): Promise<ResultsSummaryResponse> {
-  const response = await fetch(`/api/results/summary?userId=${encodeURIComponent(userId)}`);
+export async function fetchResultsSummaryRequest(): Promise<ResultsSummaryResponse> {
+  const response = await fetch('/api/results/summary', {
+    headers: getAuthHeaders(),
+  });
   const payload = await response.json();
 
   if (!response.ok) {
@@ -94,8 +95,10 @@ export async function fetchResultsSummaryRequest(userId: string): Promise<Result
   return payload;
 }
 
-export async function fetchPromptResultsSummaryRequest(userId: string): Promise<PromptSummaryResponse> {
-  const response = await fetch(`/api/results/prompt-summary?userId=${encodeURIComponent(userId)}`);
+export async function fetchPromptResultsSummaryRequest(): Promise<PromptSummaryResponse> {
+  const response = await fetch('/api/results/prompt-summary', {
+    headers: getAuthHeaders(),
+  });
   const payload = await response.json();
 
   if (!response.ok) {
@@ -106,11 +109,13 @@ export async function fetchPromptResultsSummaryRequest(userId: string): Promise<
 }
 
 export async function fetchResultsByExperimentRequest(
-  userId: string,
   experimentId: string
 ): Promise<ExperimentResultRow[]> {
   const response = await fetch(
-    `/api/results/by-experiment?userId=${encodeURIComponent(userId)}&experimentId=${encodeURIComponent(experimentId)}`
+    `/api/results/by-experiment?experimentId=${encodeURIComponent(experimentId)}`,
+    {
+      headers: getAuthHeaders(),
+    }
   );
   const payload = (await response.json()) as ResultsByExperimentResponse;
 
@@ -121,8 +126,10 @@ export async function fetchResultsByExperimentRequest(
   return payload.results || [];
 }
 
-export async function fetchResultsByUserRequest(userId: string): Promise<ExperimentResultRow[]> {
-  const response = await fetch(`/api/results/by-user?userId=${encodeURIComponent(userId)}`);
+export async function fetchResultsByUserRequest(): Promise<ExperimentResultRow[]> {
+  const response = await fetch('/api/results/by-user', {
+    headers: getAuthHeaders(),
+  });
   const payload = (await response.json()) as ResultsByUserResponse;
 
   if (!response.ok) {

@@ -1,10 +1,26 @@
 type AuthApiResult = {
+  token?: string;
   user?: {
     id: string;
     email: string;
   };
   message?: string;
 };
+
+// Token storage utility
+const TOKEN_KEY = 'auth_token';
+
+export function getStoredToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function setStoredToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearStoredToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 async function postAuth(path: 'login' | 'register', email: string, password: string): Promise<AuthApiResult> {
   const response = await fetch(`/api/auth/${path}`, {
@@ -19,6 +35,11 @@ async function postAuth(path: 'login' | 'register', email: string, password: str
 
   if (!response.ok) {
     throw new Error(data.message || `Failed to ${path}.`);
+  }
+
+  // Store token if present
+  if (data.token) {
+    setStoredToken(data.token);
   }
 
   return data;
@@ -41,4 +62,13 @@ export async function fetchUserByEmailRequest(email: string): Promise<AuthApiRes
   }
 
   return data;
+}
+
+// Helper to add authorization header to fetch options
+export function getAuthHeaders(): HeadersInit {
+  const token = getStoredToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
 }

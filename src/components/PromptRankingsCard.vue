@@ -76,7 +76,7 @@ export default {
       const userId = appStore.state.user?.id;
       if (!userId) throw new Error('User not logged in');
 
-      const results = await fetchResultsByUserRequest(userId);
+      const results = await fetchResultsByUserRequest();
       this.totalRuns = results.length;
 
       if (results.length === 0) {

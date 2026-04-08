@@ -400,7 +400,7 @@ async function loadPromptScores(): Promise<void> {
 
   try {
     const averaged: Record<number, { avg: number; count: number }> = {};
-    const response = await fetchPromptResultsSummaryRequest(resolvedUserId);
+    const response = await fetchPromptResultsSummaryRequest();
     for (const item of response.prompts) {
       averaged[item.promptId] = {
         avg: item.avgQualityScore,
@@ -424,11 +424,11 @@ async function toggleFavorite(promptId: number): Promise<void> {
 
   try {
     if (isFavorite(promptId)) {
-      await removeFavorite(userId, promptId);
+      await removeFavorite(promptId);
       favoritePromptIds.value = favoritePromptIds.value.filter((entry) => entry !== promptId);
       appStore.showToast('Removed from favorites.', 'info');
     } else {
-      await addOrUpdateFavorite(userId, promptId);
+      await addOrUpdateFavorite(promptId);
       favoritePromptIds.value = [...favoritePromptIds.value, promptId];
       appStore.showToast('Saved to favorites.', 'success');
     }
@@ -458,7 +458,7 @@ onMounted(async () => {
   const userId = appStore.state.user?.id;
   if (userId) {
     try {
-      const response = await fetchUserFavorites(userId);
+      const response = await fetchUserFavorites();
       favoritePromptIds.value = response.favorites.map((fav) => fav.promptId);
     } catch {
       favoritePromptIds.value = [];

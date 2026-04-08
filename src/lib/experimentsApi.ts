@@ -1,3 +1,5 @@
+import { getAuthHeaders } from './authApi';
+
 export type ExperimentPromptScore = {
   promptId: number;
   overallQuality: number;
@@ -89,17 +91,13 @@ function normalizeExperimentRecord(raw: Record<string, unknown>): ExperimentReco
 }
 
 export async function createExperimentRequest(
-  userId: string,
   promptIds: number[],
   summary?: ExperimentSummaryPayload
 ): Promise<CreateExperimentResponse> {
   const response = await fetch('/api/experiments', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
-      userId,
       prompts: promptIds,
       summary,
     }),
@@ -114,8 +112,10 @@ export async function createExperimentRequest(
   return data;
 }
 
-export async function fetchExperimentsRequest(userId: string): Promise<ExperimentRecord[]> {
-  const response = await fetch(`/api/experiments?userId=${encodeURIComponent(userId)}`);
+export async function fetchExperimentsRequest(): Promise<ExperimentRecord[]> {
+  const response = await fetch('/api/experiments', {
+    headers: getAuthHeaders(),
+  });
   const data = (await response.json()) as ExperimentsListResponse;
 
   if (!response.ok) {
@@ -125,9 +125,12 @@ export async function fetchExperimentsRequest(userId: string): Promise<Experimen
   return (data.experiments || []).map((item) => normalizeExperimentRecord(item as unknown as Record<string, unknown>));
 }
 
-export async function fetchExperimentByIdRequest(userId: string, experimentId: string): Promise<ExperimentRecord> {
+export async function fetchExperimentByIdRequest(experimentId: string): Promise<ExperimentRecord> {
   const response = await fetch(
-    `/api/experiments/${encodeURIComponent(experimentId)}?userId=${encodeURIComponent(userId)}`
+    `/api/experiments/${encodeURIComponent(experimentId)}`,
+    {
+      headers: getAuthHeaders(),
+    }
   );
   const data = (await response.json()) as ExperimentDetailResponse;
 

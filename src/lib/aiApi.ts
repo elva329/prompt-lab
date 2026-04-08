@@ -3,6 +3,8 @@
  * Supports OpenAI, Anthropic, or other LLM providers
  */
 
+import { getAuthHeaders } from './authApi';
+
 export type AIResponse = {
   response: string;
   tokensUsed: number;
@@ -177,9 +179,7 @@ async function callCustomAPI(
 
   const response = await fetch(proxyUrl, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(requestBody),
   });
 

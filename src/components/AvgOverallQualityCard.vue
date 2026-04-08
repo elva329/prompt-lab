@@ -67,6 +67,7 @@ import { defineComponent, ref, onMounted, computed } from 'vue'
 import { fetchResultsSummaryRequest } from '../lib/resultsApi'
 import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
 import { appStore } from '../stores/appStore'
+import { getAuthHeaders } from '../lib/authApi'
 
 export default defineComponent({
   name: 'AvgOverallQualityCard',
@@ -139,19 +140,19 @@ export default defineComponent({
     const fetchAvgQuality = async () => {
       if (!userId) return
       try {
-        const summary = await fetchResultsSummaryRequest(userId)
+        const summary = await fetchResultsSummaryRequest()
         avgQualityScore.value = summary.avgQualityScore
         experimentsRun.value = summary.experimentsRun || 0
         promptsEvaluated.value = summary.promptsEvaluated || 0
 
         // Fetch experiments for trend calculation
-        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsRes = await fetch('/api/experiments', { headers: getAuthHeaders() })
         const experimentsPayload = await experimentsRes.json()
         const experiments = experimentsPayload.experiments || []
         
         if (experiments.length > 0) {
           const currentExperimentId = experiments[0]._id
-          const currentResults = await fetchResultsByExperimentRequest(userId, currentExperimentId)
+          const currentResults = await fetchResultsByExperimentRequest(currentExperimentId)
           const currentScores = currentResults
             .map(r => r.overallQuality)
             .filter(v => typeof v === 'number')
@@ -168,7 +169,7 @@ export default defineComponent({
         if (experiments.length > 1) {
           // Get previous experiment results for trend
           const prevExperimentId = experiments[1]._id
-          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevResults = await fetchResultsByExperimentRequest(prevExperimentId)
           const prevScores = prevResults.map(r => r.overallQuality).filter(v => typeof v === 'number')
           if (prevScores.length > 0) {
             const prevAvg = Math.round(prevScores.reduce((a, b) => a + b, 0) / prevScores.length)

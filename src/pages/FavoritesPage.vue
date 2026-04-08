@@ -192,7 +192,7 @@ async function loadFavorites() {
   
   isLoading.value = true;
   try {
-    const response = await fetchUserFavorites(userId);
+    const response = await fetchUserFavorites();
     favorites.value = response.favorites; 
   } catch (error) {
     console.error('Failed to load favorites', error);
@@ -213,7 +213,7 @@ async function confirmDelete() {
 
   isDeleting.value = true;
   try {
-    await removeFavorite(userId, deletingPromptId.value);
+    await removeFavorite(deletingPromptId.value);
     favorites.value = favorites.value.filter(f => f.promptId !== deletingPromptId.value);
     selectedPromptIds.value = selectedPromptIds.value.filter(id => id !== deletingPromptId.value);
     appStore.showToast('Removed from favorites', 'info');

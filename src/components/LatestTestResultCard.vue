@@ -170,7 +170,7 @@ export default defineComponent({
     }
 
     try {
-      const results = await fetchResultsByUserRequest(userId)
+      const results = await fetchResultsByUserRequest()
       const sortedResults = [...results].sort((left, right) => {
         return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
       })

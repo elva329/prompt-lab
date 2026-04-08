@@ -1,3 +1,5 @@
+import { getAuthHeaders } from './authApi';
+
 export type FavoritePrompt = {
   _id?: string;
   userId: string;
@@ -20,8 +22,10 @@ export type FavoritesResponse = {
   favorites: FavoritePromptWithMerged[];
 };
 
-export async function fetchUserFavorites(userId: string): Promise<FavoritesResponse> {
-  const response = await fetch(`/api/favorites?userId=${encodeURIComponent(userId)}`);
+export async function fetchUserFavorites(): Promise<FavoritesResponse> {
+  const response = await fetch('/api/favorites', {
+    headers: getAuthHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error('Failed to fetch favorites.');
@@ -31,7 +35,6 @@ export async function fetchUserFavorites(userId: string): Promise<FavoritesRespo
 }
 
 export async function addOrUpdateFavorite(
-  userId: string,
   sourcePromptId: number,
   customFields?: {
     customTitle?: string;
@@ -41,11 +44,8 @@ export async function addOrUpdateFavorite(
 ): Promise<{ favorite: FavoritePrompt }> {
   const response = await fetch('/api/favorites', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
-      userId,
       sourcePromptId,
       ...customFields,
     }),
@@ -60,9 +60,10 @@ export async function addOrUpdateFavorite(
   return payload;
 }
 
-export async function removeFavorite(userId: string, sourcePromptId: number): Promise<void> {
-  const response = await fetch(`/api/favorites/${sourcePromptId}?userId=${encodeURIComponent(userId)}`, {
+export async function removeFavorite(sourcePromptId: number): Promise<void> {
+  const response = await fetch(`/api/favorites/${sourcePromptId}`, {
     method: 'DELETE',
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {

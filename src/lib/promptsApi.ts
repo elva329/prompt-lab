@@ -1,3 +1,5 @@
+import { getAuthHeaders } from './authApi';
+
 export type PromptRecord = {
   _id?: string;
   promptId: number;
@@ -77,9 +79,7 @@ export async function updatePromptById(
 ): Promise<PromptRecord> {
   const response = await fetch(`/api/prompts/${id}`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
 
@@ -116,13 +116,10 @@ export async function createPrompt(data: {
   title: string;
   promptText: string;
   category: string;
-  userId?: string;
 }): Promise<{ prompt: PromptRecord }> {
   const response = await fetch('/api/prompts', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(data),
   });
 

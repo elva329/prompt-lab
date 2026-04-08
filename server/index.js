@@ -3,6 +3,7 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
 
 import { getDb } from './db.js';
@@ -10,12 +11,33 @@ import { getDb } from './db.js';
 const app = express();
 const port = Number(process.env.PORT || 4000);
 const SALT_ROUNDS = 10;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_EXPIRATION = '7d';
+
+// Middleware to verify JWT token
+function verifyToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.substring(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Authorization token is required.' });
+  }
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch (error) {
+    console.error('Token verification error:', error.message);
+    return res.status(401).json({ message: 'Invalid or expired token.' });
+  }
+}
 
 async function ensureIndexes() {
   const db = await getDb();
   await db.collection('users').createIndex({ email: 1 }, { unique: true });
   await db.collection('prompt_library').createIndex({ promptId: 1 }, { unique: true });
   await db.collection('prompt_library').createIndex({ category: 1 });
+  await db.collection('prompt_library').createIndex({ title: 'text', promptText: 'text' });
   await db.collection('experiments').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('results').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('results').createIndex({ userId: 1, promptId: 1, createdAt: -1 });
@@ -68,7 +90,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // Proxy endpoint for HKBU GenAI API to bypass CORS
-app.post('/api/ai/chat', async (req, res) => {
+app.post('/api/ai/chat', verifyToken, async (req, res) => {
   try {
     const { messages, model, temperature, max_tokens } = req.body;
     
@@ -298,9 +320,10 @@ app.patch('/api/prompts/:id', async (req, res) => {
   }
 });
 
-app.post('/api/prompts', async (req, res) => {
+app.post('/api/prompts', verifyToken, async (req, res) => {
   try {
-    const { title, promptText, category, userId } = req.body || {};
+    const { title, promptText, category } = req.body || {};
+    const userId = req.user.id;
 
     if (!title || typeof title !== 'string' || !title.trim()) {
       return res.status(400).json({ message: 'Title is required.' });
@@ -341,9 +364,10 @@ app.post('/api/prompts', async (req, res) => {
   }
 });
 
-app.post('/api/experiments', async (req, res) => {
+app.post('/api/experiments', verifyToken, async (req, res) => {
   try {
-    const { userId, prompts, summary } = req.body || {};
+    const { prompts, summary } = req.body || {};
+    const userId = req.user.id;
 
     if (!userId || !ObjectId.isValid(String(userId))) {
       return res.status(400).json({ message: 'Valid userId is required.' });
@@ -430,13 +454,9 @@ app.post('/api/experiments', async (req, res) => {
   }
 });
 
-app.get('/api/experiments', async (req, res) => {
+app.get('/api/experiments', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const userId = req.user.id;
 
     const db = await getDb();
     const experimentsCollection = db.collection('experiments');
@@ -455,17 +475,13 @@ app.get('/api/experiments', async (req, res) => {
   }
 });
 
-app.get('/api/experiments/:id', async (req, res) => {
+app.get('/api/experiments/:id', verifyToken, async (req, res) => {
   try {
     const experimentId = String(req.params.id || '');
-    const userId = String(req.query.userId || '');
+    const userId = req.user.id;
 
     if (!experimentId || !ObjectId.isValid(experimentId)) {
       return res.status(400).json({ message: 'Valid experiment ID is required.' });
-    }
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
     }
 
     const db = await getDb();
@@ -488,15 +504,12 @@ app.get('/api/experiments/:id', async (req, res) => {
   }
 });
 
-app.post('/api/results/batch', async (req, res) => {
+app.post('/api/results/batch', verifyToken, async (req, res) => {
   try {
-    const { userId, experimentId, promptResults } = req.body || {};
+    const { experimentId, promptResults } = req.body || {};
+    const userId = req.user.id;
 
-    if (!userId || !ObjectId.isValid(String(userId))) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
-
-    if (!experimentId || !ObjectId.isValid(String(experimentId))) {
+    if (!ObjectId.isValid(String(experimentId))) {
       return res.status(400).json({ message: 'Valid experimentId is required.' });
     }
 
@@ -553,13 +566,9 @@ app.post('/api/results/batch', async (req, res) => {
   }
 });
 
-app.get('/api/results/summary', async (req, res) => {
+app.get('/api/results/summary', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const userId = req.user.id;
 
     const db = await getDb();
     const resultsCollection = db.collection('results');
@@ -648,13 +657,9 @@ app.get('/api/results/summary', async (req, res) => {
   }
 });
 
-app.get('/api/results/prompt-summary', async (req, res) => {
+app.get('/api/results/prompt-summary', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const userId = req.user.id;
 
     const db = await getDb();
     const resultsCollection = db.collection('results');
@@ -692,13 +697,9 @@ app.get('/api/results/prompt-summary', async (req, res) => {
   }
 });
 
-app.get('/api/results/by-user', async (req, res) => {
+app.get('/api/results/by-user', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const userId = req.user.id;
 
     const db = await getDb();
     const resultsCollection = db.collection('results');
@@ -716,14 +717,10 @@ app.get('/api/results/by-user', async (req, res) => {
   }
 });
 
-app.get('/api/results/by-experiment', async (req, res) => {
+app.get('/api/results/by-experiment', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
+    const userId = req.user.id;
     const experimentId = String(req.query.experimentId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
 
     if (!experimentId) {
       return res.status(400).json({ message: 'experimentId is required.' });
@@ -750,13 +747,10 @@ app.get('/api/results/by-experiment', async (req, res) => {
   }
 });
 
-app.post('/api/favorites', async (req, res) => {
+app.post('/api/favorites', verifyToken, async (req, res) => {
   try {
-    const { userId, sourcePromptId, customTitle, customCategory, customPromptText } = req.body || {};
-
-    if (!userId || !ObjectId.isValid(String(userId))) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const { sourcePromptId, customTitle, customCategory, customPromptText } = req.body || {};
+    const userId = req.user.id;
 
     const promptId = Number(sourcePromptId);
     if (!Number.isInteger(promptId)) {
@@ -803,13 +797,9 @@ app.post('/api/favorites', async (req, res) => {
   }
 });
 
-app.get('/api/favorites', async (req, res) => {
+app.get('/api/favorites', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
+    const userId = req.user.id;
 
     const db = await getDb();
     const favoritesCollection = db.collection('favorite_prompts');
@@ -852,14 +842,10 @@ app.get('/api/favorites', async (req, res) => {
   }
 });
 
-app.delete('/api/favorites/:sourcePromptId', async (req, res) => {
+app.delete('/api/favorites/:sourcePromptId', verifyToken, async (req, res) => {
   try {
-    const userId = String(req.query.userId || '');
+    const userId = req.user.id;
     const sourcePromptId = Number(req.params.sourcePromptId);
-
-    if (!userId || !ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Valid userId is required.' });
-    }
 
     if (!Number.isInteger(sourcePromptId)) {
       return res.status(400).json({ message: 'Valid sourcePromptId is required.' });
@@ -908,10 +894,18 @@ app.post('/api/auth/register', async (req, res) => {
       passwordHash,
     });
 
+    const userId = String(insertResult.insertedId);
+    const token = jwt.sign(
+      { id: userId, email: normalizedEmail },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRATION }
+    );
+
     return res.status(201).json({
       message: 'Registration successful.',
+      token,
       user: {
-        id: String(insertResult.insertedId),
+        id: userId,
         email: normalizedEmail,
       },
     });
@@ -943,10 +937,18 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password.' });
     }
 
+    const userId = String(user._id);
+    const token = jwt.sign(
+      { id: userId, email: user.email },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRATION }
+    );
+
     return res.status(200).json({
       message: 'Login successful.',
+      token,
       user: {
-        id: String(user._id),
+        id: userId,
         email: user.email,
       },
     });

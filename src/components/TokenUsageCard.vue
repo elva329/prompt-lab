@@ -139,8 +139,8 @@ export default defineComponent({
 
       try {
         const [summary, results] = await Promise.all([
-          fetchResultsSummaryRequest(userId),
-          fetchResultsByUserRequest(userId),
+          fetchResultsSummaryRequest(),
+          fetchResultsByUserRequest(),
         ])
 
         experimentsRun.value = safeNum(summary.experimentsRun)

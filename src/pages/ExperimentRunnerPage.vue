@@ -366,7 +366,7 @@ async function loadExistingExperimentDetails(): Promise<void> {
 
   try {
     const userId = await resolveUserId();
-    const experimentRecord = await fetchExperimentByIdRequest(userId, id.value);
+    const experimentRecord = await fetchExperimentByIdRequest(id.value);
 
     loadedExperimentPromptIds.value = Array.isArray(experimentRecord.prompts)
       ? experimentRecord.prompts.filter((entry) => Number.isInteger(entry))
@@ -374,7 +374,7 @@ async function loadExistingExperimentDetails(): Promise<void> {
 
     await loadSelectedPrompts();
 
-    const results = await fetchResultsByExperimentRequest(userId, id.value);
+    const results = await fetchResultsByExperimentRequest(id.value);
     const map: Record<number, {
       aiResponse: string;
       aiScore: number;
@@ -511,7 +511,7 @@ async function handleRun(): Promise<void> {
       }))
       .filter((entry) => entry.overallQuality > 0);
 
-    const experimentSave = await createExperimentRequest(appStore.state.user.id, selectedPromptIds.value, {
+    const experimentSave = await createExperimentRequest(selectedPromptIds.value, {
       status: 'completed',
       avgQualityScore,
       avgResponseTimeMs,
@@ -522,7 +522,6 @@ async function handleRun(): Promise<void> {
     const experimentId = experimentSave.experiment?.id;
     if (experimentId) {
       await saveResultsBatchRequest({
-        userId: appStore.state.user.id,
         experimentId,
         promptResults: selectedPrompts.value.map((prompt) => {
           const result = generatedResults[prompt.promptId];

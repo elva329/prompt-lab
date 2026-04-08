@@ -30,6 +30,7 @@ import { defineComponent, ref, onMounted } from 'vue'
 import { fetchResultsSummaryRequest } from '../lib/resultsApi'
 import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
 import { appStore } from '../stores/appStore'
+import { getAuthHeaders } from '../lib/authApi'
 
 export default defineComponent({
   name: 'PassRateCard',
@@ -41,17 +42,17 @@ export default defineComponent({
     const fetchPassRate = async () => {
       if (!userId) return
       try {
-        const summary = await fetchResultsSummaryRequest(userId)
+        const summary = await fetchResultsSummaryRequest()
         passRate.value = summary.passRate ?? null
 
         // Fetch previous experiment's passRate for trend calculation
-        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsRes = await fetch('/api/experiments', { headers: getAuthHeaders() })
         const experimentsPayload = await experimentsRes.json()
         const experiments = experimentsPayload.experiments || []
         if (experiments.length > 1) {
           // Get previous experiment id
           const prevExperimentId = experiments[1]._id
-          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevResults = await fetchResultsByExperimentRequest(prevExperimentId)
           // Calculate previous pass rate
           const prevTotal = prevResults.length
           const prevPass = prevResults.filter(r => typeof r.overallQuality === 'number' && r.overallQuality >= 60).length

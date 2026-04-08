@@ -30,6 +30,7 @@ import { defineComponent, ref, onMounted } from 'vue'
 import { fetchResultsSummaryRequest } from '../lib/resultsApi'
 import { appStore } from '../stores/appStore'
 import { fetchResultsByExperimentRequest } from '../lib/resultsApi'
+import { getAuthHeaders } from '../lib/authApi'
 
 export default defineComponent({
   name: 'AvgResponseTimeCard',
@@ -41,7 +42,7 @@ export default defineComponent({
     const fetchAvgResponseTime = async () => {
       if (!userId) return
       try {
-        const summary = await fetchResultsSummaryRequest(userId)
+        const summary = await fetchResultsSummaryRequest()
         if (typeof summary.avgResponseTimeMs === 'number' && Number.isFinite(summary.avgResponseTimeMs)) {
           avgResponseTimeMs.value = summary.avgResponseTimeMs
         } else {
@@ -49,13 +50,13 @@ export default defineComponent({
         }
 
         // Fetch previous experiment's avgResponseTimeMs for trend calculation
-        const experimentsRes = await fetch('/api/experiments?userId=' + encodeURIComponent(userId))
+        const experimentsRes = await fetch('/api/experiments', { headers: getAuthHeaders() })
         const experimentsPayload = await experimentsRes.json()
         const experiments = experimentsPayload.experiments || []
         if (experiments.length > 1) {
           // Get previous experiment id
           const prevExperimentId = experiments[1]._id
-          const prevResults = await fetchResultsByExperimentRequest(userId, prevExperimentId)
+          const prevResults = await fetchResultsByExperimentRequest(prevExperimentId)
           const prevTimes = prevResults.map(r => r.responseTimeMs).filter(v => typeof v === 'number')
           if (prevTimes.length > 0) {
             const prevAvg = Math.round(prevTimes.reduce((a, b) => a + b, 0) / prevTimes.length)

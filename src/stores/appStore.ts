@@ -1,6 +1,6 @@
 import { computed, reactive } from 'vue';
 
-import { loginRequest, registerRequest } from '../lib/authApi';
+import { clearStoredToken, loginRequest, registerRequest } from '../lib/authApi';
 import { MOCK_PROMPTS, type Experiment, type Prompt } from '../lib/mockData';
 
 type AuthUser = {
@@ -56,6 +56,7 @@ function logout(): void {
   state.user = null;
   window.localStorage.removeItem(USER_ID_KEY);
   window.localStorage.removeItem(USER_EMAIL_KEY);
+  clearStoredToken();
 }
 
 async function register(email: string, password: string): Promise<void> {

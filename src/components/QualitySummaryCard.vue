@@ -36,7 +36,7 @@ export default {
     console.log('QualitySummaryCard userId:', userId);
     if (userId) {
       try {
-        const results = await fetchResultsByUserRequest(userId);
+        const results = await fetchResultsByUserRequest();
         console.log('QualitySummaryCard results:', results);
         if (!results || results.length === 0) {
           // No data - rates stay at 0

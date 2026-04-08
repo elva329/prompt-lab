@@ -178,7 +178,7 @@ async function loadExperiments(): Promise<void> {
   errorMessage.value = '';
 
   try {
-    experiments.value = await fetchExperimentsRequest(resolvedUserId);
+    experiments.value = await fetchExperimentsRequest();
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to load experiments.';
   } finally {
