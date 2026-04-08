@@ -67,6 +67,17 @@
                     <div class="prompt-source-wrapper">
                       <pre class="small mb-0 prompt-pre">{{ prompt.content }}</pre>
                     </div>
+                    
+                    <!-- Response content ONLY for single prompt on left side -->
+                    <template v-if="selectedPrompts.length === 1 && resultByPrompt[prompt.id]">
+                      <div class="response-header d-flex justify-content-between align-items-center mb-3">
+                        <span class="h6 mt-4 fw-bold">AI Response</span>
+                        <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                      </div>
+                      <div class="response-text-scroll mb-0">
+                        <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
+                      </div>
+                    </template>
                   </div>
 
                   <div class="p-4 position-relative grow response-area">
@@ -92,17 +103,20 @@
                     </div>
 
                     <template v-if="resultByPrompt[prompt.id]">
-                      <div class="response-title-area mb-3">
-                        <h4 class="h6 mb-0 fw-bold">Response</h4>
-                      </div>
-                      <div class="response-header d-flex justify-content-between align-items-center mb-3">
-                        <span class="badge prompt-badge-muted">AI RESPONSE</span>
-                        <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
-                      </div>
-                      
-                      <div class="response-text-scroll mb-4">
-                        <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
-                      </div>
+                      <!-- Response content for 2+ prompts -->
+                      <template v-if="selectedPrompts.length > 1">
+                        <div class="response-title-area mb-3">
+                          <h4 class="h6 mb-0 fw-bold">Response</h4>
+                        </div>
+                        <div class="response-header d-flex justify-content-between align-items-center mb-3">
+                          <span class="badge prompt-badge-muted">AI RESPONSE</span>
+                          <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                        </div>
+                        
+                        <div class="response-text-scroll mb-4">
+                          <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
+                        </div>
+                      </template>
 
                       <div class="evaluation-section pt-0">
                         <h4 class="h7 mb-3 mt-3 d-flex align-items-center gap-2" style="font-size: 0.75rem;">
@@ -721,6 +735,15 @@ onMounted(async () => {
   letter-spacing: 0.3px;
 }
 
+/* Response title on left side for single prompt */
+.prompt-column:only-of-type .prompt-header-area .response-title-area {
+  gap: 0;
+}
+
+.prompt-column:only-of-type .prompt-header-area .response-title-area h4 {
+  font-size: 0.95rem;
+}
+
 .prompt-pre {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.8rem;
@@ -744,6 +767,15 @@ onMounted(async () => {
   font-size: 0.85rem;
   padding: 0.85rem;
   line-height: 1.6;
+}
+
+/* Response in left/prompt area for single prompt */
+.prompt-column:only-of-type .response-text-scroll {
+  height: 200px;
+  max-height: 200px;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  margin-bottom: 0;
 }
 
 .response-area {
@@ -779,7 +811,11 @@ onMounted(async () => {
 /* Compact metrics ONLY for single prompt side-by-side */
 .prompt-column:only-of-type .evaluation-section {
   padding: 0.75rem 0.85rem;
-  margin-top: 0.85rem;
+  margin-top: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .metrics-grid {
@@ -790,6 +826,7 @@ onMounted(async () => {
 }
 
 .response-text-scroll {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(27, 94, 85, 0.08);
   border-radius: 1rem;
@@ -804,6 +841,7 @@ onMounted(async () => {
 
 /* Compact response ONLY for single prompt side-by-side */
 .prompt-column:only-of-type .response-text-scroll {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
   height: 220px;
   max-height: 220px;
   padding: 1rem;
@@ -811,8 +849,15 @@ onMounted(async () => {
 }
 
 .response-copy {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
   white-space: pre-wrap;
   font-size: 0.95rem;
+}
+
+/* Response header for single prompt on left side */
+.prompt-column:only-of-type .prompt-header-area .response-header {
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
 }
 
 .metric-item-modern {
