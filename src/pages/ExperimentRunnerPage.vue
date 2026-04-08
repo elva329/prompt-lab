@@ -92,6 +92,9 @@
                     </div>
 
                     <template v-if="resultByPrompt[prompt.id]">
+                      <div class="response-title-area mb-3">
+                        <h4 class="h6 mb-0 fw-bold">Response</h4>
+                      </div>
                       <div class="response-header d-flex justify-content-between align-items-center mb-3">
                         <span class="badge prompt-badge-muted">AI RESPONSE</span>
                         <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
@@ -696,7 +699,26 @@ onMounted(async () => {
   flex-shrink: 0;
   border-bottom: none;
   border-right: 1px solid rgba(27, 94, 85, 0.06);
-  padding: 1.5rem 1rem;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.prompt-column:only-of-type .prompt-header-area h3 {
+  font-size: 1rem;
+}
+
+.response-title-area {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0;
+}
+
+.response-title-area h4 {
+  font-size: 1rem;
+  letter-spacing: 0.3px;
 }
 
 .prompt-pre {
@@ -718,8 +740,10 @@ onMounted(async () => {
 .prompt-column:only-of-type .prompt-pre {
   height: auto;
   max-height: 100%;
-  font-size: 0.8rem;
-  padding: 1rem;
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 0.85rem;
+  line-height: 1.6;
 }
 
 .response-area {
@@ -733,7 +757,7 @@ onMounted(async () => {
 /* Right side content area ONLY for single prompt side-by-side */
 .prompt-column:only-of-type .response-area {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
 }
 
