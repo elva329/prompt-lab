@@ -4,6 +4,26 @@
    General utility classes and state helpers
    ======================================== */
 
+/* Primary Button Styling - Override Bootstrap Blue */
+.btn-primary {
+  background-color: #1b5e55;
+  border-color: #1b5e55;
+  color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #15493f;
+  border-color: #15493f;
+}
+
+.btn-primary:disabled {
+  background-color: #1b5e55;
+  border-color: #1b5e55;
+  opacity: 0.65;
+}
+
 .spin {
   animation: spin 1s linear infinite;
 }
