@@ -1,0 +1,23 @@
+/* ============================================
+   MAIN CSS ENTRY POINT - MODULAR IMPORTS
+   ============================================
+   
+   This file currently imports the main styles.css
+   as a transitional step. The styles.css file is being
+   organized into logical modules:
+   
+   - 00-global.css: Base styles and variables ✓
+   - 01-layout.css: Layout and navigation ✓
+   - 02-landing.css: Landing page (in progress)
+   - 03-pages.css: App pages (in progress)
+   - 04-dashboard.css: Analytics and dashboard (in progress)
+   - 05-components.css: Reusable components (in progress)
+   - 06-auth.css: Auth pages (in progress)
+   - 07-animations.css: Animations and effects (in progress)
+   
+   See CSS_REFACTORING.md for detailed plan.
+   ============================================ */
+
+/* Current consolidated styles (4,275 lines)
+   This will be progressively split into modular files above */
+@import "./styles.css";

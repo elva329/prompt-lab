@@ -1,0 +1,59 @@
+/* ================================================
+   CSS MODULAR STRUCTURE ENTRY POINT
+   ================================================
+   
+   This file imports the main CSS styles.
+   
+   Current Structure: Consolidated
+   - index.css (this file - entry point)
+   - styles.css (4,275 lines - all styles organized by section)
+   
+   For detailed CSS organization reference, see:
+   CSS_ORGANIZATION_GUIDE.md (in project root)
+   
+   CSS Sections (in styles.css):
+   - Lines 1-150: Global styles, variables, utilities
+   - Lines 151-280: Layout, app shell, sidebar, navigation
+   - Lines 281-842: Landing page (hero, features, workflow, matrix)
+   - Lines 843-1170: Authentication (login, register)
+   - Lines 1171-1450: Dashboard home, KPI cards
+   - Lines 1451-1900: Prompts page, grid, cards
+   - Lines 1901-2100: Experiments page styles
+   - Lines 2101-2300: Favorites page styles
+   - Lines 2301-2800: Analytics dashboard, charts
+   - Lines 2801-3170: Reusable components (modals, badges)
+   - Lines 3171-4130: Responsive design, media queries
+   - Lines 4131-4275: Animations, loading states
+   
+   ================================================ */
+
+/* MODULAR CSS IMPORTS */
+
+/* Global styles, variables, typography, base elements */
+@import "./00-global.css";
+
+/* Layout, navigation, sidebar, auth topbar */
+@import "./01-layout.css";
+
+/* Landing page - hero, features, workflow, matrix, signals */
+@import "./02-landing.css";
+
+/* Authentication - login, register pages */
+@import "./03-auth.css";
+
+/* Dashboard - KPI cards, menus, charts */
+@import "./04-dashboard.css";
+
+/* Pages - prompts, experiments, favorites, page surfaces */
+@import "./05-pages.css";
+
+/* Responsive - media queries for desktop, tablet, mobile */
+@import "./06-responsive.css";
+
+/* Animations - keyframes and motion effects */
+@import "./07-animations.css";
+
+/* Utilities - loaders, modals, helpers */
+@import "./08-utilities.css";
+
+

@@ -1,0 +1,126 @@
+/* SECTION 2: Layout & Navigation */
+
+.marketing-brand {
+  color: #161b26;
+}
+
+.marketing-brand i {
+  color: var(--app-primary);
+  font-size: 1.15rem;
+}
+
+.marketing-link-btn {
+  color: #313a4f;
+}
+
+.marketing-outline-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--app-border);
+  color: #1f2737;
+  padding: 0.5rem 1rem;
+}
+
+.auth-topbar {
+  background: rgba(250, 246, 240, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(232, 225, 214, 0.9);
+}
+
+.auth-nav-pills {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.auth-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: #4a556c;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.4rem 0.78rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: color 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.auth-nav-link:hover {
+  color: #21414a;
+  background: rgba(214, 239, 233, 0.72);
+  border-color: rgba(122, 180, 170, 0.35);
+}
+
+.auth-nav-link.active {
+  color: #17333d;
+  border-color: rgba(122, 180, 170, 0.42);
+  background: linear-gradient(120deg, #eef6f3, #e7f0eb);
+}
+
+.sidebar-desktop {
+  width: 260px;
+  max-width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(255, 250, 244, 0.92), rgba(246, 242, 235, 0.96));
+  border-right: 1px solid rgba(233, 225, 215, 0.92);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.nav-item-link {
+  border: 1px solid transparent;
+  color: #4a556c;
+}
+
+.sidebar-desktop .nav-item-link {
+  display: flex;
+  width: 100%;
+  text-decoration: none;
+  padding: 0.35rem 0.55rem;
+  min-height: 0;
+  font-size: 0.92rem;
+  line-height: 1.1;
+  border-radius: 0.65rem;
+}
+
+.nav-item-link.active {
+  border-color: rgba(122, 180, 170, 0.42);
+  background: linear-gradient(120deg, #eef6f3, #e7f0eb);
+  color: #17333d;
+}
+
+.avatar-pill {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: linear-gradient(140deg, #dcebe6, #f0e8db);
+  color: #24454d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.sidebar-desktop .border-top {
+  border-color: rgba(222, 214, 205, 0.9) !important;
+}
+
+.sidebar-desktop .border-bottom {
+  border-color: rgba(222, 214, 205, 0.9) !important;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--app-accent), #1683d8);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
