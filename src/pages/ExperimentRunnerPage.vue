@@ -629,6 +629,10 @@ onMounted(async () => {
 
 .runner-columns {
   display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -645,9 +649,25 @@ onMounted(async () => {
 .prompt-column {
   transition: background-color 0.2s;
   background: rgba(255, 255, 255, 0.75);
-  flex: 1;
+  flex: 0 0 380px;
   display: flex;
   flex-direction: column;
+}
+
+/* Wider cards for 2-prompt scenario */
+.prompt-column:nth-last-child(2):nth-child(1),
+.prompt-column:nth-last-child(1):nth-child(2) {
+  flex: 0 0 420px;
+}
+
+/* Wider single prompt for better space utilization */
+.prompt-column:only-of-type {
+  flex: 0 0 clamp(800px, 85vw, 1000px);
+}
+
+/* Side-by-side layout ONLY for single prompt - inner flex container */
+.prompt-column:only-of-type > .h-100 {
+  flex-direction: row !important;
 }
 
 .prompt-header-area {
@@ -657,6 +677,16 @@ onMounted(async () => {
   flex-shrink: 0;
   background: linear-gradient(135deg, rgba(27, 94, 85, 0.05) 0%, rgba(27, 94, 85, 0.02) 100%);
   border-bottom: 1px solid rgba(27, 94, 85, 0.06);
+}
+
+/* Sidebar layout ONLY for single prompt */
+.prompt-column:only-of-type .prompt-header-area {
+  height: auto;
+  width: 420px;
+  flex-shrink: 0;
+  border-bottom: none;
+  border-right: 1px solid rgba(27, 94, 85, 0.06);
+  padding: 1.5rem 1rem;
 }
 
 .prompt-pre {
@@ -674,6 +704,14 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
+/* Full height prompt code for single prompt side-by-side */
+.prompt-column:only-of-type .prompt-pre {
+  height: auto;
+  max-height: 100%;
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
 .response-area {
   flex: 1;
   display: flex;
@@ -682,9 +720,16 @@ onMounted(async () => {
   position: relative;
 }
 
+/* Right side content area ONLY for single prompt side-by-side */
+.prompt-column:only-of-type .response-area {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
 .evaluation-section {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
   padding-left: 1rem;
   padding-right: 1rem;
   flex: 0 0 auto;
@@ -697,24 +742,16 @@ onMounted(async () => {
   width: 100%;
 }
 
-/* Compact small card for single prompt metric section */
+/* Compact metrics ONLY for single prompt side-by-side */
 .prompt-column:only-of-type .evaluation-section {
-  max-width: 380px;
-  /* width: auto; */
-  padding-top: 0.85rem;
-  padding-bottom: 0.85rem;
-  margin:0 auto;
+  padding: 0.85rem 1rem;
+  margin-top: 0.85rem;
 }
 
 .metrics-grid {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-}
-
-/* Reduce gap for single prompt */
-.runner-columns:only-child ~ .evaluation-section .metrics-grid {
   gap: 0.5rem;
 }
 
@@ -731,6 +768,14 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
+/* Compact response ONLY for single prompt side-by-side */
+.prompt-column:only-of-type .response-text-scroll {
+  height: 220px;
+  max-height: 220px;
+  padding: 1rem;
+  font-size: 0.95rem;
+}
+
 .response-copy {
   white-space: pre-wrap;
   font-size: 0.95rem;
@@ -740,11 +785,6 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(27, 94, 85, 0.08);
   border-radius: 0.85rem;
-  padding: 0.85rem;
-}
-
-/* More compact for single prompt */
-.prompt-column:only-of-type .metric-item-modern {
   padding: 0.8rem;
 }
 
@@ -798,12 +838,6 @@ onMounted(async () => {
 .metrics-subgrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-/* More compact for single prompt */
-.prompt-column:only-of-type .metrics-subgrid {
-  grid-template-columns: 1fr 1fr;
   gap: 0.5rem;
 }
 
@@ -811,14 +845,9 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(27, 94, 85, 0.06);
   border-radius: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.85rem;
   display: flex;
   flex-direction: column;
-}
-
-/* Reduce padding for single prompt */
-.prompt-column:only-of-type .metric-item-mini {
-  padding: 0.6rem 0.85rem;
 }
 
 .mini-label {
@@ -837,20 +866,14 @@ onMounted(async () => {
 .metrics-detailed-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-/* Keep 2-column layout for single prompt */
-.prompt-column:only-of-type .metrics-detailed-grid {
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .metric-badge-card {
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(27, 94, 85, 0.10);
   border-radius: 0.75rem;
-  padding: 0.75rem;
+  padding: 0.7rem 0.65rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -859,28 +882,17 @@ onMounted(async () => {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* More compact for single prompt */
-.prompt-column:only-of-type .metric-badge-card {
-  padding: 0.7rem 0.65rem;
-}
-
 .metric-badge-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(27, 94, 85, 0.12);
 }
 
 .badge-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.025em;
-  margin-bottom: 0.25rem;
-}
-
-/* Smaller text for single prompt */
-.runner-columns:only-child .badge-label {
-  font-size: 0.6rem;
   margin-bottom: 0.15rem;
 }
 
@@ -891,14 +903,9 @@ onMounted(async () => {
 }
 
 .badge-score {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   line-height: 1;
-}
-
-/* Smaller score for single prompt */
-.runner-columns:only-child .badge-score {
-  font-size: 1.1rem;
 }
 
 .badge-max {
@@ -939,8 +946,13 @@ onMounted(async () => {
 }
 
 .loading-content-wrapper {
-  max-width: 280px;
+  max-width: 100%;
   width: 100%;
+}
+
+/* Loading content for single prompt side-by-side */
+.prompt-column:only-of-type .loading-content-wrapper {
+  max-width: 100%;
 }
 
 .spinner-border {
