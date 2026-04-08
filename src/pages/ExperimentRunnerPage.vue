@@ -578,12 +578,18 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   padding-bottom: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  justify-content: flex-start;
 }
 
 .experiment-card-modern {
   border-radius: 1.25rem;
-  background: #fff;
+  background: none;
+  box-shadow: none !important;
   height: auto;
+  max-width: 1220px;
+  margin: 0 auto;
 }
 
 .experiment-card-modern > .card-body {
@@ -604,7 +610,7 @@ onMounted(async () => {
 .runner-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(8px);
   z-index: 10;
   display: flex;
@@ -633,6 +639,9 @@ onMounted(async () => {
   flex-wrap: nowrap;
   overflow-x: auto;
   justify-content: center;
+  max-width: 1220px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -649,20 +658,21 @@ onMounted(async () => {
 .prompt-column {
   transition: background-color 0.2s;
   background: rgba(255, 255, 255, 0.75);
-  flex: 0 0 380px;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
-/* Wider cards for 2-prompt scenario */
+/* Same width distribution for all scenarios */
 .prompt-column:nth-last-child(2):nth-child(1),
 .prompt-column:nth-last-child(1):nth-child(2) {
-  flex: 0 0 420px;
+  flex: 1;
 }
 
-/* Wider single prompt for better space utilization */
+/* Same width for single prompt */
 .prompt-column:only-of-type {
-  flex: 0 0 clamp(800px, 85vw, 1000px);
+  flex: 1;
 }
 
 /* Side-by-side layout ONLY for single prompt - inner flex container */
@@ -682,7 +692,7 @@ onMounted(async () => {
 /* Sidebar layout ONLY for single prompt */
 .prompt-column:only-of-type .prompt-header-area {
   height: auto;
-  width: 420px;
+  width: 55%;
   flex-shrink: 0;
   border-bottom: none;
   border-right: 1px solid rgba(27, 94, 85, 0.06);
@@ -744,7 +754,7 @@ onMounted(async () => {
 
 /* Compact metrics ONLY for single prompt side-by-side */
 .prompt-column:only-of-type .evaluation-section {
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 0.85rem;
   margin-top: 0.85rem;
 }
 
@@ -924,6 +934,15 @@ onMounted(async () => {
   justify-content: center;
   z-index: 5;
   padding: 2rem;
+}
+
+/* Remove card background when loading */
+.response-area:has(.runner-loading) {
+  background: transparent !important;
+}
+
+.prompt-column:has(.runner-loading) {
+  background: transparent !important;
 }
 
 .status-icon-box {
