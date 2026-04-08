@@ -139,6 +139,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute, RouterLink } from 'vue-router';
 import { appStore } from '../stores/appStore';
 import { fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
+import { getAuthHeaders } from '../lib/authApi';
 
 // Define interface matching expected data
 interface FavoritePrompt {
@@ -275,9 +276,8 @@ async function saveEdit() {
     if (userId) {
       const response = await fetch('/api/favorites', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
-          userId,
           sourcePromptId: editingPrompt.value.promptId,
           customTitle: editForm.value.title,
           customCategory: editForm.value.category,
