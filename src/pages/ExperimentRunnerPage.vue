@@ -101,10 +101,10 @@
                         <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
                       </div>
 
-                      <div class="evaluation-section pt-4 border-top mt-auto">
-                        <h4 class="h6 mb-4 d-flex align-items-center gap-2">
-                          <i class="bi bi-shield-check text-success"></i>
-                          <span class="text-uppercase tracking-wider fw-bold small text-muted">Evaluation Metrics</span>
+                      <div class="evaluation-section pt-0">
+                        <h4 class="h7 mb-3 mt-3 d-flex align-items-center gap-2" style="font-size: 0.75rem;">
+                          <i class="bi bi-shield-check text-success" style="font-size: 0.9rem;"></i>
+                          <span class="text-uppercase tracking-wider fw-bold text-muted">Evaluation Metrics</span>
                         </h4>
 
                         <div class="metrics-grid">
@@ -683,18 +683,39 @@ onMounted(async () => {
 }
 
 .evaluation-section {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-  flex: 1;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 1rem;
+  border: 1px solid rgba(27, 94, 85, 0.08);
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Compact small card for single prompt metric section */
+.prompt-column:only-of-type .evaluation-section {
+  max-width: 380px;
+  /* width: auto; */
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+  margin:0 auto;
 }
 
 .metrics-grid {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.6rem;
+}
+
+/* Reduce gap for single prompt */
+.runner-columns:only-child ~ .evaluation-section .metrics-grid {
+  gap: 0.5rem;
 }
 
 .response-text-scroll {
@@ -718,8 +739,13 @@ onMounted(async () => {
 .metric-item-modern {
   background: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(27, 94, 85, 0.08);
-  border-radius: 1rem;
-  padding: 1.25rem;
+  border-radius: 0.85rem;
+  padding: 0.85rem;
+}
+
+/* More compact for single prompt */
+.prompt-column:only-of-type .metric-item-modern {
+  padding: 0.8rem;
 }
 
 .metric-item-modern.highlight {
@@ -730,22 +756,22 @@ onMounted(async () => {
 
 .metric-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: #64748b;
   letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .metric-value-wrapper {
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .metric-value {
-  font-size: 2rem;
+  font-size: 1.6rem;
   font-weight: 800;
   color: #1b5e55;
   line-height: 1;
@@ -775,6 +801,12 @@ onMounted(async () => {
   gap: 0.75rem;
 }
 
+/* More compact for single prompt */
+.prompt-column:only-of-type .metrics-subgrid {
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
 .metric-item-mini {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(27, 94, 85, 0.06);
@@ -784,21 +816,32 @@ onMounted(async () => {
   flex-direction: column;
 }
 
+/* Reduce padding for single prompt */
+.prompt-column:only-of-type .metric-item-mini {
+  padding: 0.6rem 0.85rem;
+}
+
 .mini-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: #94a3b8;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .mini-value {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #334155;
 }
 
 .metrics-detailed-grid {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+/* Keep 2-column layout for single prompt */
+.prompt-column:only-of-type .metrics-detailed-grid {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
 }
@@ -816,6 +859,11 @@ onMounted(async () => {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* More compact for single prompt */
+.prompt-column:only-of-type .metric-badge-card {
+  padding: 0.7rem 0.65rem;
+}
+
 .metric-badge-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(27, 94, 85, 0.12);
@@ -830,6 +878,12 @@ onMounted(async () => {
   margin-bottom: 0.25rem;
 }
 
+/* Smaller text for single prompt */
+.runner-columns:only-child .badge-label {
+  font-size: 0.6rem;
+  margin-bottom: 0.15rem;
+}
+
 .badge-score-container {
   display: flex;
   align-items: baseline;
@@ -840,6 +894,11 @@ onMounted(async () => {
   font-size: 1.25rem;
   font-weight: 800;
   line-height: 1;
+}
+
+/* Smaller score for single prompt */
+.runner-columns:only-child .badge-score {
+  font-size: 1.1rem;
 }
 
 .badge-max {
