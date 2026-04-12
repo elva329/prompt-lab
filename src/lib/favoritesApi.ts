@@ -3,10 +3,9 @@ import { getAuthHeaders } from './authApi';
 export type FavoritePrompt = {
   _id?: string;
   userId: string;
-  sourcePromptId: number;
-  customTitle?: string;
-  customCategory?: string;
-  customPromptText?: string;
+  customTitle: string;
+  customCategory: string;
+  customPromptText: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -15,7 +14,7 @@ export type FavoritePromptWithMerged = FavoritePrompt & {
   title: string;
   category: string;
   promptText: string;
-  promptId: number;
+  promptId: string;
 };
 
 export type FavoritesResponse = {
@@ -34,34 +33,57 @@ export async function fetchUserFavorites(): Promise<FavoritesResponse> {
   return response.json();
 }
 
-export async function addOrUpdateFavorite(
-  sourcePromptId: number,
-  customFields?: {
-    customTitle?: string;
-    customCategory?: string;
-    customPromptText?: string;
-  }
+export async function createPrompt(
+  customTitle: string,
+  customPromptText: string,
+  customCategory?: string
 ): Promise<{ favorite: FavoritePrompt }> {
   const response = await fetch('/api/favorites', {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
-      sourcePromptId,
-      ...customFields,
+      customTitle,
+      customPromptText,
+      customCategory: customCategory || 'General',
     }),
   });
 
   const payload = await response.json();
 
   if (!response.ok) {
-    throw new Error(payload?.message || 'Failed to save favorite.');
+    throw new Error(payload?.message || 'Failed to create prompt.');
   }
 
   return payload;
 }
 
-export async function removeFavorite(sourcePromptId: number): Promise<void> {
-  const response = await fetch(`/api/favorites/${sourcePromptId}`, {
+export async function updatePrompt(
+  id: string,
+  customTitle: string,
+  customPromptText: string,
+  customCategory?: string
+): Promise<{ favorite: FavoritePrompt }> {
+  const response = await fetch(`/api/favorites/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      customTitle,
+      customPromptText,
+      customCategory: customCategory || 'General',
+    }),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    throw new Error(payload?.message || 'Failed to update prompt.');
+  }
+
+  return payload;
+}
+
+export async function removeFavorite(id: string): Promise<void> {
+  const response = await fetch(`/api/favorites/${id}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

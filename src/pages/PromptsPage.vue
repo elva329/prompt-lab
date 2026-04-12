@@ -94,18 +94,6 @@
             <p class="prompt-content-preview mb-0">{{ prompt.promptText }}</p>
 
             <div class="prompt-card-footer mt-auto">
-              <button
-                type="button"
-                class="prompt-favorite-btn"
-                :aria-label="isFavorite(prompt.promptId) ? 'Remove from favorites' : 'Save to favorites'"
-                @click="toggleFavorite(prompt.promptId)"
-              >
-                <i
-                  class="bi fs-6"
-                  :class="isFavorite(prompt.promptId) ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
-                ></i>
-              </button>
-
               <div class="prompt-score-wrap">
                 <span v-if="getPromptScoreSummary(prompt.promptId)" class="badge rounded-pill prompt-badge-score">
                   <i class="bi bi-bar-chart-line-fill"></i>
@@ -153,7 +141,6 @@ import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import { fetchUserByEmailRequest } from '../lib/authApi';
-import { addOrUpdateFavorite, fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
 import { fetchPrompts, type PromptRecord } from '../lib/promptsApi';
 import { fetchPromptResultsSummaryRequest } from '../lib/resultsApi';
 import { appStore } from '../stores/appStore';
@@ -163,7 +150,6 @@ const selectedCategory = ref('all');
 const prompts = ref<PromptRecord[]>([]);
 const visibleCountByCategory = ref<Record<string, number>>({});
 const selectedPromptIds = ref<number[]>([]);
-const favoritePromptIds = ref<number[]>([]);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const promptScoreMap = ref<Record<number, { avg: number; count: number }>>({});
@@ -362,10 +348,6 @@ function togglePromptSelection(promptId: number): void {
   }
 }
 
-function isFavorite(promptId: number): boolean {
-  return favoritePromptIds.value.includes(promptId);
-}
-
 function getPromptScoreSummary(promptId: number): string | null {
   const score = promptScoreMap.value[promptId];
   if (!score) {
@@ -415,28 +397,6 @@ async function loadPromptScores(): Promise<void> {
   }
 }
 
-async function toggleFavorite(promptId: number): Promise<void> {
-  const userId = appStore.state.user?.id;
-  if (!userId) {
-    appStore.showToast('Please log in to save favorites.', 'warning');
-    return;
-  }
-
-  try {
-    if (isFavorite(promptId)) {
-      await removeFavorite(promptId);
-      favoritePromptIds.value = favoritePromptIds.value.filter((entry) => entry !== promptId);
-      appStore.showToast('Removed from favorites.', 'info');
-    } else {
-      await addOrUpdateFavorite(promptId);
-      favoritePromptIds.value = [...favoritePromptIds.value, promptId];
-      appStore.showToast('Saved to favorites.', 'success');
-    }
-  } catch (error) {
-    appStore.showToast(error instanceof Error ? error.message : 'Failed to update favorites.', 'danger');
-  }
-}
-
 function clearSelection(): void {
   selectedPromptIds.value = [];
 }
@@ -455,16 +415,6 @@ function goToTestPrompt(): void {
 }
 
 onMounted(async () => {
-  const userId = appStore.state.user?.id;
-  if (userId) {
-    try {
-      const response = await fetchUserFavorites();
-      favoritePromptIds.value = response.favorites.map((fav) => fav.promptId);
-    } catch {
-      favoritePromptIds.value = [];
-    }
-  }
-
   loadPrompts();
   loadPromptScores();
 });

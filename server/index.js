@@ -749,51 +749,82 @@ app.get('/api/results/by-experiment', verifyToken, async (req, res) => {
 
 app.post('/api/favorites', verifyToken, async (req, res) => {
   try {
-    const { sourcePromptId, customTitle, customCategory, customPromptText } = req.body || {};
+    const { customTitle, customCategory, customPromptText } = req.body || {};
     const userId = req.user.id;
 
-    const promptId = Number(sourcePromptId);
-    if (!Number.isInteger(promptId)) {
-      return res.status(400).json({ message: 'Valid sourcePromptId is required.' });
+    if (!customTitle || !customPromptText) {
+      return res.status(400).json({ message: 'Title and prompt content are required.' });
     }
 
     const db = await getDb();
     const favoritesCollection = db.collection('favorite_prompts');
-    const promptsCollection = db.collection('prompt_library');
-
-    const sourcePrompt = await promptsCollection.findOne({ promptId });
-    if (!sourcePrompt) {
-      return res.status(404).json({ message: 'Source prompt not found.' });
-    }
-
     const now = new Date().toISOString();
     
-    // Always set custom fields for consistency (null if not provided)
-    const updateData = {
+    const insertData = {
       userId: String(userId),
-      sourcePromptId: promptId,
-      customTitle: typeof customTitle === 'string' && customTitle.trim() ? customTitle.trim() : null,
-      customCategory: typeof customCategory === 'string' && customCategory.trim() ? customCategory.trim() : null,
-      customPromptText: typeof customPromptText === 'string' && customPromptText.trim() ? customPromptText.trim() : null,
+      customTitle: customTitle.trim(),
+      customCategory: (typeof customCategory === 'string' && customCategory.trim()) ? customCategory.trim() : 'General',
+      customPromptText: customPromptText.trim(),
+      createdAt: now,
       updatedAt: now,
     };
 
-    const result = await favoritesCollection.findOneAndUpdate(
-      { userId: String(userId), sourcePromptId: promptId },
-      { 
-        $set: updateData, 
-        $setOnInsert: { createdAt: now } 
-      },
-      { upsert: true, returnDocument: 'after' }
-    );
+    const result = await favoritesCollection.insertOne(insertData);
+
+    return res.status(201).json({
+      message: 'Prompt created successfully.',
+      favorite: { ...insertData, _id: result.insertedId },
+    });
+  } catch (error) {
+    console.error('Create prompt error:', error);
+    return res.status(500).json({ message: 'Failed to create prompt.' });
+  }
+});
+
+app.put('/api/favorites/:id', verifyToken, async (req, res) => {
+  try {
+    const { customTitle, customCategory, customPromptText } = req.body || {};
+    const userId = req.user.id;
+    const id = req.params.id;
+
+    if (!customTitle || !customPromptText) {
+      return res.status(400).json({ message: 'Title and prompt content are required.' });
+    }
+
+    const db = await getDb();
+    const favoritesCollection = db.collection('favorite_prompts');
+    const { ObjectId } = await import('mongodb');
+
+    let result;
+    try {
+      const objectId = new ObjectId(id);
+      result = await favoritesCollection.findOneAndUpdate(
+        { _id: objectId, userId },
+        {
+          $set: {
+            customTitle: customTitle.trim(),
+            customCategory: (typeof customCategory === 'string' && customCategory.trim()) ? customCategory.trim() : 'General',
+            customPromptText: customPromptText.trim(),
+            updatedAt: new Date().toISOString(),
+          },
+        },
+        { returnDocument: 'after' }
+      );
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid prompt ID.' });
+    }
+
+    if (!result) {
+      return res.status(404).json({ message: 'Prompt not found.' });
+    }
 
     return res.status(200).json({
-      message: 'Favorite saved successfully.',
+      message: 'Prompt updated successfully.',
       favorite: result,
     });
   } catch (error) {
-    console.error('Save favorite error:', error);
-    return res.status(500).json({ message: 'Failed to save favorite.' });
+    console.error('Update prompt error:', error);
+    return res.status(500).json({ message: 'Failed to update prompt.' });
   }
 });
 
@@ -803,37 +834,19 @@ app.get('/api/favorites', verifyToken, async (req, res) => {
 
     const db = await getDb();
     const favoritesCollection = db.collection('favorite_prompts');
-    const promptsCollection = db.collection('prompt_library');
 
     const favorites = await favoritesCollection
       .find({ userId })
       .sort({ updatedAt: -1 })
       .toArray();
 
-    const sourcePromptIds = favorites.map((fav) => fav.sourcePromptId);
-    const sourcePrompts = await promptsCollection
-      .find({ promptId: { $in: sourcePromptIds } })
-      .toArray();
-
-    const promptsMap = new Map();
-    sourcePrompts.forEach((prompt) => {
-      promptsMap.set(prompt.promptId, prompt);
-    });
-
-    const merged = favorites.map((fav) => {
-      const sourcePrompt = promptsMap.get(fav.sourcePromptId);
-      if (!sourcePrompt) {
-        return null;
-      }
-
-      return {
-        ...fav,
-        promptId: fav.sourcePromptId,
-        title: fav.customTitle ?? sourcePrompt.title,
-        category: fav.customCategory ?? sourcePrompt.category,
-        promptText: fav.customPromptText ?? sourcePrompt.promptText,
-      };
-    }).filter(Boolean);
+    const merged = favorites.map((fav) => ({
+      ...fav,
+      promptId: fav._id.toString(),
+      title: fav.customTitle,
+      category: fav.customCategory || 'General',
+      promptText: fav.customPromptText,
+    }));
 
     return res.json({ favorites: merged });
   } catch (error) {
@@ -842,28 +855,31 @@ app.get('/api/favorites', verifyToken, async (req, res) => {
   }
 });
 
-app.delete('/api/favorites/:sourcePromptId', verifyToken, async (req, res) => {
+app.delete('/api/favorites/:id', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const sourcePromptId = Number(req.params.sourcePromptId);
-
-    if (!Number.isInteger(sourcePromptId)) {
-      return res.status(400).json({ message: 'Valid sourcePromptId is required.' });
-    }
+    const id = req.params.id;
 
     const db = await getDb();
     const favoritesCollection = db.collection('favorite_prompts');
+    const { ObjectId } = await import('mongodb');
 
-    const result = await favoritesCollection.deleteOne({
-      userId,
-      sourcePromptId,
-    });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: 'Favorite not found.' });
+    let result;
+    try {
+      const objectId = new ObjectId(id);
+      result = await favoritesCollection.deleteOne({
+        _id: objectId,
+        userId,
+      });
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid prompt ID.' });
     }
 
-    return res.json({ message: 'Favorite removed successfully.' });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Prompt not found.' });
+    }
+
+    return res.json({ message: 'Prompt removed successfully.' });
   } catch (error) {
     console.error('Remove favorite error:', error);
     return res.status(500).json({ message: 'Failed to remove favorite.' });

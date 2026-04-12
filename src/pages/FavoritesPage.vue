@@ -29,6 +29,10 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary" v-if="selectedPromptIds.length">Selected: {{ selectedPromptIds.length }}/3</span>
+        <button class="btn btn-outline-secondary btn-sm" @click="showCreateModal = true" title="Create a new prompt">
+          <i class="bi bi-plus-circle me-1"></i>
+          Create
+        </button>
         <button class="btn btn-primary btn-sm" :disabled="selectedPromptIds.length === 0 || selectedPromptIds.length > 3" @click="goToTestPrompt">
           Test Prompts
         </button>
@@ -50,8 +54,11 @@
         <i class="bi bi-heart"></i>
       </div>
       <h3 class="h5 fw-bold text-secondary mb-2">No favorites yet</h3>
-      <p class="text-muted small mb-4" style="max-width: 300px;">Mark prompts as favorites in the library to see them here.</p>
-      <RouterLink to="/prompts" class="btn btn-primary px-4">Browse Prompts</RouterLink>
+      <p class="text-muted small mb-4" style="max-width: 300px;">Create your own prompts or mark prompts as favorites in the library to see them here.</p>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary px-4" @click="showCreateModal = true">Create Prompt</button>
+        <RouterLink to="/prompts" class="btn btn-outline-primary px-4">Browse Prompts</RouterLink>
+      </div>
     </div>
 
     <section v-else class="row g-4 prompts-grid prompts-scrollable-grid">
@@ -86,6 +93,34 @@
         </article>
       </div>
     </section>
+
+    <!-- Create Prompt Modal -->
+    <div v-if="showCreateModal" class="modal-overlay" @click.self="closeCreateModal">
+      <div class="modal-card p-4" style="width: 500px; max-width: 90vw;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 class="h5 mb-0 fw-bold">Create New Prompt</h3>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeCreateModal"></button>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Title</label>
+          <input v-model="createForm.title" class="form-control" placeholder="Prompt Title" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Category</label>
+          <input v-model="createForm.category" class="form-control" placeholder="Category (e.g. Technology)" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold text-secondary">Prompt Content</label>
+          <textarea v-model="createForm.promptText" class="form-control prompt-textarea" rows="6" placeholder="Enter your prompt text here..."></textarea>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button class="btn btn-outline-secondary btn-sm" @click="closeCreateModal">Cancel</button>
+          <button class="btn btn-primary btn-sm" @click="saveCreate" :disabled="isCreating || !createForm.title || !createForm.promptText">
+            {{ isCreating ? 'Creating...' : 'Create Prompt' }}
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Edit Modal -->
     <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
@@ -138,26 +173,30 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute, RouterLink } from 'vue-router';
 import { appStore } from '../stores/appStore';
-import { fetchUserFavorites, removeFavorite } from '../lib/favoritesApi';
+import { fetchUserFavorites, removeFavorite, createPrompt } from '../lib/favoritesApi';
 import { getAuthHeaders } from '../lib/authApi';
 
 // Define interface matching expected data
 interface FavoritePrompt {
-  promptId: number;
+  promptId: string;
   title: string;
   promptText: string;
   category: string;
 }
 
 const favorites = ref<FavoritePrompt[]>([]);
-const selectedPromptIds = ref<number[]>([]);
+const selectedPromptIds = ref<string[]>([]);
 const showEditModal = ref(false);
 const isSaving = ref(false);
 const editingPrompt = ref<FavoritePrompt | null>(null);
 const editForm = ref({ title: '', promptText: '', category: '' });
 const showDeleteModal = ref(false);
-const deletingPromptId = ref<number | null>(null);
+const deletingPromptId = ref<string | null>(null);
 const isDeleting = ref(false);
+
+const showCreateModal = ref(false);
+const isCreating = ref(false);
+const createForm = ref({ title: '', promptText: '', category: '' });
 
 const isLoading = ref(true);
 const router = useRouter();
@@ -203,7 +242,7 @@ async function loadFavorites() {
   }
 }
 
-function handleRemoveFavorite(promptId: number) {
+function handleRemoveFavorite(promptId: string) {
   deletingPromptId.value = promptId;
   showDeleteModal.value = true;
 }
@@ -232,11 +271,11 @@ function cancelDelete() {
   deletingPromptId.value = null;
 }
 
-function isSelected(id: number) {
+function isSelected(id: string) {
   return selectedPromptIds.value.includes(id);
 }
 
-function toggleSelection(id: number) {
+function toggleSelection(id: string) {
   if (isSelected(id)) {
     selectedPromptIds.value = selectedPromptIds.value.filter(i => i !== id);
   } else {
@@ -251,6 +290,34 @@ function goToTestPrompt() {
     params: { id: 'new' },
     query: { prompts: selectedPromptIds.value.join(',') },
   });
+}
+
+function closeCreateModal() {
+  showCreateModal.value = false;
+  createForm.value = { title: '', promptText: '', category: '' };
+}
+
+async function saveCreate() {
+  if (!createForm.value.title || !createForm.value.promptText) {
+    appStore.showToast('Title and prompt content are required', 'warning');
+    return;
+  }
+
+  isCreating.value = true;
+  try {
+    await createPrompt(
+      createForm.value.title,
+      createForm.value.promptText,
+      createForm.value.category
+    );
+    await loadFavorites();
+    closeCreateModal();
+    appStore.showToast('Prompt created successfully', 'success');
+  } catch (error) {
+    appStore.showToast(error instanceof Error ? error.message : 'Failed to create prompt', 'danger');
+  } finally {
+    isCreating.value = false;
+  }
 }
 
 function closeEditModal() {
@@ -272,26 +339,22 @@ async function saveEdit() {
   if (!editingPrompt.value) return;
   isSaving.value = true;
   try {
-    const userId = appStore.state.user?.id;
-    if (userId) {
-      const response = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          sourcePromptId: editingPrompt.value.promptId,
-          customTitle: editForm.value.title,
-          customCategory: editForm.value.category,
-          customPromptText: editForm.value.promptText
-        })
-      });
-      if (!response.ok) throw new Error('Failed to update favorite');
-      // Refresh list
-      await loadFavorites();
-      closeEditModal();
-      appStore.showToast('Favorite updated successfully', 'success');
-    }
+    const response = await fetch(`/api/favorites/${editingPrompt.value.promptId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        customTitle: editForm.value.title,
+        customCategory: editForm.value.category,
+        customPromptText: editForm.value.promptText
+      })
+    });
+    if (!response.ok) throw new Error('Failed to update favorite');
+    // Refresh list
+    await loadFavorites();
+    closeEditModal();
+    appStore.showToast('Prompt updated successfully', 'success');
   } catch (error) {
-    appStore.showToast('Failed to update favorite', 'danger');
+    appStore.showToast('Failed to update prompt', 'danger');
   } finally {
     isSaving.value = false;
   }
