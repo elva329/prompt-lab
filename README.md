@@ -79,6 +79,45 @@ Prompt Lab is a full-stack web application that allows users to:
 
 ---
 
+## 🏛 System Architecture
+
+### 1. Overall Architecture
+The system follows a three-tier client-server architecture with clear separation between frontend, backend, and database layers.
+
+| Layer | Technology | Responsibility |
+|-------|-----------|-----------------|
+| Frontend | Vue 3 + TypeScript + Composition API | UI rendering, state management, user interaction |
+| Backend | Node.js + Express | API handling, authentication, business logic |
+| Database | MongoDB | Data persistence, indexing, aggregation |
+| External | HKBU GenAI API | AI response generation (extended feature) |
+
+### 2. Frontend Architecture
+The frontend is organized into three layers:
+
+- **UI Layer**: Vue components (pages: Login, LandingPage, PromptsPage, FavoritesPage, ExperimentsPage, AnalyticsPage; reusable components: cards, modals, charts)
+- **State Layer**: Vue Composition API with `reactive()` and `computed()` (appStore.ts manages user, prompts, experiments state)
+- **Service Layer**: API abstraction modules (promptsApi.ts, authApi.ts, resultsApi.ts, etc.) that handle HTTP communication
+
+**Data Flow**: User Action → Component → Service Layer → Backend → State Update → UI Re-render
+
+**Responsive Design**: Bootstrap 5 grid system with mobile-first layout and CSS flexbox positioning.
+
+### 3 Backend Architecture
+The backend uses a layered request processing pipeline:
+
+```
+Request → CORS → JSON Parser → JWT Auth → Route Handler → Database → Response
+```
+
+Each layer has a specific responsibility:
+- **CORS and JSON parser**: Handle cross-origin requests and body parsing
+- **JWT middleware**: Verify authentication tokens for protected routes
+- **Route handlers**: Execute controller logic
+- **Database operations**: Query and persist data in MongoDB
+- **Error handler**: Standardize all error responses with consistent format
+
+---
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have installed:
