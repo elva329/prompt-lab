@@ -1556,3 +1556,409 @@
 .marketing-footer-copy::after {
   right: 0;
 }
+
+/* MOBILE RESPONSIVE STYLES */
+
+@media (max-width: 768px) {
+  /* Landing shell and container */
+  .landing-shell {
+    padding: 0.5rem 0 0.3rem;
+  }
+
+  /* Hero grid: stack vertically on mobile */
+  .landing-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* Hero copy section */
+  .landing-hero-copy {
+    padding: 0.2rem;
+    order: 1;
+  }
+
+  /* Preview panel */
+  .landing-preview-panel {
+    padding: 0.5rem;
+    order: 2;
+  }
+
+  /* Title responsiveness */
+  .landing-title {
+    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    line-height: 1.1;
+    max-width: none;
+    letter-spacing: -0.04em;
+  }
+
+  /* Subtitle responsiveness */
+  .landing-subtitle {
+    font-size: 0.95rem;
+    max-width: none;
+    line-height: 1.6;
+  }
+
+  /* Eyebrow pill */
+  .landing-eyebrow-pill {
+    font-size: 0.68rem;
+    padding: 0.32rem 0.6rem;
+  }
+
+  .landing-eyebrow-note {
+    font-size: 0.82rem;
+  }
+
+  /* CTA buttons stack vertically */
+  .landing-cta-row {
+    flex-direction: column;
+    gap: 0.8rem;
+    width: 100%;
+  }
+
+  .landing-primary-btn,
+  .landing-secondary-btn {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Login/Register buttons */
+  .landing-login-link,
+  .landing-register-btn,
+  .landing-auth-btn {
+    padding: 0.28rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  /* Entry actions gap */
+  .landing-entry-actions {
+    gap: 0.4rem;
+  }
+
+  /* Process grid: 1 column on mobile */
+  .landing-process-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .landing-process-card {
+    padding: 0.7rem;
+    border-radius: 14px;
+  }
+
+  .landing-process-title {
+    font-size: 0.86rem;
+  }
+
+  .landing-process-copy {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  /* Feature cards: 1 column */
+  .landing-feature-card {
+    padding: 0.7rem;
+    border-radius: 14px;
+    gap: 0.6rem;
+  }
+
+  .landing-feature-icon {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .landing-feature-title {
+    font-size: 0.88rem;
+  }
+
+  .landing-feature-copy {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  /* Module rail: 2 columns on mobile */
+  .landing-module-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .landing-module-node {
+    padding: 0.7rem;
+    border-radius: 14px;
+  }
+
+  .landing-module-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1rem;
+  }
+
+  .landing-module-title {
+    font-size: 0.85rem;
+  }
+
+  .landing-module-copy {
+    font-size: 0.78rem;
+    line-height: 1.4;
+  }
+
+  /* Preview image wrap */
+  .landing-preview-image-wrap {
+    border-radius: 12px;
+    margin-top: 0.8rem;
+  }
+
+  /* Metrics preview */
+  .landing-metrics-preview {
+    padding: 1rem 0.7rem;
+    gap: 0.7rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing-metrics-header {
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .landing-metrics-item {
+    padding: 0.65rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  .landing-metrics-label {
+    font-size: 0.55rem;
+  }
+
+  .landing-metrics-value {
+    font-size: 1rem;
+  }
+
+  .landing-metrics-item--full .landing-metrics-value {
+    font-size: 1.2rem;
+  }
+
+  /* Preview summary */
+  .landing-preview-summary {
+    padding: 0.7rem;
+    gap: 0.65rem;
+    border-radius: 12px;
+  }
+
+  .landing-preview-summary-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 10px;
+  }
+
+  .landing-preview-summary-title {
+    font-size: 0.86rem;
+  }
+
+  .landing-preview-summary-copy {
+    font-size: 0.78rem;
+  }
+
+  /* Workflow grid: 1 column stacked */
+  .landing-workflow-flow {
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+
+  .landing-workflow-node {
+    min-height: auto;
+    padding: 0.8rem;
+  }
+
+  .landing-workflow-node-marker {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .landing-workflow-title {
+    font-size: 0.88rem;
+  }
+
+  .landing-workflow-copy {
+    font-size: 0.78rem;
+  }
+
+  /* Diagram grid: 2 columns on mobile */
+  .landing-diagram {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .landing-diagram-node {
+    min-height: auto;
+    padding: 0.7rem;
+    border-radius: 14px;
+  }
+
+  .landing-diagram-node:not(:last-child)::after {
+    display: none;
+  }
+
+  .landing-diagram-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+
+  .landing-diagram-label {
+    font-size: 0.8rem;
+  }
+
+  /* Matrix container: stack vertically */
+  .landing-matrix-container {
+    gap: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .landing-matrix-side {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
+    gap: 1rem;
+  }
+
+  .landing-matrix-side--left,
+  .landing-matrix-side--right {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .landing-matrix-label-title {
+    font-size: 0.82rem;
+  }
+
+  .landing-matrix-label-copy {
+    font-size: 0.65rem;
+  }
+
+  /* Section headings */
+  .landing-workflow-section {
+    padding-bottom: 0.5rem;
+  }
+
+  .landing-diagram-section,
+  .landing-interactive-section,
+  .landing-module-section,
+  .landing-flow-section {
+    padding: 0.8rem;
+    margin-top: 0.8rem;
+    border-radius: 16px;
+  }
+
+  .landing-section-heading--compact {
+    margin-bottom: 0.7rem;
+  }
+
+  /* Preview kicker and title */
+  .landing-preview-kicker {
+    font-size: 0.65rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .landing-preview-title {
+    font-size: 0.9rem;
+  }
+
+  .landing-preview-badge {
+    font-size: 0.65rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  /* Topbar */
+  .landing-topbar {
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  /* Brand cluster */
+  .landing-brand-cluster {
+    gap: 0.5rem;
+  }
+
+  /* Typography scaling */
+  .landing-top-brand-pill {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small devices */
+  .landing-shell {
+    padding: 0.4rem 0;
+  }
+
+  .landing-hero-grid {
+    gap: 1.5rem;
+  }
+
+  .landing-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .landing-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .landing-cta-row {
+    gap: 0.6rem;
+  }
+
+  .landing-primary-btn,
+  .landing-secondary-btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .landing-process-grid,
+  .landing-module-rail,
+  .landing-diagram {
+    gap: 0.5rem;
+  }
+
+  .landing-process-card,
+  .landing-module-node,
+  .landing-diagram-node {
+    padding: 0.6rem;
+  }
+
+  .landing-entry-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.3rem;
+  }
+
+  .landing-login-link,
+  .landing-register-btn {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .landing-metrics-preview {
+    padding: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .landing-matrix-side {
+    gap: 0.8rem;
+  }
+
+  /* Reduce all spacing */
+  .landing-workflow-flow {
+    gap: 1.5rem;
+    padding: 0.8rem 0;
+  }
+
+  .landing-diagram-section,
+  .landing-interactive-section {
+    padding: 0.6rem;
+    margin-top: 0.6rem;
+  }
+}
