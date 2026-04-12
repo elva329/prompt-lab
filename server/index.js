@@ -377,12 +377,19 @@ app.post('/api/experiments', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'At least one prompt ID is required.' });
     }
 
-    const normalizedPrompts = prompts
-      .map((entry) => Number(entry))
-      .filter((entry) => Number.isInteger(entry));
+    // Accept both numeric IDs (library prompts) and string IDs (user-created favorites)
+    const normalizedPrompts = prompts.filter((entry) => {
+      if (typeof entry === 'number' && Number.isInteger(entry)) {
+        return true; // Valid numeric ID (library prompt)
+      }
+      if (typeof entry === 'string' && entry.trim() !== '') {
+        return true; // Valid string ID (user-created prompt)
+      }
+      return false;
+    });
 
     if (normalizedPrompts.length === 0) {
-      return res.status(400).json({ message: 'Prompt IDs must be numbers.' });
+      return res.status(400).json({ message: 'Prompt IDs must be valid numbers or MongoDB ObjectId strings.' });
     }
 
     const db = await getDb();
@@ -412,11 +419,21 @@ app.post('/api/experiments', verifyToken, async (req, res) => {
               : 0,
           promptScores: Array.isArray(summary.promptScores)
             ? summary.promptScores
-                .map((entry) => ({
-                  promptId: Number(entry?.promptId),
-                  overallQuality: Number(entry?.overallQuality),
-                }))
-                .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
+                .map((entry) => {
+                  const promptId = typeof entry?.promptId === 'string' 
+                    ? entry.promptId.trim() 
+                    : Number(entry?.promptId);
+                  return {
+                    promptId,
+                    overallQuality: Number(entry?.overallQuality),
+                  };
+                })
+                .filter((entry) => {
+                  // Accept both numeric IDs (library) and non-empty string IDs (user-created)
+                  const hasValidId = (typeof entry.promptId === 'number' && Number.isInteger(entry.promptId)) ||
+                                    (typeof entry.promptId === 'string' && entry.promptId.trim() !== '');
+                  return hasValidId && Number.isFinite(entry.overallQuality);
+                })
                 .map((entry) => ({
                   promptId: entry.promptId,
                   overallQuality: Math.max(0, Math.min(100, Math.round(entry.overallQuality))),
@@ -519,22 +536,32 @@ app.post('/api/results/batch', verifyToken, async (req, res) => {
 
     const createdAt = new Date().toISOString();
     const normalized = promptResults
-      .map((entry) => ({
-        userId: String(userId),
-        experimentId: String(experimentId),
-        promptId: Number(entry?.promptId),
-        category: typeof entry?.category === 'string' ? entry.category.trim().toLowerCase() : '',
-        aiResponse: typeof entry?.aiResponse === 'string' ? entry.aiResponse : '',
-        overallQuality: Number(entry?.overallQuality),
-        responseTimeMs: Number(entry?.responseTimeMs || 0),
-        clarity: Number(entry?.clarity || 0),
-        relevance: Number(entry?.relevance || 0),
-        coherence: Number(entry?.coherence || 0),
-        completeness: Number(entry?.completeness || 0),
-        tokensUsed: Number(entry?.tokensUsed || 0),
-        createdAt,
-      }))
-      .filter((entry) => Number.isInteger(entry.promptId) && Number.isFinite(entry.overallQuality))
+      .map((entry) => {
+        const promptId = typeof entry?.promptId === 'string' 
+          ? entry.promptId.trim() 
+          : Number(entry?.promptId);
+        return {
+          userId: String(userId),
+          experimentId: String(experimentId),
+          promptId,
+          category: typeof entry?.category === 'string' ? entry.category.trim().toLowerCase() : '',
+          aiResponse: typeof entry?.aiResponse === 'string' ? entry.aiResponse : '',
+          overallQuality: Number(entry?.overallQuality),
+          responseTimeMs: Number(entry?.responseTimeMs || 0),
+          clarity: Number(entry?.clarity || 0),
+          relevance: Number(entry?.relevance || 0),
+          coherence: Number(entry?.coherence || 0),
+          completeness: Number(entry?.completeness || 0),
+          tokensUsed: Number(entry?.tokensUsed || 0),
+          createdAt,
+        };
+      })
+      .filter((entry) => {
+        // Accept both numeric IDs (library) and non-empty string IDs (user-created)
+        const hasValidId = (typeof entry.promptId === 'number' && Number.isInteger(entry.promptId)) ||
+                          (typeof entry.promptId === 'string' && entry.promptId.trim() !== '');
+        return hasValidId && Number.isFinite(entry.overallQuality);
+      })
       .map((entry) => ({
         ...entry,
         category: entry.category || 'uncategorized',
@@ -852,6 +879,50 @@ app.get('/api/favorites', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Fetch favorites error:', error);
     return res.status(500).json({ message: 'Failed to fetch favorites.' });
+  }
+});
+
+app.get('/api/favorites/:id', verifyToken, async (req, res) => {
+  try {
+    const userId = String(req.user.id);
+    const id = req.params.id;
+
+    console.log(`GET /api/favorites/${id} for userId: ${userId}`);
+
+    const db = await getDb();
+    const favoritesCollection = db.collection('favorite_prompts');
+    const { ObjectId } = await import('mongodb');
+
+    let favorite;
+    try {
+      const objectId = new ObjectId(id);
+      console.log(`Looking for ObjectId: ${objectId}`);
+      favorite = await favoritesCollection.findOne({
+        _id: objectId,
+        userId: userId,
+      });
+      console.log(`Found favorite:`, favorite ? 'yes' : 'no');
+    } catch (e) {
+      console.error('Error parsing ObjectId:', e.message);
+      return res.status(400).json({ message: 'Invalid prompt ID.' });
+    }
+
+    if (!favorite) {
+      console.error(`Favorite not found for ID: ${id}, userId: ${userId}`);
+      return res.status(404).json({ message: 'Prompt not found.' });
+    }
+
+    const result = {
+      promptId: favorite._id.toString(),
+      title: favorite.customTitle,
+      category: favorite.customCategory || 'General',
+      promptText: favorite.customPromptText,
+    };
+
+    return res.json(result);
+  } catch (error) {
+    console.error('Fetch favorite error:', error);
+    return res.status(500).json({ message: 'Failed to fetch favorite.' });
   }
 });
 

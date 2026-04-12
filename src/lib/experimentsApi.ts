@@ -91,7 +91,7 @@ function normalizeExperimentRecord(raw: Record<string, unknown>): ExperimentReco
 }
 
 export async function createExperimentRequest(
-  promptIds: number[],
+  promptIds: (string | number)[],
   summary?: ExperimentSummaryPayload
 ): Promise<CreateExperimentResponse> {
   const response = await fetch('/api/experiments', {

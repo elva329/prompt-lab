@@ -209,7 +209,7 @@ const router = useRouter();
 const isRunning = ref(false);
 const hasRun = ref(false);
 const selectedPromptRecords = ref<PromptRecord[]>([]);
-const loadedExperimentPromptIds = ref<number[]>([]);
+const loadedExperimentPromptIds = ref<(string | number)[]>([]);
 const runResults = ref<Record<number, {
   aiResponse: string;
   aiScore: number;
@@ -244,8 +244,13 @@ const selectedPromptIds = computed(() => {
 
   return value
     .split(',')
-    .map((entry) => Number(entry.trim()))
-    .filter((entry) => Number.isInteger(entry));
+    .map((entry) => {
+      const trimmed = entry.trim();
+      // Try to parse as number, otherwise keep as string (for user-created prompts)
+      const num = Number(trimmed);
+      return Number.isInteger(num) ? num : trimmed;
+    })
+    .filter((entry) => entry !== '');
 });
 
 const selectedPrompts = computed(() => {
@@ -310,7 +315,7 @@ function getScoreColor(score: number): string {
   return '#ef4444'; // Danger red
 }
 
-function getResolvedPromptIds(): number[] {
+function getResolvedPromptIds(): (string | number)[] {
   if (isNew.value) {
     return selectedPromptIds.value;
   }
@@ -386,7 +391,12 @@ async function loadExistingExperimentDetails(): Promise<void> {
     const experimentRecord = await fetchExperimentByIdRequest(id.value);
 
     loadedExperimentPromptIds.value = Array.isArray(experimentRecord.prompts)
-      ? experimentRecord.prompts.filter((entry) => Number.isInteger(entry))
+      ? experimentRecord.prompts.filter((entry: any) => {
+          // Accept both numeric IDs and non-empty string IDs
+          if (typeof entry === 'number') return Number.isInteger(entry);
+          if (typeof entry === 'string') return entry.trim() !== '';
+          return false;
+        })
       : [];
 
     await loadSelectedPrompts();

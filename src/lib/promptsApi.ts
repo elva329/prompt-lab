@@ -63,14 +63,40 @@ export async function fetchPrompts(params?: {
   return response.json();
 }
 
-export async function fetchPromptById(id: number): Promise<PromptRecord> {
-  const response = await fetch(`/api/prompts/${id}`);
+export async function fetchPromptById(id: string | number): Promise<PromptRecord> {
+  // Check if it's a string ID (user-created favorite) or numeric ID (library prompt)
+  if (typeof id === 'string') {
+    // Fetch from favorites API for user-created prompts
+    const response = await fetch(`/api/favorites/${id}`, {
+      headers: getAuthHeaders(),
+    });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch prompt.');
+    if (!response.ok) {
+      throw new Error('Failed to fetch prompt.');
+    }
+
+    const favorite = await response.json();
+    
+    // Convert favorite format to PromptRecord format
+    return {
+      promptId: 0, // User-created prompts don't have numeric IDs
+      title: favorite.title,
+      promptText: favorite.promptText,
+      category: favorite.category,
+      createdAt: favorite.updatedAt || favorite.createdAt,
+      createdBy: '', // User-created prompts don't track this
+      _id: id,
+    };
+  } else {
+    // Fetch from library prompts API for numeric IDs
+    const response = await fetch(`/api/prompts/${id}`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch prompt.');
+    }
+
+    return response.json();
   }
-
-  return response.json();
 }
 
 export async function updatePromptById(
