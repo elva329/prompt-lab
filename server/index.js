@@ -993,6 +993,6 @@ ensureIndexes()
     });
   })
   .catch((error) => {
-    console.error('Failed to initialize server:', error);
+    console.error('Failed to initialize server:', error.message);
     process.exit(1);
   });
