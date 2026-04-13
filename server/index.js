@@ -777,7 +777,7 @@ app.get('/api/results/by-experiment', verifyToken, async (req, res) => {
 
 app.post('/api/favorites', verifyToken, async (req, res) => {
   try {
-    const { customTitle, customCategory, customPromptText } = req.body || {};
+    const { customTitle, customCategory, customPromptText, sourcePromptId } = req.body || {};
     const userId = req.user.id;
 
     if (!customTitle || !customPromptText) {
@@ -787,9 +787,12 @@ app.post('/api/favorites', verifyToken, async (req, res) => {
     const db = await getDb();
     const favoritesCollection = db.collection('favorite_prompts');
     const now = new Date().toISOString();
-    
+    // Always provide a unique sourcePromptId for user-created prompts
+    const newSourcePromptId = sourcePromptId || `user_${userId}_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+
     const insertData = {
       userId: String(userId),
+      sourcePromptId: newSourcePromptId,
       customTitle: customTitle.trim(),
       customCategory: (typeof customCategory === 'string' && customCategory.trim()) ? customCategory.trim() : 'General',
       customPromptText: customPromptText.trim(),
