@@ -23,22 +23,9 @@
     </div>
 
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
-      <div class="search-input-wrapper">
-         <input
-          v-model.trim="searchTerm"
-          type="text"
-          class="form-control"
-          placeholder="Search prompts..."
-          @input="handleSearch"
-        />
-        <button 
-          v-if="searchTerm" 
-          class="btn-search-clear" 
-          @click="clearSearch"
-          title="Clear search"
-        >
-          <i class="bi bi-x"></i>
-        </button>
+      <div>
+        <h1 class="h3 fw-bold mb-1">Prompt Library</h1>
+        <p class="text-secondary mb-0 small">Browse and test AI prompts from our collection.</p>
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary">Selected: {{ selectedPromptIds.length }}/3</span>
@@ -52,7 +39,7 @@
     </section>
 
     <section class="row g-2 page-filters-row">
-      <div class="col-12">
+      <div class="col">
         <div class="prompt-category-tabs" role="tablist" aria-label="Prompt categories">
           <button
             v-for="cat in tabCategories"
@@ -64,6 +51,25 @@
             @click="setSelectedCategory(cat)"
           >
             {{ formatCategoryName(cat) }}
+          </button>
+        </div>
+      </div>
+      <div class="col-auto">
+        <div class="search-input-wrapper-compact">
+           <input
+            v-model.trim="searchTerm"
+            type="text"
+            class="form-control"
+            placeholder="Search..."
+            @input="handleSearch"
+          />
+          <button 
+            v-if="searchTerm" 
+            class="btn-search-clear" 
+            @click="clearSearch"
+            title="Clear search"
+          >
+            <i class="bi bi-x"></i>
           </button>
         </div>
       </div>
@@ -565,17 +571,39 @@ onMounted(async () => {
   color: #94a3b8;
 }
 
-.search-input-wrapper {
+.search-input-wrapper-compact {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  max-width: 400px;
+  width: 280px;
+}
+
+.search-input-wrapper-compact .form-control {
+  width: 100%;
+  border-radius: 99px;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper-compact .form-control:focus {
+  border-color: #1b5e55;
+  box-shadow: 0 4px 12px rgba(27, 94, 85, 0.12);
+}
+
+.search-input-wrapper-compact .form-control::placeholder {
+  color: #cbd5e1;
+}
+
+.search-input-wrapper-compact .form-control {
+  padding-right: 3rem;
 }
 
 .btn-search-clear {
   position: absolute;
-  right: 0.75rem;
+  right: 0.5rem;
   background: none;
   border: 1px solid rgba(27, 94, 85, 0.2);
   border-radius: 0.5rem;
@@ -604,13 +632,5 @@ onMounted(async () => {
 
 .btn-search-clear i {
   font-size: 1rem;
-}
-
-.search-input-wrapper .form-control {
-  padding-right: 3rem;
-}
-
-.search-input-wrapper .form-control:focus {
-  border-color: var(--color-primary);
 }
 </style>
