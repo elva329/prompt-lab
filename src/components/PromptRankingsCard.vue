@@ -266,15 +266,16 @@ export default {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.85rem;
 }
 
 .ranking-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.85rem;
+  gap: 0.7rem;
+  font-size: 0.97rem;
   font-family: 'Manrope', sans-serif;
+  min-height: 32px;
 }
 
 .rank-circle {
@@ -285,84 +286,49 @@ export default {
   justify-content: center;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 1rem;
   flex-shrink: 0;
   background: #ecf9f7;
   color: #1b5e55;
-}
-
-.rank-circle.attention {
-  background: #fce4e6;
-  color: #dc2626;
+  margin-right: 2px;
 }
 
 .prompt-name {
-  flex: 0 0 90px;
+  flex: 1 1 120px;
   font-weight: 600;
   color: #475569;
-  font-size: 0.85rem;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .score-bar {
-  flex: 1;
+  flex: 2 1 80px;
   height: 8px;
   border-radius: 4px;
   background: #d1fae5;
-  min-width: 30px;
-}
-
-.score-bar.top {
-  background: linear-gradient(90deg, #1b5e55 50%, #d1fae5 100%);
-}
-
-.score-bar.attention {
-  background: linear-gradient(90deg, #dc2626 50%, #fce4e6 100%);
+  min-width: 60px;
+  margin: 0 8px;
 }
 
 .score-value {
   font-weight: 700;
-  font-size: 0.85rem;
-  min-width: 28px;
+  font-size: 1rem;
+  min-width: 32px;
   text-align: right;
   flex-shrink: 0;
+  margin-left: 2px;
 }
 
-.score-value.top {
-  color: #1b5e55;
-}
-
-.score-value.attention {
-  color: #dc2626;
-}
-
-/* Layout styles */
-.ranking-row {
+.section-header {
   display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  flex: 1;
-  min-height: 0;
-}
-
-.ranking-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: visible;
-}
-
-.ranking-footer {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  font-weight: 500;
-  text-align: center;
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(203, 213, 225, 0.3);
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  letter-spacing: 0.05em;
 }
 
 @media (max-width: 768px) {
@@ -371,34 +337,35 @@ export default {
     gap: 1.5rem;
   }
   .ranking-list {
-    gap: 0.5rem;
+    gap: 0.7rem;
   }
   .ranking-item {
     flex-wrap: wrap;
-    font-size: 0.95rem;
-    padding: 0.15rem 0;
+    font-size: 0.97rem;
+    padding: 0.12rem 0;
+    min-height: 28px;
   }
   .prompt-name {
     flex: 1 1 100%;
     min-width: 0;
     max-width: 100%;
-    font-size: 0.95rem;
+    font-size: 0.97rem;
     margin-bottom: 2px;
   }
   .score-bar {
     min-width: 40px;
-    height: 10px;
-    margin: 2px 0;
+    height: 9px;
+    margin: 2px 0 2px 8px;
   }
   .rank-circle {
     width: 24px;
     height: 24px;
-    font-size: 0.85rem;
+    font-size: 0.97rem;
     margin-right: 4px;
   }
   .score-value {
-    min-width: 22px;
-    font-size: 0.95rem;
+    min-width: 26px;
+    font-size: 0.97rem;
     margin-left: 4px;
   }
   .run-counter {
