@@ -234,6 +234,8 @@ export default defineComponent({
 .latest-result-body {
   flex: 1 1 auto;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .latest-result-card .card-title {
@@ -301,6 +303,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  flex: 1;
 }
 
 .latest-result-summary {
@@ -517,20 +520,6 @@ export default defineComponent({
     max-height: none;
     overflow-y: visible;
     /* padding-bottom: 1.2rem; */
-  }
-
-  .latest-result-link {
-    position: sticky;
-    bottom: 0;
-    background: #fff;
-    z-index: 2;
-    margin-left: -1rem;
-    margin-right: -1rem;
-    padding-bottom: 0.5rem;
-    padding-top: 0.5rem;
-    border-bottom-left-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-    border-top: 1px solid #e2e7ef;
   }
 }
 </style>
