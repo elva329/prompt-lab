@@ -26,7 +26,6 @@
           <span>Claude</span>
           <span>Gemini</span>
         </div>
-        <img src="/experiment-result-preview.svg" alt="" class="login-theme-preview" />
       </div>
 
       <div class="login-theme-chip login-theme-chip-1">
