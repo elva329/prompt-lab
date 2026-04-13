@@ -77,10 +77,10 @@ Live Demo: https://prompt-lab-test.vercel.app/
 
 ## Database Setup (MongoDB Atlas)
 
-1. Go to `prompts/prompt_library.json`.
-2. In MongoDB Atlas, use "Add Data" → "Import JSON or CSV".
-3. Set collection name to `prompt_library` and import.
-4. Create empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
+1. Create a MongoDB database named `prompt-lab`
+2. Create a collection named `prompt-lab` in MongoDB Atlas, then go to the project folder `prompts/prompt_library.json`, copy the whole file contents.
+3. Then go back to MongoDB Atlas, select the collection `prompt_library`, click "Add Data" → "Insert Document"to import the data, this is to create the public prompt-library.
+4. Then create other empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
 
 ---
 
