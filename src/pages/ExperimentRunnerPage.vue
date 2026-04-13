@@ -46,7 +46,7 @@
 
       <div class="experiment-main-container">
         <div class="card border-0 shadow-sm overflow-hidden experiment-card-modern">
-          <div class="card-body p-0 position-relative">
+          <div class="card-body p-0 position-relative" :class="{ 'pre-run-state': !hasRun && !isRunning }">
             <div v-if="!hasRun && !isRunning" class="runner-overlay text-center p-5">
               <div class="overlay-icon mx-auto mb-4"><i class="bi bi-flask"></i></div>
               <h2 class="h4 fw-bold mb-3">Ready to Test {{ selectedPrompts.length }} Prompts</h2>
@@ -84,13 +84,23 @@
                           <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
                         </div>
                       </div>
-                      <div class="response-text-scroll mb-0">
+                      <div :class="['response-text-scroll', { expanded: expandedResponses[prompt.id] }, 'mb-0']">
                         <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
+                        <button v-if="shouldShowToggle(resultByPrompt[prompt.id].aiResponse)" class="btn btn-link btn-sm px-0 mt-1" @click="toggleExpand(prompt.id)">
+                          <span v-if="!expandedResponses[prompt.id]">Show more</span>
+                          <span v-else>Show less</span>
+                        </button>
                       </div>
                     </template>
                   </div>
 
-                  <div class="p-4 position-relative grow response-area">
+                  <div
+                    class="p-4 position-relative grow response-area"
+                    :class="{
+                      'response-area-empty': !resultByPrompt[prompt.id] && !isRunning,
+                      'response-area-loading': isRunning && !resultByPrompt[prompt.id]
+                    }"
+                  >
                     <div v-if="isRunning && !resultByPrompt[prompt.id]" class="runner-loading text-center">
                       <div class="loading-content-wrapper">
                         <template v-if="index === currentProgress.current - 1">
@@ -133,8 +143,12 @@
                           </div>
                         </div>
                         
-                        <div class="response-text-scroll mb-4">
+                        <div :class="['response-text-scroll', { expanded: expandedResponses[prompt.id] }, 'mb-4']">
                           <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
+                          <button v-if="shouldShowToggle(resultByPrompt[prompt.id].aiResponse)" class="btn btn-link btn-sm px-0 mt-1" @click="toggleExpand(prompt.id)">
+                            <span v-if="!expandedResponses[prompt.id]">Show more</span>
+                            <span v-else>Show less</span>
+                          </button>
                         </div>
                       </template>
 
@@ -212,9 +226,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
-
 import { getDefaultConfig, sendPromptToAI, type AIResponse } from '../lib/aiApi';
 import { evaluateResponse, type EvaluationCriteria } from '../lib/evaluationMetrics';
 import { fetchUserByEmailRequest } from '../lib/authApi';
@@ -230,7 +243,7 @@ const isRunning = ref(false);
 const hasRun = ref(false);
 const selectedPromptRecords = ref<PromptRecord[]>([]);
 const loadedExperimentPromptIds = ref<(string | number)[]>([]);
-const runResults = ref<Record<number, {
+const runResults = ref<Record<string | number, {
   aiResponse: string;
   aiScore: number;
   responseTimeMs: number;
@@ -260,14 +273,24 @@ function handleLogout(): void {
   router.push('/');
 }
 
+// --- Expand/collapse logic for response field ---
+const expandedResponses = reactive<Record<string, boolean>>({});
+function toggleExpand(promptId: string | number) {
+  expandedResponses[promptId] = !expandedResponses[promptId];
+}
+function shouldShowToggle(response: string) {
+  // Show toggle if response is long (arbitrary threshold, e.g., 300 chars or 6 lines)
+  if (!response) return false;
+  return response.length > 300 || response.split('\n').length > 6;
+}
+
+// --- Experiment runner computed properties and helpers ---
 const selectedPromptIds = computed(() => {
   const value = String(route.query.prompts || '');
-
   return value
     .split(',')
     .map((entry) => {
       const trimmed = entry.trim();
-      // Try to parse as number, otherwise keep as string (for user-created prompts)
       const num = Number(trimmed);
       return Number.isInteger(num) ? num : trimmed;
     })
@@ -304,14 +327,12 @@ const resultByPrompt = computed(() => {
     completeness: number;
     tokensUsed: number;
   }> = {};
-
   for (const prompt of selectedPrompts.value) {
     const result = runResults.value[prompt.promptId];
     if (result) {
       map[prompt.id] = result;
     }
   }
-
   return map;
 });
 
@@ -319,11 +340,9 @@ const runButtonText = computed(() => {
   if (isRunning.value) {
     return 'Processing...';
   }
-
   if (hasRun.value) {
     return 'Completed';
   }
-
   return 'Run Experiment';
 });
 
@@ -439,7 +458,7 @@ async function loadExistingExperimentDetails(): Promise<void> {
     await loadSelectedPrompts();
 
     const results = await fetchResultsByExperimentRequest(id.value);
-    const map: Record<number, {
+    const map: Record<string | number, {
       aiResponse: string;
       aiScore: number;
       responseTimeMs: number;
@@ -621,14 +640,18 @@ async function handleRun(): Promise<void> {
   }
 }
 
+
 onMounted(async () => {
   if (isNew.value) {
     await loadSelectedPrompts();
     return;
   }
-
   await loadExistingExperimentDetails();
 });
+
+// --- Expand/collapse logic for response field ---
+// (already defined above)
+
 </script>
 
 <style scoped>
@@ -651,6 +674,7 @@ onMounted(async () => {
   border-radius: 1.25rem;
   background: none;
   box-shadow: none !important;
+  width: 100%;
   height: auto;
   max-width: 1220px;
   margin: 0 auto;
@@ -708,14 +732,118 @@ onMounted(async () => {
   width: 100%;
 }
 
+.experiment-card-modern > .card-body.pre-run-state {
+  min-height: 360px;
+}
+
 @media (max-width: 768px) {
-  .runner-columns {
-    min-height: 0;
-    height: auto;
+  .experiment-main-container {
+    padding-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
-  
-  .response-area {
-    min-height: 300px;
+
+  .experiment-card-modern > .card-body.pre-run-state {
+    min-height: 260px;
+  }
+
+  .experiment-card-modern > .card-body.pre-run-state .runner-columns {
+    display: none;
+  }
+
+  .experiment-card-modern > .card-body.pre-run-state .runner-overlay {
+    position: relative;
+    inset: auto;
+    min-height: 260px;
+    padding: 1.2rem !important;
+    border-radius: 1rem;
+  }
+
+  .experiment-card-modern > .card-body.pre-run-state .overlay-icon {
+    width: 56px;
+    height: 56px;
+    font-size: 1.8rem;
+    margin-bottom: 0.85rem !important;
+  }
+
+  .experiment-card-modern > .card-body.pre-run-state h2 {
+    font-size: 1.7rem;
+    margin-bottom: 0.6rem !important;
+  }
+
+  .runner-columns {
+    min-height: 300px !important;
+    height: auto;
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 0.75rem;
+  }
+
+  .experiment-card-modern > .card-body {
+    min-height: 320px;
+  }
+
+  .prompt-column {
+    flex: 1 1 100%;
+    width: 100%;
+    border-right: none !important;
+    min-height: auto;
+  }
+
+  .prompt-column:only-of-type > .h-100 {
+    flex-direction: column !important;
+  }
+
+  .prompt-column:only-of-type .prompt-header-area {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(27, 94, 85, 0.06);
+    padding: 1rem;
+  }
+
+  .prompt-column:only-of-type .response-area {
+    width: 100%;
+    padding: 1rem;
+    overflow-y: visible;
+  }
+
+  .prompt-header-area {
+    height: auto;
+    min-height: 220px;
+    padding: 1rem;
+  }
+
+  /* Override global mobile rule in src/styles/05-pages.css that forces 460px height */
+  .response-area:not(.response-area-loading),
+  .prompt-column:only-of-type .response-area:not(.response-area-loading) {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 1rem !important;
+  }
+
+  .response-area.response-area-empty {
+    flex: 0 0 auto;
+    min-height: 96px !important;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+  }
+
+  .prompt-pre {
+    height: 180px;
+    max-height: 180px;
+  }
+
+  .response-text-scroll,
+  .prompt-column:only-of-type .response-text-scroll {
+    height: 220px;
+    max-height: 220px;
+    padding: 0.85rem;
+  }
+
+  .evaluation-section,
+  .prompt-column:only-of-type .evaluation-section {
+    margin-top: 0.75rem;
+    overflow-y: visible;
   }
 }
 
@@ -831,6 +959,10 @@ onMounted(async () => {
   flex-direction: column;
   padding-bottom: 2rem !important;
   position: relative;
+}
+
+.response-area-loading {
+  min-height: 240px;
 }
 
 /* Right side content area ONLY for single prompt side-by-side */
@@ -1153,5 +1285,107 @@ onMounted(async () => {
 
 .btn-copy-response i {
   font-size: 0.9rem;
+}
+
+/* Final mobile overrides (kept at end to win cascade over desktop rules) */
+@media (max-width: 768px) {
+  .prompt-column:only-of-type > .h-100 {
+    flex-direction: column !important;
+  }
+
+  .prompt-column:only-of-type .prompt-header-area {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(27, 94, 85, 0.06) !important;
+  }
+
+  .prompt-column:only-of-type .response-area {
+    width: 100% !important;
+    padding: 1rem !important;
+    overflow-y: visible !important;
+  }
+
+  .prompt-column:only-of-type .prompt-pre {
+    height: 150px !important;
+    max-height: 150px !important;
+    overflow-y: auto !important;
+  }
+
+  .prompt-column:only-of-type .response-text-scroll {
+    height: 180px !important;
+    max-height: 180px !important;
+  }
+
+  .response-area-loading {
+    min-height: 180px !important;
+  }
+
+  .prompt-column:only-of-type .evaluation-section {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .metrics-subgrid,
+  .metrics-detailed-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .response-header {
+    gap: 0.4rem;
+  }
+
+  .response-header .smallest {
+    font-size: 0.65rem;
+  }
+}
+
+/* Tablet + mobile: keep prompt cards readable when running multiple prompts */
+@media (max-width: 1024px) {
+  .runner-columns {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    gap: 0.85rem;
+  }
+
+  .prompt-column {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-right: none !important;
+  }
+
+  .prompt-header-area {
+    height: auto;
+    min-height: 220px;
+  }
+
+  .prompt-pre {
+    height: 170px;
+    max-height: 170px;
+  }
+
+  .prompt-column:only-of-type .prompt-header-area {
+    max-height: 320px;
+    overflow: hidden;
+  }
+
+  .prompt-column:only-of-type .prompt-pre {
+    height: 170px !important;
+    max-height: 170px !important;
+    overflow-y: auto !important;
+  }
+
+  .prompt-column:only-of-type .response-text-scroll {
+    height: 200px !important;
+    max-height: 200px !important;
+  }
+
+  .response-area {
+    padding-bottom: 1rem !important;
+  }
+
+  .response-area-loading {
+    min-height: 200px !important;
+  }
 }
 </style>
