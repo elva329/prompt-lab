@@ -226,7 +226,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, reactive } from 'vue';
+import { computed, onMounted, ref, reactive, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 import { getDefaultConfig, sendPromptToAI, type AIResponse } from '../lib/aiApi';
 import { evaluateResponse, type EvaluationCriteria } from '../lib/evaluationMetrics';
@@ -647,6 +647,24 @@ onMounted(async () => {
     return;
   }
   await loadExistingExperimentDetails();
+});
+
+watch(id, async (newId) => {
+  // Reset local state when switching between experiment IDs (e.g. from saved ID -> 'new')
+  isRunning.value = false;
+  hasRun.value = false;
+  runResults.value = {};
+  selectedPromptRecords.value = [];
+  loadedExperimentPromptIds.value = [];
+  currentProgress.value = { current: 0, total: 0 };
+  copiedPromptIds.value.clear();
+  Object.keys(expandedResponses).forEach(key => delete expandedResponses[key]);
+
+  if (newId === 'new') {
+    await loadSelectedPrompts();
+  } else if (newId) {
+    await loadExistingExperimentDetails();
+  }
 });
 
 // --- Expand/collapse logic for response field ---

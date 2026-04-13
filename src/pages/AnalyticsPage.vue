@@ -293,7 +293,7 @@ export default defineComponent({
 }
 
 .analytics-panel--rankings {
-  grid-column: 2;
+  /* Removed grid-column: 2 to allow default grid sizing */
 }
 
 .analytics-panel {

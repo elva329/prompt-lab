@@ -137,20 +137,21 @@ export default {
 </script>
 
 <style scoped>
+
 .ui-card {
   background: rgba(255, 255, 255, 0.75);
   border: none;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(16, 35, 63, 0.08);
   padding: 1.2rem;
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   font-family: 'Manrope', sans-serif;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .ui-card:hover {
@@ -369,10 +370,43 @@ export default {
     flex-direction: column;
     gap: 1.5rem;
   }
-
+  .ranking-list {
+    gap: 0.5rem;
+  }
+  .ranking-item {
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+    padding: 0.15rem 0;
+  }
+  .prompt-name {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+  .score-bar {
+    min-width: 40px;
+    height: 10px;
+    margin: 2px 0;
+  }
+  .rank-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
+    margin-right: 4px;
+  }
+  .score-value {
+    min-width: 22px;
+    font-size: 0.95rem;
+    margin-left: 4px;
+  }
   .run-counter {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
+  }
+  .ui-card {
+    padding: 0.7rem;
   }
 }
 </style>
