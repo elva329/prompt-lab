@@ -331,6 +331,17 @@ export default {
   letter-spacing: 0.05em;
 }
 
+.ranking-footer {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.6);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+  font-family: 'Manrope', sans-serif;
+}
+
 @media (max-width: 768px) {
   .ranking-row {
     flex-direction: column;

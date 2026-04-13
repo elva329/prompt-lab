@@ -231,11 +231,14 @@ export default defineComponent({
   flex: 1;
 }
 
+.latest-result-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
 .latest-result-card .card-title {
-  font-family: 'Sora', sans-serif;
-  font-size: 0.75rem;
   font-weight: 700;
-  color: #687083;
+  color: #10233f;
   margin-bottom: 0.15rem;
   letter-spacing: 0.01em;
   margin-top: 0;
@@ -489,6 +492,7 @@ export default defineComponent({
 @media screen and (max-width: 768px) {
   .latest-result-card {
     padding: 1rem;
+    min-height: 480px;
   }
 
   .latest-result-summary {
@@ -508,6 +512,25 @@ export default defineComponent({
   .latest-result-response {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .latest-result-body {
+    max-height: none;
+    overflow-y: visible;
+    /* padding-bottom: 1.2rem; */
+  }
+
+  .latest-result-link {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 2;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    border-top: 1px solid #e2e7ef;
   }
 }
 </style>

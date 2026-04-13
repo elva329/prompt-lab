@@ -552,6 +552,9 @@ export default defineComponent({
 }
 
 :deep(.quality-card .quality-card-inner),
+:deep(.prompt-name),
+:deep(.section-header),
+:deep(.score-value),
 :deep(.ui-card) {
   font-family: 'Manrope', sans-serif !important;
 }
@@ -691,6 +694,10 @@ export default defineComponent({
 }
 
 @media screen and (max-width: 1200px) {
+  .analytics-card-shell {
+    max-height: none;
+  }
+
   .analytics-top-strip,
   .analytics-main-grid {
     grid-template-columns: 1fr;
