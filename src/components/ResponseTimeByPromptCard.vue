@@ -41,7 +41,11 @@ export default {
     this.loading = true;
     try {
       const userId = appStore.state.user?.id;
-      if (!userId) throw new Error('User not logged in');
+      if (!userId) {
+        this.avgTimes = [];
+        this.loading = false;
+        return;
+      }
 
       const results = await fetchResultsByUserRequest();
 
@@ -76,6 +80,11 @@ export default {
         }
       });
     } catch (e) {
+      if (e instanceof Error && e.message === 'User not logged in') {
+        this.avgTimes = [];
+        this.loading = false;
+        return;
+      }
       console.error("Failed to fetch response times:", e);
       this.avgTimes = [];
       this.loading = false;

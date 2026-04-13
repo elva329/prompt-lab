@@ -74,7 +74,13 @@ export default {
     this.loading = true;
     try {
       const userId = appStore.state.user?.id;
-      if (!userId) throw new Error('User not logged in');
+      if (!userId) {
+        this.topPerformers = [];
+        this.needsAttention = [];
+        this.totalRuns = 0;
+        this.loading = false;
+        return;
+      }
 
       const results = await fetchResultsByUserRequest();
       this.totalRuns = results.length;
@@ -113,6 +119,13 @@ export default {
 
       this.loading = false;
     } catch (e) {
+      if (e instanceof Error && e.message === 'User not logged in') {
+        this.topPerformers = [];
+        this.needsAttention = [];
+        this.totalRuns = 0;
+        this.loading = false;
+        return;
+      }
       console.error("Failed to fetch prompt rankings:", e);
       this.topPerformers = [];
       this.needsAttention = [];
