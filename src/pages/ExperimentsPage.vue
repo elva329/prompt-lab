@@ -125,11 +125,11 @@ function handleLogout(): void {
   router.push('/');
 }
 
-function rerunExperiment(promptIds: number[]): void {
+function rerunExperiment(promptIds: (string | number)[]): void {
   router.push({
     name: 'experiment-runner',
     params: { id: 'new' },
-    query: { prompts: promptIds.join(',') },
+    query: { prompts: promptIds.join(','), autorun: 'true' },
   });
 }
 

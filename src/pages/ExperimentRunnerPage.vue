@@ -396,7 +396,7 @@ function rerunLoadedExperiment(): void {
   router.push({
     name: 'experiment-runner',
     params: { id: 'new' },
-    query: { prompts: promptIds.join(',') },
+    query: { prompts: promptIds.join(','), autorun: 'true' },
   });
 }
 
@@ -428,10 +428,21 @@ async function loadSelectedPrompts(): Promise<void> {
     return;
   }
 
+  if (route.query.autorun === 'true') {
+    isRunning.value = true;
+  }
+
   try {
     const prompts = await Promise.all(promptIds.map((promptId) => fetchPromptById(promptId)));
     selectedPromptRecords.value = prompts;
+
+    if (route.query.autorun === 'true') {
+      handleRun();
+      // Clean up the URL to prevent re-running on manual refresh
+      router.replace({ query: { ...route.query, autorun: undefined } });
+    }
   } catch (error) {
+    isRunning.value = false;
     console.error('Failed to load selected prompts:', error);
     appStore.showToast('Failed to load selected prompts.', 'danger');
   }
