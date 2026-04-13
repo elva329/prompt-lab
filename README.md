@@ -6,6 +6,10 @@ Prompt Lab is a web application for creating, managing, and evaluating AI prompt
 
 ---
 
+Live Demo: https://prompt-lab-test.vercel.app/ 
+
+---
+
 ## Features
 
 - Manage a library of AI prompts (CRUD)
@@ -76,7 +80,7 @@ Prompt Lab is a web application for creating, managing, and evaluating AI prompt
 1. Go to `prompts/prompt_library.json`.
 2. In MongoDB Atlas, use "Add Data" → "Import JSON or CSV".
 3. Set collection name to `prompt_library` and import.
-4. Create empty collections (`users`, `results`, `experiments`, `favorites`) manually in Atlas for verification/testing.
+4. Create empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
 
 ---
 
