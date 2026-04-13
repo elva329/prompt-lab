@@ -23,7 +23,7 @@
     </div>
 
     <section class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 page-header-row">
-      <div class="col-4">
+      <div class="search-input-wrapper">
          <input
           v-model.trim="searchTerm"
           type="text"
@@ -31,6 +31,14 @@
           placeholder="Search prompts..."
           @input="handleSearch"
         />
+        <button 
+          v-if="searchTerm" 
+          class="btn-search-clear" 
+          @click="clearSearch"
+          title="Clear search"
+        >
+          <i class="bi bi-x"></i>
+        </button>
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small text-secondary">Selected: {{ selectedPromptIds.length }}/3</span>
@@ -301,6 +309,11 @@ function handleSearch(): void {
   }, 500);
 }
 
+function clearSearch(): void {
+  searchTerm.value = '';
+  loadPrompts();
+}
+
 function setSelectedCategory(category: string): void {
   if (selectedCategory.value === category) {
     return;
@@ -550,5 +563,54 @@ onMounted(async () => {
 .prompt-badge-muted {
   background-color: rgba(203, 213, 225, 0.2);
   color: #94a3b8;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 400px;
+}
+
+.btn-search-clear {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: 1px solid rgba(27, 94, 85, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  color: #1b5e55;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 2rem;
+  height: 2rem;
+}
+
+.btn-search-clear:hover {
+  background: rgba(27, 94, 85, 0.08);
+  border-color: rgba(27, 94, 85, 0.4);
+  color: #0f3d38;
+}
+
+.btn-search-clear:active {
+  background: rgba(27, 94, 85, 0.12);
+  transform: scale(0.95);
+}
+
+.btn-search-clear i {
+  font-size: 1rem;
+}
+
+.search-input-wrapper .form-control {
+  padding-right: 3rem;
+}
+
+.search-input-wrapper .form-control:focus {
+  border-color: var(--color-primary);
 }
 </style>
