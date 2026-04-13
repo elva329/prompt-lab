@@ -76,7 +76,7 @@ Prompt Lab is a web application for creating, managing, and evaluating AI prompt
 1. Go to `prompts/prompt_library.json`.
 2. In MongoDB Atlas, use "Add Data" → "Import JSON or CSV".
 3. Set collection name to `prompt_library` and import.
-4. If you do not use the app, create empty collections (`users`, `results`, `experiments`, `favorites`) manually in Atlas for verification/testing.
+4. Create empty collections (`users`, `results`, `experiments`, `favorites`) manually in Atlas for verification/testing.
 
 ---
 
@@ -110,14 +110,3 @@ npm run lint      # Lint code
 npm run build     # Build for production
 npm run preview   # Preview production build
 ```
-
----
-
-## License & Contact
-
-- **Course:** COMP7270 Web and Mobile Programming, HKBU, Spring 2026
-- For questions/issues: contact project team or check code comments.
-
----
-
-**Happy prompting! 🚀**
