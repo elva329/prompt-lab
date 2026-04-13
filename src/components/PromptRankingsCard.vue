@@ -221,15 +221,28 @@ export default {
   flex: 1;
 }
 
+.ranking-row {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  width: 100%;
+}
+
+.ranking-section {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Section header styles */
 .section-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
   letter-spacing: 0.05em;
+  font-family: 'Manrope', sans-serif;
 }
 
 .section-header.top {
@@ -267,14 +280,15 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
+  font-family: 'Manrope', sans-serif;
 }
 
 .ranking-item {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  font-size: 0.97rem;
-  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+  font-family: inherit;
   min-height: 32px;
 }
 
@@ -286,7 +300,7 @@ export default {
   justify-content: center;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.85rem;
   flex-shrink: 0;
   background: #ecf9f7;
   color: #1b5e55;
@@ -297,7 +311,7 @@ export default {
   flex: 1 1 120px;
   font-weight: 600;
   color: #475569;
-  font-size: 1rem;
+  font-size: 0.88rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -314,23 +328,12 @@ export default {
 
 .score-value {
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.88rem;
   min-width: 32px;
   text-align: right;
   flex-shrink: 0;
   margin-left: 2px;
 }
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.92rem;
-  font-weight: 700;
-  margin-bottom: 0.85rem;
-  letter-spacing: 0.05em;
-}
-
 .ranking-footer {
   margin-top: 0.5rem;
   padding-top: 0.75rem;
@@ -352,7 +355,7 @@ export default {
   }
   .ranking-item {
     flex-wrap: wrap;
-    font-size: 0.97rem;
+    font-size: 0.85rem;
     padding: 0.12rem 0;
     min-height: 28px;
   }
@@ -360,7 +363,7 @@ export default {
     flex: 1 1 100%;
     min-width: 0;
     max-width: 100%;
-    font-size: 0.97rem;
+    font-size: 0.85rem;
     margin-bottom: 2px;
   }
   .score-bar {
@@ -371,12 +374,12 @@ export default {
   .rank-circle {
     width: 24px;
     height: 24px;
-    font-size: 0.97rem;
+    font-size: 0.8rem;
     margin-right: 4px;
   }
   .score-value {
     min-width: 26px;
-    font-size: 0.97rem;
+    font-size: 0.85rem;
     margin-left: 4px;
   }
   .run-counter {
