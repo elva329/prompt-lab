@@ -5,6 +5,7 @@ import cors from 'cors';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { ObjectId } from 'mongodb';
+import { pathToFileURL } from 'url';
 
 import { getDb } from './db.js';
 
@@ -32,7 +33,7 @@ function verifyToken(req, res, next) {
   }
 }
 
-async function ensureIndexes() {
+export async function ensureIndexes() {
   const db = await getDb();
   await db.collection('users').createIndex({ email: 1 }, { unique: true });
   await db.collection('prompt_library').createIndex({ promptId: 1 }, { unique: true });
@@ -1073,13 +1074,20 @@ app.get('/api/auth/user', async (req, res) => {
   }
 });
 
-ensureIndexes()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Auth API running on http://localhost:${port}`);
+export { app };
+
+const isDirectRun =
+  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun) {
+  ensureIndexes()
+    .then(() => {
+      app.listen(port, () => {
+        console.log(`Auth API running on http://localhost:${port}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Failed to initialize server:', error.message);
+      process.exit(1);
     });
-  })
-  .catch((error) => {
-    console.error('Failed to initialize server:', error.message);
-    process.exit(1);
-  });
+}
