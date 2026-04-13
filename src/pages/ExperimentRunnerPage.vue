@@ -72,7 +72,17 @@
                     <template v-if="selectedPrompts.length === 1 && resultByPrompt[prompt.id]">
                       <div class="response-header d-flex justify-content-between align-items-center mb-3">
                         <span class="h6 mt-4 fw-bold">AI Response</span>
-                        <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                        <div class="d-flex align-items-center gap-2">
+                          <button 
+                            class="btn-copy-response" 
+                            :class="{ 'btn-copy-response-copied': copiedPromptIds.has(prompt.id) }"
+                            @click="copyToClipboard(resultByPrompt[prompt.id].aiResponse, prompt.id)"
+                            :title="copiedPromptIds.has(prompt.id) ? 'Copied!' : 'Copy response'"
+                          >
+                            <i :class="copiedPromptIds.has(prompt.id) ? 'bi bi-check' : 'bi bi-files'"></i>
+                          </button>
+                          <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                        </div>
                       </div>
                       <div class="response-text-scroll mb-0">
                         <p class="response-copy mb-0">{{ resultByPrompt[prompt.id].aiResponse }}</p>
@@ -110,7 +120,17 @@
                         </div>
                         <div class="response-header d-flex justify-content-between align-items-center mb-3">
                           <span class="badge prompt-badge-muted">AI RESPONSE</span>
-                          <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                          <div class="d-flex align-items-center gap-2">
+                            <button 
+                              class="btn-copy-response" 
+                              :class="{ 'btn-copy-response-copied': copiedPromptIds.has(prompt.id) }"
+                              @click="copyToClipboard(resultByPrompt[prompt.id].aiResponse, prompt.id)"
+                              :title="copiedPromptIds.has(prompt.id) ? 'Copied!' : 'Copy response'"
+                            >
+                              <i :class="copiedPromptIds.has(prompt.id) ? 'bi bi-check' : 'bi bi-files'"></i>
+                            </button>
+                            <span class="text-muted smallest">ID: #{{ prompt.id }}</span>
+                          </div>
                         </div>
                         
                         <div class="response-text-scroll mb-4">
@@ -221,6 +241,7 @@ const runResults = ref<Record<number, {
   tokensUsed: number;
 }>>({});
 const currentProgress = ref({ current: 0, total: 0 });
+const copiedPromptIds = ref<Set<string>>(new Set());
 
 const id = computed(() => String(route.params.id || ''));
 const isNew = computed(() => id.value === 'new');
@@ -362,6 +383,22 @@ function rerunLoadedExperiment(): void {
 
 function goBack(): void {
   router.back();
+}
+
+function copyToClipboard(text: string, promptId: string): void {
+  navigator.clipboard.writeText(text).then(() => {
+    // Add promptId to copied set
+    copiedPromptIds.value.add(promptId);
+    appStore.showToast('Response copied to clipboard!', 'success');
+    
+    // Revert icon after 2 seconds
+    setTimeout(() => {
+      copiedPromptIds.value.delete(promptId);
+    }, 2000);
+  }).catch((error) => {
+    console.error('Failed to copy to clipboard:', error);
+    appStore.showToast('Failed to copy response.', 'danger');
+  });
 }
 
 async function loadSelectedPrompts(): Promise<void> {
@@ -1073,5 +1110,48 @@ onMounted(async () => {
 
 .tracking-wider {
   letter-spacing: 0.05em;
+}
+
+.btn-copy-response {
+  background: none;
+  border: 1px solid rgba(27, 94, 85, 0.2);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  color: #1b5e55;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-width: 2rem;
+  height: 2rem;
+}
+
+.btn-copy-response:hover {
+  background: rgba(27, 94, 85, 0.08);
+  border-color: rgba(27, 94, 85, 0.4);
+  color: #0f3d38;
+}
+
+.btn-copy-response:active {
+  background: rgba(27, 94, 85, 0.12);
+  transform: scale(0.95);
+}
+
+.btn-copy-response-copied {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.3);
+  color: #16a34a;
+}
+
+.btn-copy-response-copied:hover {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #15803d;
+}
+
+.btn-copy-response i {
+  font-size: 0.9rem;
 }
 </style>

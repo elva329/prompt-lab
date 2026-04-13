@@ -1,5 +1,5 @@
 <template>
-  <div class="position-fixed top-0 end-0 p-3 toast-container-custom" style="z-index: 1080">
+  <div class="position-fixed bottom-0 end-0 p-3 pt-5 toast-container-custom" style="z-index: 1080">
     <div
       v-if="toast.visible"
       class="toast show align-items-center border-0 shadow"
