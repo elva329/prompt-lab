@@ -57,7 +57,7 @@
       <p class="text-muted small mb-4" style="max-width: 300px;">Create your own prompts or mark prompts as favorites in the library to see them here.</p>
       <div class="d-flex gap-2">
         <button class="btn btn-primary px-4" @click="showCreateModal = true">Create Prompt</button>
-        <RouterLink to="/prompts" class="btn btn-outline-primary px-4">Browse Prompts</RouterLink>
+        <RouterLink to="/prompts" class="btn btn-outline-accent px-4">Browse Prompts</RouterLink>
       </div>
     </div>
 

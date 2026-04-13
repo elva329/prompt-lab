@@ -1,3 +1,17 @@
+/* Outline accent button for secondary CTAs */
+.btn-outline-accent {
+  color: #13b8d2;
+  border: 2px solid #13b8d2;
+  background: #fff;
+  font-weight: 700;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.btn-outline-accent:hover,
+.btn-outline-accent:focus {
+  background: #e6fafd;
+  color: #0fa3b1;
+  border-color: #0fa3b1;
+}
 /* ========================================
    UTILITIES & COMPONENTS
    Modals, loaders, spinners, helpers
