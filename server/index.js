@@ -43,7 +43,15 @@ export async function ensureIndexes() {
   await db.collection('results').createIndex({ userId: 1, createdAt: -1 });
   await db.collection('results').createIndex({ userId: 1, promptId: 1, createdAt: -1 });
   await db.collection('results').createIndex({ userId: 1, experimentId: 1 });
-  await db.collection('favorite_prompts').createIndex({ userId: 1, sourcePromptId: 1 }, { unique: true });
+  await db.collection('favorite_prompts').createIndex(
+    { userId: 1, sourcePromptId: 1 },
+    {
+      unique: true,
+      partialFilterExpression: {
+        sourcePromptId: { $exists: true, $type: 'string' },
+      },
+    }
+  );
   await db.collection('favorite_prompts').createIndex({ userId: 1, updatedAt: -1 });
 }
 
