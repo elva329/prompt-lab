@@ -8,24 +8,40 @@ if (!mongoUri) {
 }
 
 let connectedClient;
+let initPromise = null;
 
-export async function getDb() {
-  if (!connectedClient) {
+  async function connectWithRetry(maxRetries = 2) {
     const client = new MongoClient(mongoUri, {
       serverSelectionTimeoutMS: 5000,
       connectTimeoutMS: 5000,
-      socketTimeoutMS: 10000,
+      socketTimeoutMS: 5000,
       maxPoolSize: 1,
+      minPoolSize: 0,
     });
 
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       connectedClient = await client.connect();
       console.log('[MongoDB] Connected successfully');
+      return connectedClient;
     } catch (error) {
-      console.error('[MongoDB] Connection failed:', error.message);
-      throw error;
+      lastError = error;
+      console.error(`[MongoDB] Connection attempt ${attempt} failed:`, error.message);
+      if (attempt < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
     }
   }
 
-  return connectedClient.db(dbName);
+  throw lastError;
+}
+
+export async function getDb() {
+  if (!initPromise) {
+    initPromise = connectWithRetry();
+  }
+
+  const client = await initPromise;
+  return client.db(dbName);
 }
