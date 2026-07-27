@@ -7,15 +7,17 @@ if (!mongoUri) {
   throw new Error('Missing MONGODB_URI in environment variables.');
 }
 
-const client = new MongoClient(mongoUri, {
-  serverSelectionTimeoutMS: 10000,
-  connectTimeoutMS: 10000,
-  socketTimeoutMS: 10000,
-});
 let connectedClient;
 
 export async function getDb() {
   if (!connectedClient) {
+    const client = new MongoClient(mongoUri, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+      maxPoolSize: 1,
+    });
+
     try {
       connectedClient = await client.connect();
       console.log('[MongoDB] Connected successfully');

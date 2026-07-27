@@ -6,6 +6,11 @@ export default async function handler(req, res) {
   try {
     initPromise ??= ensureIndexes();
     await initPromise;
+
+    const route = req.query.route;
+    const path = Array.isArray(route) ? route.join('/') : typeof route === 'string' ? route : '';
+    req.url = `/api/${path}` || '/api/health';
+
     return app(req, res);
   } catch (error) {
     console.error('Server initialization error:', error);
