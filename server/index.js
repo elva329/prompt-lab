@@ -33,26 +33,45 @@ function verifyToken(req, res, next) {
   }
 }
 
+function isDuplicateIndexError(error) {
+  const message = typeof error?.message === 'string' ? error.message : '';
+  return message.includes('already exists') || message.includes('same name') || message.includes('duplicate index');
+}
+
 export async function ensureIndexes() {
   const db = await getDb();
-  await db.collection('users').createIndex({ email: 1 }, { unique: true });
-  await db.collection('prompt_library').createIndex({ promptId: 1 }, { unique: true });
-  await db.collection('prompt_library').createIndex({ category: 1 });
-  await db.collection('prompt_library').createIndex({ title: 'text', promptText: 'text' });
-  await db.collection('experiments').createIndex({ userId: 1, createdAt: -1 });
-  await db.collection('results').createIndex({ userId: 1, createdAt: -1 });
-  await db.collection('results').createIndex({ userId: 1, promptId: 1, createdAt: -1 });
-  await db.collection('results').createIndex({ userId: 1, experimentId: 1 });
-  await db.collection('favorite_prompts').createIndex(
-    { userId: 1, sourcePromptId: 1 },
-    {
-      unique: true,
-      partialFilterExpression: {
-        sourcePromptId: { $exists: true, $type: 'string' },
+
+  const indexSpecs = [
+    ['users', { email: 1 }, { unique: true }],
+    ['prompt_library', { promptId: 1 }, { unique: true }],
+    ['prompt_library', { category: 1 }, {}],
+    ['prompt_library', { title: 'text', promptText: 'text' }, {}],
+    ['experiments', { userId: 1, createdAt: -1 }, {}],
+    ['results', { userId: 1, createdAt: -1 }, {}],
+    ['results', { userId: 1, promptId: 1, createdAt: -1 }, {}],
+    ['results', { userId: 1, experimentId: 1 }, {}],
+    [
+      'favorite_prompts',
+      { userId: 1, sourcePromptId: 1 },
+      {
+        unique: true,
+        partialFilterExpression: {
+          sourcePromptId: { $exists: true, $type: 'string' },
+        },
       },
+    ],
+    ['favorite_prompts', { userId: 1, updatedAt: -1 }, {}],
+  ];
+
+  for (const [collection, spec, options] of indexSpecs) {
+    try {
+      await db.collection(collection).createIndex(spec, options);
+    } catch (error) {
+      if (!isDuplicateIndexError(error)) {
+        throw error;
+      }
     }
-  );
-  await db.collection('favorite_prompts').createIndex({ userId: 1, updatedAt: -1 });
+  }
 }
 
 app.use(cors());
