@@ -3,7 +3,9 @@ import { app, ensureIndexes } from '../server/index.js';
 let initPromise;
 
 export default async function handler(req, res) {
-  const route = req.query.route;
+  // The rewrite forwards the full path via `__path`; fall back to the
+  // filesystem catch-all segments (`route`) when present.
+  const route = req.query.__path ?? req.query.route;
   const path = Array.isArray(route) ? route.join('/') : typeof route === 'string' ? route : '';
   req.url = path ? `/api/${path}` : '/api/health';
 
