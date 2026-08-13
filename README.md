@@ -107,6 +107,44 @@ prompt-lab/
 
 ---
 
+## Troubleshooting: Login & Register
+
+### Local dev — `500` / "Unexpected end of JSON input"
+
+**Symptom:** Browser console shows `POST http://localhost:5173/api/auth/login 500 (Internal Server Error)` followed by `Failed to execute 'json' on 'Response': Unexpected end of JSON input`.
+
+**Cause:** The backend server isn't running. Vite's dev proxy forwards `/api/*` to `http://localhost:4000`; when nothing is listening there, it returns an empty `500`, and `response.json()` fails to parse it.
+
+**Fix:**
+1. Make sure `.env` exists and contains `MONGODB_URI` (see [Environment Setup](#environment-setup)).
+2. Run the backend in a **second** terminal while `npm run dev` keeps running:
+   ```bash
+   npm run dev:server
+   ```
+3. Confirm the API is up: `curl http://localhost:4000/api/health` should return `{"ok":true}`.
+
+### Vercel — `404 Not Found` (or `Cannot POST /api/health`)
+
+**Symptom:** Login/register work locally but fail after deploying, with `POST /api/auth/register 404 (Not Found)` or a response body of `Cannot POST /api/health`.
+
+**Cause:** The rewrite in `vercel.json` that routes `/api/*` to the serverless catch-all function must **forward the path**. A plain rewrite to `/api/[...route]` drops the path segments, so every `/api/*` request falls back to the health endpoint.
+
+**Fix:** Keep the rewrite as a path-preserving wildcard:
+```json
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/[...route]?__path=:path*" }
+  ]
+}
+```
+and ensure `api/[...route].js` reads `req.query.__path` (falling back to `req.query.route`) to reconstruct the original URL before handing off to Express. Redeploy after changing this.
+
+### Auth endpoints must not be blocked by index setup
+
+`api/[...route].js` runs `ensureIndexes()` on a best-effort basis only. If MongoDB index creation fails (for example, duplicate keys in existing data), it logs a warning and continues, so `/api/auth/login` and `/api/auth/register` still execute instead of returning `Server initialization failed.`
+
+---
+
 ## Build & Test
 
 ```bash
