@@ -35,7 +35,15 @@ function verifyToken(req, res, next) {
 
 function isDuplicateIndexError(error) {
   const message = typeof error?.message === 'string' ? error.message : '';
-  return message.includes('already exists') || message.includes('same name') || message.includes('duplicate index');
+  const code = error?.code;
+  return (
+    code === 11000 ||
+    code === 11001 ||
+    message.includes('already exists') ||
+    message.includes('same name') ||
+    message.includes('duplicate index') ||
+    message.includes('duplicate key')
+  );
 }
 
 export async function ensureIndexes() {
@@ -1110,14 +1118,15 @@ const isDirectRun =
   Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectRun) {
+  // Index setup is best-effort; the server must still start and serve auth routes
+  // even if index creation fails (e.g. duplicate keys in existing data).
   ensureIndexes()
-    .then(() => {
+    .catch((error) => {
+      console.warn('[Index setup] failed (non-fatal):', error?.message);
+    })
+    .finally(() => {
       app.listen(port, () => {
         console.log(`Auth API running on http://localhost:${port}`);
       });
-    })
-    .catch((error) => {
-      console.error('Failed to initialize server:', error.message);
-      process.exit(1);
     });
 }
