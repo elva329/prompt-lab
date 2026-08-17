@@ -5,7 +5,7 @@
 Prompt Lab is a web application for creating, managing, and evaluating AI prompts. Test multiple prompts, track quality metrics, and analyze results with a simple dashboard.
 
 
-Live Demo: https://prompt-lab-test.vercel.app/ 
+**Live Demo:** [prompt-lab-test.vercel.app](https://prompt-lab-test.vercel.app/)
 
 
 ## Features
@@ -16,6 +16,34 @@ Live Demo: https://prompt-lab-test.vercel.app/
 - Analytics dashboard
 - User authentication (JWT)
 - Responsive design (mobile & desktop)
+
+
+## Tech Stack
+
+- **Frontend:** Vue 3, TypeScript, Bootstrap 5
+- **Backend:** Node.js, Express, MongoDB
+- **Other:** Vite, JWT, dotenv
+
+
+## Architecture & Design
+
+### System Architecture
+
+High-level overview of the full stack: the Vue 3 single-page app on the frontend, the Express API (serverless via Vercel) in the middle, and MongoDB Atlas on the backend.
+
+![System architecture](screenshots/system-architecture.png)
+
+### Database Design
+
+MongoDB collections and their relationships: `users`, `prompts`, `experiments`, `results`, and `favorite_prompts`.
+
+![Database design](screenshots/database-design.png)
+
+### Frontend Architecture
+
+Vue 3 application structure — pages, reusable components, router, Pinia store, and the API client modules under `src/lib`.
+
+![Frontend architecture](screenshots/frontend-architecture.png)
 
 
 ## Screenshots
@@ -62,22 +90,23 @@ JWT-based register and login.
 
 ![Login page](screenshots/login-page.png)
 
+### Responsive UI
 
-## Tech Stack
+Fully responsive layout that adapts from desktop down to mobile.
 
-- **Frontend:** Vue 3, TypeScript, Bootstrap 5
-- **Backend:** Node.js, Express, MongoDB
-- **Other:** Vite, JWT, dotenv
+![Responsive UI](screenshots/responsive-ui.png)
 
 
-## Prerequisites
+## Getting Started
+
+### Prerequisites
 
 - Node.js v16+
 - npm or yarn
 - MongoDB (local or Atlas)
 
 
-## Installation
+### Installation
 
 1. **Clone the repository:**
    ```bash
@@ -90,7 +119,7 @@ JWT-based register and login.
    ```
 
 
-## Environment Setup
+### Environment Setup
 
 1. Copy `.env.example` to `.env`:
    ```bash
@@ -99,7 +128,7 @@ JWT-based register and login.
 2. Edit `.env` and set your MongoDB URI and JWT secret.
 
 
-## Running the App
+### Running the App
 
 1. **Start backend server:**
    ```bash
@@ -114,13 +143,13 @@ JWT-based register and login.
 
 ## Database Setup (MongoDB Atlas)
 
-1. Create a MongoDB database named `prompt-lab`
-2. Create a collection named `prompt-lab` in MongoDB Atlas, then go to the project folder `prompts/prompt_library.json`, copy the whole file contents.
-3. Then go back to MongoDB Atlas, select the collection `prompt_library`, click "Add Data" → "Insert Document"to import the data, this is to create the public prompt-library.
-4. Then create other empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
+1. Create a MongoDB database named `prompt-lab`.
+2. Create a collection named `prompt_library` in MongoDB Atlas.
+3. Open `prompts/prompt_library.json`, copy the full file contents, then in MongoDB Atlas select the `prompt_library` collection and click "Add Data" → "Insert Document" to import the data. This creates the public prompt library.
+4. Create the remaining empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
 
 
-## Basic Usage
+## Usage
 
 1. Register a new user account.
 2. Browse and search prompts in the library.
@@ -138,6 +167,15 @@ prompt-lab/
 ├── src/                    # Frontend (Vue 3)
 ├── .env.example            # Example environment config
 └── package.json
+```
+
+
+## Build & Test
+
+```bash
+npm run lint      # Lint code
+npm run build     # Build for production
+npm run preview   # Preview production build
 ```
 
 
@@ -176,13 +214,3 @@ and ensure `api/[...route].js` reads `req.query.__path` (falling back to `req.qu
 ### Auth endpoints must not be blocked by index setup
 
 `api/[...route].js` runs `ensureIndexes()` on a best-effort basis only. If MongoDB index creation fails (for example, duplicate keys in existing data), it logs a warning and continues, so `/api/auth/login` and `/api/auth/register` still execute instead of returning `Server initialization failed.`
-
----
-
-## Build & Test
-
-```bash
-npm run lint      # Lint code
-npm run build     # Build for production
-npm run preview   # Preview production build
-```
