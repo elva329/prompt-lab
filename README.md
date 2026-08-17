@@ -4,11 +4,9 @@
 
 Prompt Lab is a web application for creating, managing, and evaluating AI prompts. Test multiple prompts, track quality metrics, and analyze results with a simple dashboard.
 
----
 
 Live Demo: https://prompt-lab-test.vercel.app/ 
 
----
 
 ## Features
 
@@ -19,7 +17,51 @@ Live Demo: https://prompt-lab-test.vercel.app/
 - User authentication (JWT)
 - Responsive design (mobile & desktop)
 
----
+
+## Screenshots
+
+### Landing page
+
+The public entry point — product overview, the evaluation matrix (clarity, relevance, coherence, completeness), and the four-step experiment workflow.
+
+![Prompt Lab landing page](screenshots/landing-page.png)
+
+### Prompt Library
+
+Browse, search, and filter the 150+ prompt library by category, then select up to three prompts to send into an experiment.
+
+![Prompt Library](screenshots/prompt-library.png)
+
+### Experiment Runner
+
+Run selected prompts side-by-side and compare AI responses with automated quality scores for each evaluation dimension.
+
+![Experiment Runner](screenshots/experiment-runner.png)
+
+### Analytics Dashboard
+
+Track average quality, pass rate, response time, token usage, quality dimensions, score trends, and prompt rankings in one workspace.
+
+![Analytics Dashboard](screenshots/analytics-dashboard.png)
+
+### Experiments
+
+Review saved experiments and re-run them with one click.
+
+![Experiments list](screenshots/experiments-list.png)
+
+### Favorites
+
+Create, edit, and manage your own saved prompts.
+
+![Favorites](screenshots/favorites.png)
+
+### Authentication
+
+JWT-based register and login.
+
+![Login page](screenshots/login-page.png)
+
 
 ## Tech Stack
 
@@ -27,7 +69,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
 - **Backend:** Node.js, Express, MongoDB
 - **Other:** Vite, JWT, dotenv
 
----
 
 ## Prerequisites
 
@@ -35,7 +76,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
 - npm or yarn
 - MongoDB (local or Atlas)
 
----
 
 ## Installation
 
@@ -49,7 +89,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
    npm install
    ```
 
----
 
 ## Environment Setup
 
@@ -59,7 +98,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
    ```
 2. Edit `.env` and set your MongoDB URI and JWT secret.
 
----
 
 ## Running the App
 
@@ -73,7 +111,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
    ```
 3. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
----
 
 ## Database Setup (MongoDB Atlas)
 
@@ -82,7 +119,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
 3. Then go back to MongoDB Atlas, select the collection `prompt_library`, click "Add Data" → "Insert Document"to import the data, this is to create the public prompt-library.
 4. Then create other empty collections (`users`, `results`, `experiments`, `favorite_prompts`) manually in Atlas for verification/testing.
 
----
 
 ## Basic Usage
 
@@ -92,7 +128,6 @@ Live Demo: https://prompt-lab-test.vercel.app/
 4. Select prompts and run experiments.
 5. View analytics dashboard for results.
 
----
 
 ## Project Structure
 
@@ -105,7 +140,6 @@ prompt-lab/
 └── package.json
 ```
 
----
 
 ## Troubleshooting: Login & Register
 
